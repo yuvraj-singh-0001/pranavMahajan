@@ -5,6 +5,7 @@ import {
   Sun,
   Sparkles,
   ArrowRight,
+  ArrowLeft,
   ArrowDown,
   ArrowUp,
   X,
@@ -19,7 +20,47 @@ import {
   CheckCircle2,
   ChevronDown,
   ChevronUp,
+  Globe,
+  Phone,
+  MessageCircle,
+  ExternalLink,
+  Heart,
 } from 'lucide-react';
+
+// Custom lightweight SVG Icons for Social Networks
+function YoutubeIcon({ className = 'w-5 h-5' }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="currentColor">
+      <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+    </svg>
+  );
+}
+
+function InstagramIcon({ className = 'w-5 h-5' }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <rect width="20" height="20" x="2" y="2" rx="5" ry="5"/>
+      <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/>
+      <line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/>
+    </svg>
+  );
+}
+
+function LinkedinIcon({ className = 'w-5 h-5' }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="currentColor">
+      <path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.28 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.75M6.46 10.9v8.37H9.2V10.9H6.46M7.83 6.45a1.62 1.62 0 1 0 0 3.24 1.62 1.62 0 0 0 0-3.24z"/>
+    </svg>
+  );
+}
+
+function TwitterIcon({ className = 'w-5 h-5' }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="currentColor">
+      <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+    </svg>
+  );
+}
 
 export default function LishbosExperience() {
   const [current, setCurrent] = useState(0);
@@ -30,10 +71,24 @@ export default function LishbosExperience() {
   const [formData, setFormData] = useState({ name: '', email: '', org: '', message: '' });
   const [formSent, setFormSent] = useState(false);
 
+  // Footer newsletter & contact state
+  const [newsletterEmail, setNewsletterEmail] = useState('');
+  const [newsletterSent, setNewsletterSent] = useState(false);
+  const [copiedEmail, setCopiedEmail] = useState(false);
+
+  const copyEmailToClipboard = () => {
+    if (navigator?.clipboard?.writeText) {
+      navigator.clipboard.writeText('speaking@pranavmahajan.com');
+      setCopiedEmail(true);
+      setTimeout(() => setCopiedEmail(false), 2200);
+    }
+  };
+
   const isLockedRef = useRef(false);
   const touchStartXRef = useRef(0);
   const touchStartYRef = useRef(0);
-  const slide4Ref = useRef<HTMLDivElement>(null);
+  const footerRef = useRef<HTMLDivElement>(null);
+  const [footerOpen, setFooterOpen] = useState(false);
 
   const totalSlides = 5;
 
@@ -50,9 +105,7 @@ export default function LishbosExperience() {
     // Step 2: At mid-point (~420ms) when the dark glowing board covers the screen, switch slide
     setTimeout(() => {
       setCurrent(targetIndex);
-      if (slide4Ref.current) {
-        slide4Ref.current.scrollTop = 0;
-      }
+      setFooterOpen(false);
     }, 420);
 
     // Step 3: At 870ms when the dark glowing board has fully swept to the other side, reset and unlock
@@ -88,34 +141,46 @@ export default function LishbosExperience() {
       // 2. Ultra-sensitive: even a slight touch of mousewheel or trackpad triggers it
       if (Math.abs(e.deltaY) < 2) return;
 
-      // 3. Special handling for Slide 4 (last slide with footer)
+      // 3. Special handling for Slide 4 (Inquiries) and its bottom footer drawer
       if (current === totalSlides - 1) {
-        const container = slide4Ref.current;
-        if (container) {
-          if (e.deltaY > 0) {
-            // Scrolling down -> scroll into footer
-            const maxScroll = container.scrollHeight - container.clientHeight;
-            if (container.scrollTop < maxScroll - 2) {
-              container.scrollTop += e.deltaY;
+        if (footerOpen) {
+          const container = footerRef.current;
+          if (container) {
+            if (e.deltaY < 0) {
+              // Scrolling up: if near top of footer drawer, smoothly close it!
+              if (container.scrollTop <= 10) {
+                e.preventDefault();
+                setFooterOpen(false);
+                return;
+              } else {
+                container.scrollTop += e.deltaY;
+                e.preventDefault();
+                return;
+              }
+            } else {
+              // Scrolling down inside footer drawer
+              const maxScroll = container.scrollHeight - container.clientHeight;
+              if (container.scrollTop < maxScroll - 4) {
+                container.scrollTop += e.deltaY;
+                e.preventDefault();
+                return;
+              }
               e.preventDefault();
               return;
             }
-            // Already at bottom of footer - stop (do not loop)
+          }
+        } else {
+          // Footer is not open yet on Slide 4
+          if (e.deltaY > 0) {
+            // Scrolling down -> smoothly slide up footer from bottom (no black sweep!)
             e.preventDefault();
+            setFooterOpen(true);
             return;
           } else {
-            // Scrolling up
-            if (container.scrollTop > 10) {
-              // Scroll up inside container back towards contact form
-              container.scrollTop += e.deltaY;
-              e.preventDefault();
-              return;
-            } else {
-              // At the very top of Slide 4! Go back to Slide 3
-              e.preventDefault();
-              prevSlide();
-              return;
-            }
+            // Scrolling up -> slide backward to Slide 3
+            e.preventDefault();
+            prevSlide();
+            return;
           }
         }
       }
@@ -130,20 +195,32 @@ export default function LishbosExperience() {
     };
 
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
-        if (current === totalSlides - 1 && slide4Ref.current) {
-          slide4Ref.current.scrollBy({ top: 180, behavior: 'smooth' });
+      if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === 'PageDown') {
+        if (current === totalSlides - 1) {
+          if (!footerOpen) {
+            setFooterOpen(true);
+          } else if (footerRef.current) {
+            footerRef.current.scrollBy({ top: 220, behavior: 'smooth' });
+          }
         } else {
           nextSlide();
         }
-      } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
-        if (current === totalSlides - 1 && slide4Ref.current && slide4Ref.current.scrollTop > 20) {
-          slide4Ref.current.scrollBy({ top: -180, behavior: 'smooth' });
+      } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp' || e.key === 'PageUp') {
+        if (current === totalSlides - 1 && footerOpen) {
+          if (footerRef.current && footerRef.current.scrollTop <= 20) {
+            setFooterOpen(false);
+          } else if (footerRef.current) {
+            footerRef.current.scrollBy({ top: -220, behavior: 'smooth' });
+          }
         } else {
           prevSlide();
         }
       } else if (e.key === 'Escape') {
-        setMenuOpen(false);
+        if (footerOpen) {
+          setFooterOpen(false);
+        } else {
+          setMenuOpen(false);
+        }
       }
     };
 
@@ -157,14 +234,18 @@ export default function LishbosExperience() {
       const diffY = touchStartYRef.current - e.changedTouches[0].clientY;
 
       if (current === totalSlides - 1) {
-        const container = slide4Ref.current;
-        if (container) {
-          // If swiping down at top of Slide 4, go back to slide 3
-          if (diffY < -25 && container.scrollTop <= 10) {
-            prevSlide();
+        if (footerOpen) {
+          const container = footerRef.current;
+          if (container && diffY < -25 && container.scrollTop <= 15) {
+            setFooterOpen(false);
             return;
           }
           return;
+        } else {
+          if (diffY > 20) {
+            setFooterOpen(true);
+            return;
+          }
         }
       }
 
@@ -192,7 +273,7 @@ export default function LishbosExperience() {
       window.removeEventListener('touchstart', handleTouchStart);
       window.removeEventListener('touchend', handleTouchEnd);
     };
-  }, [current, totalSlides, nextSlide, prevSlide]);
+  }, [current, totalSlides, footerOpen, nextSlide, prevSlide]);
 
   return (
     <div className="relative w-screen h-screen overflow-hidden bg-[#fffcf7] text-slate-800 select-none">
@@ -218,7 +299,7 @@ export default function LishbosExperience() {
           <img
             src="/pranav_mahajan_transparent.png"
             alt="Pranav Mahajan"
-            className="h-8 sm:h-10 w-auto object-contain drop-shadow-sm"
+            className="h-12 sm:h-16 md:h-20 w-auto object-contain drop-shadow-md brightness-90 contrast-125"
           />
         </button>
 
@@ -657,14 +738,11 @@ export default function LishbosExperience() {
           </div>
         </div>
 
-        {/* SLIDE 4: GET IN TOUCH & MASTER LUXURY FOOTER */}
+        {/* SLIDE 4: GET IN TOUCH */}
         <div
-          ref={slide4Ref}
-          className="slide-item bg-[#fffbf5] flex flex-col items-stretch justify-start overflow-y-auto"
+          className="slide-item bg-[#fffbf5] flex items-center justify-center px-6 sm:px-12 py-12 sm:py-16"
         >
-          {/* Part 1: Contact Form Section (Full Viewport Height) */}
-          <div className="min-h-screen w-full flex items-center justify-center px-6 sm:px-12 py-12 sm:py-16">
-            <div className={`max-w-6xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-10 items-center ${current === 4 ? 'slide-content-anim' : ''}`}>
+          <div className={`max-w-6xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-10 items-center ${current === 4 ? 'slide-content-anim' : ''}`}>
               {/* Left Column: Direct Contact & Office Details */}
               <div className="lg:col-span-5 flex justify-center">
                 <div className="relative w-full max-w-[340px] rounded-3xl bg-gradient-to-tr from-[#f6eee2] via-[#fffdf9] to-[#faeee0] border-2 border-amber-200/80 p-6 sm:p-7 flex flex-col justify-between shadow-xl shadow-amber-900/[0.06] text-center overflow-hidden">
@@ -802,194 +880,403 @@ export default function LishbosExperience() {
                     &larr; Back to Events &amp; Tour
                   </button>
                   <button
-                    onClick={() => {
-                      slide4Ref.current?.scrollBy({ top: 380, behavior: 'smooth' });
-                    }}
-                    className="text-xs font-bold text-amber-800 hover:text-amber-900 uppercase tracking-widest cursor-pointer flex items-center gap-1.5"
+                    onClick={() => setFooterOpen(true)}
+                    className="ochre-pill-button py-2.5 px-6 text-xs font-bold shadow-md hover:shadow-lg flex items-center gap-2 cursor-pointer transition-transform hover:-translate-y-0.5"
                   >
-                    <span>Scroll Down to Footer</span>
-                    <ArrowDown className="w-3.5 h-3.5 animate-bounce" />
+                    <span>Explore Footer &amp; Sacred Channels</span>
+                    <ArrowDown className="w-4 h-4 animate-bounce" />
                   </button>
                 </div>
               </div>
             </div>
           </div>
+        </div>
 
-          {/* Part 2: Master Luxury Footer (Scrolls Naturally Downward) */}
-          <footer className="w-full bg-[#faf4ea] border-t-2 border-amber-200/90 text-slate-700 pt-16 pb-28 px-6 sm:px-12 relative overflow-hidden">
-            <div className="absolute top-0 right-1/4 w-96 h-96 bg-amber-200/20 rounded-full blur-3xl pointer-events-none" />
+      {/* 
+        MASTER LUXURY FOOTER DRAWER:
+        Slides UP smoothly from the BOTTOM (vertical drawer, NOT from the side).
+        Zero black sweep board triggered.
+        Anchored below the top header (top-24 sm:top-28) to ensure ZERO overlap with the logo & header!
+      */}
+      {/* Subtle Backdrop when drawer is open */}
+      <div
+        onClick={() => setFooterOpen(false)}
+        className={`fixed inset-0 z-40 bg-black/25 backdrop-blur-[2px] transition-opacity duration-300 ${
+          footerOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
+        }`}
+      />
 
-            <div className="max-w-6xl mx-auto relative z-10 space-y-12">
-              {/* Top Row: Brand Monogram & Mission Quote */}
-              <div className="flex flex-col md:flex-row items-center md:items-start justify-between gap-8 pb-10 border-b border-amber-200/80">
-                <div className="space-y-3 text-center md:text-left max-w-md">
-                  <img
-                    src="/pranav_mahajan_transparent.png"
-                    alt="Pranav Mahajan"
-                    className="h-10 sm:h-12 w-auto object-contain mx-auto md:mx-0 drop-shadow-xs"
-                  />
-                  <div className="font-serif-luxury text-2xl sm:text-3xl font-bold text-[#784d1c]">
-                    Urban Mindfulness &bull; Vedic Leadership
+      <div
+        ref={footerRef}
+        className={`fixed inset-x-0 bottom-0 top-24 sm:top-28 z-45 bg-[#fbf6ee] rounded-t-3xl border-t-2 border-amber-300/90 shadow-[0_-20px_50px_rgba(0,0,0,0.18)] overflow-y-auto px-5 sm:px-10 lg:px-16 pt-5 pb-28 transition-transform duration-500 ease-out select-text ${
+          footerOpen ? 'translate-y-0' : 'translate-y-full pointer-events-none'
+        }`}
+      >
+        {/* Ambient Warm Golden Aura Glows */}
+        <div className="absolute top-0 right-1/4 w-[500px] h-[500px] bg-amber-200/25 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute bottom-10 left-10 w-[350px] h-[350px] bg-orange-200/20 rounded-full blur-3xl pointer-events-none" />
+
+        <div className="max-w-7xl mx-auto relative z-10 space-y-10 sm:space-y-12 w-full">
+          {/* DRAWER TOP BAR: Pull Indicator & Header Controls */}
+          <div className="flex flex-col items-center">
+            <div className="w-12 h-1.5 bg-amber-300/80 rounded-full mx-auto mb-3" />
+            <div className="w-full flex items-center justify-between pb-3 border-b border-amber-200/80">
+              <span className="text-xs font-mono font-bold uppercase tracking-wider text-amber-800">
+                Master Sanctum // Official Channels &amp; Bureau
+              </span>
+              <button
+                onClick={() => setFooterOpen(false)}
+                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white border border-amber-300 text-xs font-bold text-amber-900 hover:bg-amber-100 shadow-xs cursor-pointer transition-all"
+              >
+                <span>Close Footer</span>
+                <X className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          </div>
+
+          {/* BRAND MISSION & QUOTE ROW */}
+          <div className="flex flex-col lg:flex-row items-center lg:items-start justify-between gap-6 pb-6 border-b border-amber-200/60">
+            <div className="space-y-2 text-center lg:text-left max-w-2xl">
+              <div className="font-serif-luxury text-2xl sm:text-3xl lg:text-4xl font-bold text-[#6d4416] tracking-tight">
+                Urban Mindfulness &bull; Vedic Leadership
+              </div>
+              <p className="text-xs sm:text-sm text-slate-600 leading-relaxed font-serif italic max-w-lg">
+                &ldquo;When clarity meets devotion, outer turmoil turns into silent power. Stillness is not inaction—it is the foundation of supreme action.&rdquo;
+              </p>
+              <div className="flex flex-wrap items-center justify-center lg:justify-start gap-3 text-xs font-semibold text-amber-900 pt-1">
+                <span className="inline-flex items-center gap-1.5 bg-amber-100/90 px-3 py-1 rounded-full border border-amber-200/70">
+                  <Star className="w-3.5 h-3.5 text-amber-700 fill-amber-500" />
+                  500,000+ Seekers Guided
+                </span>
+                <span className="inline-flex items-center gap-1.5 bg-amber-100/90 px-3 py-1 rounded-full border border-amber-200/70">
+                  <Globe className="w-3.5 h-3.5 text-amber-700" />
+                  24+ Nations Reached
+                </span>
+                <span className="inline-flex items-center gap-1.5 bg-amber-100/90 px-3 py-1 rounded-full border border-amber-200/70">
+                  <Sparkles className="w-3.5 h-3.5 text-amber-700" />
+                  180+ Global Keynotes
+                </span>
+              </div>
+            </div>
+          </div>
+
+              {/* SOCIAL MEDIA HUB ROW - Prominent, interactive channels */}
+              <div className="p-6 sm:p-8 rounded-3xl bg-white/90 border border-amber-200/80 shadow-md">
+                <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-6">
+                  <div>
+                    <h3 className="text-base sm:text-lg font-bold text-slate-900 flex items-center gap-2">
+                      <Sparkles className="w-4 h-4 text-amber-700" />
+                      Connect Across Sacred Digital Channels
+                    </h3>
+                    <p className="text-xs text-slate-600 mt-0.5">
+                      Daily mindfulness transmissions, live keynote recordings, and contemplative podcasts.
+                    </p>
                   </div>
-                  <p className="text-xs sm:text-sm text-slate-600 leading-relaxed font-serif italic">
-                    &ldquo;When clarity meets devotion, outer turmoil turns into silent power. Stillness is not inaction—it is the foundation of supreme action.&rdquo;
-                  </p>
+                  <span className="text-[11px] font-mono font-bold text-amber-900 bg-amber-100 px-3 py-1 rounded-full">
+                    Official Social Channels
+                  </span>
                 </div>
 
-                <div className="flex flex-col items-center md:items-end gap-3">
-                  <button
-                    onClick={() => {
-                      slide4Ref.current?.scrollTo({ top: 0, behavior: 'smooth' });
-                    }}
-                    className="ochre-pill-button py-2.5 px-6 text-xs font-bold shadow-md hover:shadow-lg flex items-center gap-2 cursor-pointer"
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3.5">
+                  {/* YouTube */}
+                  <a
+                    href="https://youtube.com"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="p-3.5 rounded-2xl bg-[#faf6f0] hover:bg-amber-50 border border-amber-200/70 hover:border-amber-400 transition-all flex items-center gap-3 group shadow-2xs hover:shadow-sm"
                   >
-                    <ArrowUp className="w-3.5 h-3.5" />
-                    <span>Back to Top of Form</span>
-                  </button>
-                  <span className="text-[11px] font-mono font-medium text-amber-800">
-                    Serving seekers across 24+ nations
-                  </span>
+                    <div className="w-10 h-10 rounded-xl bg-red-600 text-white flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform shadow-xs">
+                      <YoutubeIcon className="w-5 h-5" />
+                    </div>
+                    <div className="text-left overflow-hidden">
+                      <div className="text-xs font-bold text-slate-900 group-hover:text-amber-900 truncate">YouTube</div>
+                      <div className="text-[10px] text-slate-500 truncate">Talks &amp; Meditations</div>
+                    </div>
+                    <ExternalLink className="w-3 h-3 text-slate-400 group-hover:text-amber-700 ml-auto flex-shrink-0" />
+                  </a>
+
+                  {/* Instagram */}
+                  <a
+                    href="https://instagram.com"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="p-3.5 rounded-2xl bg-[#faf6f0] hover:bg-amber-50 border border-amber-200/70 hover:border-amber-400 transition-all flex items-center gap-3 group shadow-2xs hover:shadow-sm"
+                  >
+                    <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-500 via-rose-500 to-purple-600 text-white flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform shadow-xs">
+                      <InstagramIcon className="w-5 h-5" />
+                    </div>
+                    <div className="text-left overflow-hidden">
+                      <div className="text-xs font-bold text-slate-900 group-hover:text-amber-900 truncate">Instagram</div>
+                      <div className="text-[10px] text-slate-500 truncate">Daily Mindset Reels</div>
+                    </div>
+                    <ExternalLink className="w-3 h-3 text-slate-400 group-hover:text-amber-700 ml-auto flex-shrink-0" />
+                  </a>
+
+                  {/* LinkedIn */}
+                  <a
+                    href="https://linkedin.com"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="p-3.5 rounded-2xl bg-[#faf6f0] hover:bg-amber-50 border border-amber-200/70 hover:border-amber-400 transition-all flex items-center gap-3 group shadow-2xs hover:shadow-sm"
+                  >
+                    <div className="w-10 h-10 rounded-xl bg-[#0a66c2] text-white flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform shadow-xs">
+                      <LinkedinIcon className="w-5 h-5" />
+                    </div>
+                    <div className="text-left overflow-hidden">
+                      <div className="text-xs font-bold text-slate-900 group-hover:text-amber-900 truncate">LinkedIn</div>
+                      <div className="text-[10px] text-slate-500 truncate">Executive Leadership</div>
+                    </div>
+                    <ExternalLink className="w-3 h-3 text-slate-400 group-hover:text-amber-700 ml-auto flex-shrink-0" />
+                  </a>
+
+                  {/* Twitter / X */}
+                  <a
+                    href="https://twitter.com"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="p-3.5 rounded-2xl bg-[#faf6f0] hover:bg-amber-50 border border-amber-200/70 hover:border-amber-400 transition-all flex items-center gap-3 group shadow-2xs hover:shadow-sm"
+                  >
+                    <div className="w-10 h-10 rounded-xl bg-slate-900 text-white flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform shadow-xs">
+                      <TwitterIcon className="w-5 h-5" />
+                    </div>
+                    <div className="text-left overflow-hidden">
+                      <div className="text-xs font-bold text-slate-900 group-hover:text-amber-900 truncate">X / Twitter</div>
+                      <div className="text-[10px] text-slate-500 truncate">Zen Contemplations</div>
+                    </div>
+                    <ExternalLink className="w-3 h-3 text-slate-400 group-hover:text-amber-700 ml-auto flex-shrink-0" />
+                  </a>
+
+                  {/* WhatsApp Desk */}
+                  <a
+                    href="https://wa.me"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="p-3.5 rounded-2xl bg-[#faf6f0] hover:bg-amber-50 border border-amber-200/70 hover:border-amber-400 transition-all flex items-center gap-3 group shadow-2xs hover:shadow-sm"
+                  >
+                    <div className="w-10 h-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform shadow-xs">
+                      <MessageCircle className="w-5 h-5" />
+                    </div>
+                    <div className="text-left overflow-hidden">
+                      <div className="text-xs font-bold text-slate-900 group-hover:text-amber-900 truncate">WhatsApp Desk</div>
+                      <div className="text-[10px] text-slate-500 truncate">Keynote Coordinator</div>
+                    </div>
+                    <ExternalLink className="w-3 h-3 text-slate-400 group-hover:text-amber-700 ml-auto flex-shrink-0" />
+                  </a>
                 </div>
               </div>
 
-              {/* 4 Multi-column Grid */}
+              {/* 4 MULTI-COLUMN DETAILED FOOTER CONTENT */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 sm:gap-10 text-left">
                 {/* Column 1: Directory Experience */}
-                <div className="space-y-3">
-                  <h4 className="text-xs font-mono font-bold uppercase tracking-widest text-amber-900 flex items-center gap-1.5">
-                    <Compass className="w-3.5 h-3.5 text-amber-700" />
-                    Sanctum Directory
+                <div className="space-y-4">
+                  <h4 className="text-xs font-mono font-bold uppercase tracking-widest text-amber-900 flex items-center gap-2">
+                    <Compass className="w-4 h-4 text-amber-700" />
+                    Sanctum Navigation
                   </h4>
-                  <ul className="space-y-2 text-xs sm:text-sm">
+                  <ul className="space-y-2.5 text-xs sm:text-sm">
                     <li>
                       <button
                         onClick={() => goToSlide(0, 'backward')}
-                        className="text-slate-600 hover:text-amber-800 hover:underline transition-colors cursor-pointer text-left"
+                        className="text-slate-600 hover:text-amber-800 hover:underline transition-colors cursor-pointer text-left flex items-center gap-1.5"
                       >
+                        <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
                         01 &bull; Welcome Sanctum (Home)
                       </button>
                     </li>
                     <li>
                       <button
                         onClick={() => goToSlide(1, 'backward')}
-                        className="text-slate-600 hover:text-amber-800 hover:underline transition-colors cursor-pointer text-left"
+                        className="text-slate-600 hover:text-amber-800 hover:underline transition-colors cursor-pointer text-left flex items-center gap-1.5"
                       >
-                        02 &bull; Books &amp; Publications
+                        <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+                        02 &bull; Books &amp; Literary Works
                       </button>
                     </li>
                     <li>
                       <button
                         onClick={() => goToSlide(2, 'backward')}
-                        className="text-slate-600 hover:text-amber-800 hover:underline transition-colors cursor-pointer text-left"
+                        className="text-slate-600 hover:text-amber-800 hover:underline transition-colors cursor-pointer text-left flex items-center gap-1.5"
                       >
+                        <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
                         03 &bull; Keynotes &amp; Resilience
                       </button>
                     </li>
                     <li>
                       <button
                         onClick={() => goToSlide(3, 'backward')}
-                        className="text-slate-600 hover:text-amber-800 hover:underline transition-colors cursor-pointer text-left"
+                        className="text-slate-600 hover:text-amber-800 hover:underline transition-colors cursor-pointer text-left flex items-center gap-1.5"
                       >
-                        04 &bull; Global Events &amp; Tour
+                        <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+                        04 &bull; Global Events &amp; Retreats
                       </button>
                     </li>
                     <li>
                       <button
-                        onClick={() => {
-                          slide4Ref.current?.scrollTo({ top: 0, behavior: 'smooth' });
-                        }}
-                        className="text-amber-900 font-semibold hover:text-amber-700 hover:underline transition-colors cursor-pointer text-left"
+                        onClick={() => goToSlide(4, 'backward')}
+                        className="text-amber-900 font-bold hover:text-amber-700 hover:underline transition-colors cursor-pointer text-left flex items-center gap-1.5"
                       >
-                        05 &bull; Inquiries &amp; Bookings
+                        <span className="w-1.5 h-1.5 rounded-full bg-amber-600 animate-ping" />
+                        05 &bull; Inquiries &amp; Speaking Desk
                       </button>
                     </li>
                   </ul>
                 </div>
 
-                {/* Column 2: Programs & Mentorship */}
-                <div className="space-y-3">
-                  <h4 className="text-xs font-mono font-bold uppercase tracking-widest text-amber-900 flex items-center gap-1.5">
-                    <Sparkles className="w-3.5 h-3.5 text-amber-700" />
+                {/* Column 2: Programs & Mentorship Offerings */}
+                <div className="space-y-4">
+                  <h4 className="text-xs font-mono font-bold uppercase tracking-widest text-amber-900 flex items-center gap-2">
+                    <Sparkles className="w-4 h-4 text-amber-700" />
                     Sacred Offerings
                   </h4>
-                  <ul className="space-y-2 text-xs sm:text-sm text-slate-600">
-                    <li className="hover:text-slate-900 transition-colors">Vedic Mindfulness Executive Circles</li>
-                    <li className="hover:text-slate-900 transition-colors">Keynote: The Unstoppable Mind</li>
-                    <li className="hover:text-slate-900 transition-colors">Awaken 3-Day Himalayan Retreats</li>
-                    <li className="hover:text-slate-900 transition-colors">Youth Clarity &amp; Leadership Initiative</li>
-                    <li className="hover:text-slate-900 transition-colors">Corporate Cognitive Burnout Audit</li>
+                  <ul className="space-y-2.5 text-xs sm:text-sm text-slate-600">
+                    <li className="hover:text-slate-900 transition-colors flex items-center gap-1.5">
+                      <span className="w-1 h-1 rounded-full bg-slate-400" />
+                      Vedic Mindfulness Executive Circles
+                    </li>
+                    <li className="hover:text-slate-900 transition-colors flex items-center gap-1.5">
+                      <span className="w-1 h-1 rounded-full bg-slate-400" />
+                      Keynote: The Unstoppable Mind In Chaos
+                    </li>
+                    <li className="hover:text-slate-900 transition-colors flex items-center gap-1.5">
+                      <span className="w-1 h-1 rounded-full bg-slate-400" />
+                      Awaken 3-Day Himalayan Stillness
+                    </li>
+                    <li className="hover:text-slate-900 transition-colors flex items-center gap-1.5">
+                      <span className="w-1 h-1 rounded-full bg-slate-400" />
+                      Youth Mental Mastery Initiative
+                    </li>
+                    <li className="hover:text-slate-900 transition-colors flex items-center gap-1.5">
+                      <span className="w-1 h-1 rounded-full bg-slate-400" />
+                      Corporate Cognitive Burnout Audit
+                    </li>
                   </ul>
                 </div>
 
-                {/* Column 3: Representation & Offices */}
-                <div className="space-y-3">
-                  <h4 className="text-xs font-mono font-bold uppercase tracking-widest text-amber-900 flex items-center gap-1.5">
-                    <MapPin className="w-3.5 h-3.5 text-amber-700" />
-                    Global Bureau
+                {/* Column 3: Direct Email & Global Bureau Representation */}
+                <div className="space-y-4">
+                  <h4 className="text-xs font-mono font-bold uppercase tracking-widest text-amber-900 flex items-center gap-2">
+                    <Mail className="w-4 h-4 text-amber-700" />
+                    Executive Desk &amp; Email
                   </h4>
-                  <div className="space-y-2.5 text-xs text-slate-600">
-                    <div>
-                      <div className="font-bold text-slate-800">New Delhi Bureau (HQ)</div>
-                      <div>Connaught Place, Central Sanctum, New Delhi 110001</div>
+                  <div className="space-y-3 text-xs text-slate-700">
+                    {/* Interactive Clickable Email Card with Copy button */}
+                    <div className="p-3.5 rounded-2xl bg-white border border-amber-200/80 shadow-2xs space-y-1.5">
+                      <div className="text-[10px] font-bold uppercase tracking-wider text-amber-800">
+                        Official Direct Email:
+                      </div>
+                      <a
+                        href="mailto:speaking@pranavmahajan.com"
+                        className="font-bold text-slate-900 hover:text-amber-700 text-xs sm:text-sm break-all block"
+                      >
+                        speaking@pranavmahajan.com
+                      </a>
+                      <button
+                        onClick={copyEmailToClipboard}
+                        className="text-[10px] font-bold text-amber-800 hover:text-amber-950 flex items-center gap-1 cursor-pointer pt-0.5"
+                      >
+                        {copiedEmail ? (
+                          <span className="text-emerald-700 font-bold flex items-center gap-1">
+                            <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+                            Email Copied to Clipboard!
+                          </span>
+                        ) : (
+                          <span>Copy Email Address</span>
+                        )}
+                      </button>
                     </div>
-                    <div>
-                      <div className="font-bold text-slate-800">Dubai &amp; EMEA Office</div>
-                      <div>Downtown Dubai, United Arab Emirates</div>
-                    </div>
-                    <div>
-                      <div className="font-bold text-slate-800">Speaking &amp; Press Desk:</div>
-                      <div className="font-semibold text-amber-900">speaking@pranavmahajan.com</div>
+
+                    {/* Global Bureau Offices */}
+                    <div className="space-y-2 pt-1 text-xs">
+                      <div>
+                        <div className="font-bold text-slate-900 flex items-center gap-1">
+                          <MapPin className="w-3 h-3 text-amber-700" />
+                          New Delhi Bureau (HQ)
+                        </div>
+                        <div className="text-slate-600 pl-4 text-[11px]">Connaught Place, Central Sanctum, New Delhi 110001</div>
+                      </div>
+                      <div>
+                        <div className="font-bold text-slate-900 flex items-center gap-1">
+                          <MapPin className="w-3 h-3 text-amber-700" />
+                          Dubai EMEA Bureau
+                        </div>
+                        <div className="text-slate-600 pl-4 text-[11px]">Downtown Dubai, United Arab Emirates</div>
+                      </div>
                     </div>
                   </div>
                 </div>
 
-                {/* Column 4: Weekly Contemplation Newsletter */}
-                <div className="space-y-3">
-                  <h4 className="text-xs font-mono font-bold uppercase tracking-widest text-amber-900 flex items-center gap-1.5">
-                    <Sun className="w-3.5 h-3.5 text-amber-700" />
+                {/* Column 4: Sunday Contemplation Newsletter */}
+                <div className="space-y-4">
+                  <h4 className="text-xs font-mono font-bold uppercase tracking-widest text-amber-900 flex items-center gap-2">
+                    <Sun className="w-4 h-4 text-amber-700" />
                     Sunday Contemplation
                   </h4>
                   <p className="text-xs text-slate-600 leading-relaxed">
                     Join 65,000+ conscious leaders receiving Pranav&rsquo;s weekly meditation on stillness, focus, and purposeful living.
                   </p>
-                  <div className="space-y-2 pt-1">
-                    <input
-                      type="email"
-                      placeholder="Enter your personal email"
-                      className="w-full px-3.5 py-2 rounded-xl bg-white border border-amber-200 text-xs text-slate-900 placeholder-slate-400 outline-none focus:border-amber-500 shadow-2xs"
-                    />
-                    <button
-                      onClick={() => alert('Thank you for subscribing to Sunday Contemplation!')}
-                      className="w-full py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs shadow-xs transition-colors cursor-pointer"
+
+                  {newsletterSent ? (
+                    <div className="p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs">
+                      <div className="font-bold flex items-center gap-1 mb-0.5">
+                        <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                        Subscribed with Gratitude!
+                      </div>
+                      <div>You will receive our next Sunday contemplation.</div>
+                    </div>
+                  ) : (
+                    <form
+                      onSubmit={(e) => {
+                        e.preventDefault();
+                        if (newsletterEmail) setNewsletterSent(true);
+                      }}
+                      className="space-y-2 pt-1"
                     >
-                      Subscribe Free
-                    </button>
+                      <input
+                        type="email"
+                        required
+                        placeholder="Enter your personal email..."
+                        value={newsletterEmail}
+                        onChange={(e) => setNewsletterEmail(e.target.value)}
+                        className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-amber-200 text-xs text-slate-900 placeholder-slate-400 outline-none focus:border-amber-500 shadow-2xs"
+                      />
+                      <button
+                        type="submit"
+                        className="w-full py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs shadow-xs transition-all cursor-pointer flex items-center justify-center gap-1.5"
+                      >
+                        <Send className="w-3 h-3" />
+                        <span>Subscribe Weekly Letter</span>
+                      </button>
+                    </form>
+                  )}
+                  <div className="text-[10px] text-slate-500">
+                    Zero spam. Unsubscribe at any time with a single click.
                   </div>
                 </div>
               </div>
 
-              {/* Bottom Legal / Copyright Row */}
-              <div className="pt-8 border-t border-amber-200/80 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
-                <div>
-                  &copy; 2026 Pranav Mahajan Official. All rights reserved. &bull; Inspired by Gaur Gopal Das &amp; Ancient Vedic Wisdom.
+              {/* BOTTOM LEGAL & COPYRIGHT ROW */}
+              <div className="pt-8 border-t border-amber-200/80 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-slate-600">
+                <div className="text-center md:text-left">
+                  &copy; 2026 Pranav Mahajan Official. All rights reserved. &bull; Inspired by Gaur Gopal Das &amp; Timeless Vedic Contemplation.
                 </div>
-                <div className="flex items-center gap-6">
-                  <span className="hover:text-slate-800 cursor-pointer">Privacy Policy</span>
-                  <span className="hover:text-slate-800 cursor-pointer">Terms of Service</span>
-                  <span className="hover:text-slate-800 cursor-pointer">Press Kit &amp; Rider</span>
+                <div className="flex flex-wrap items-center justify-center gap-5 sm:gap-6 font-medium">
+                  <span className="hover:text-slate-900 cursor-pointer">Privacy Policy</span>
+                  <span className="hover:text-slate-900 cursor-pointer">Terms of Mentorship</span>
+                  <span className="hover:text-slate-900 cursor-pointer">Press Kit &amp; Rider</span>
                   <button
-                    onClick={() => goToSlide(0, 'backward')}
-                    className="font-bold text-amber-800 hover:text-amber-900 cursor-pointer flex items-center gap-1"
+                    onClick={() => {
+                      setFooterOpen(false);
+                      goToSlide(0, 'backward');
+                    }}
+                    className="font-bold text-amber-800 hover:text-amber-950 cursor-pointer flex items-center gap-1"
                   >
                     <ArrowUp className="w-3 h-3" />
-                    Home Sanctum
+                    Back to Beginning
                   </button>
                 </div>
               </div>
             </div>
-          </footer>
-        </div>
-      </div>
+          </div>
 
       {/* BOTTOM CONTROLLER BAR: Prev / Next & Progress */}
       <div className="fixed bottom-6 left-6 sm:left-12 right-6 sm:right-12 z-40 flex items-center justify-between pointer-events-none">
@@ -1007,7 +1294,13 @@ export default function LishbosExperience() {
 
         <div className="pointer-events-auto flex items-center gap-2">
           <button
-            onClick={prevSlide}
+            onClick={() => {
+              if (current === totalSlides - 1 && footerOpen) {
+                setFooterOpen(false);
+              } else {
+                prevSlide();
+              }
+            }}
             disabled={current === 0}
             className={`w-9 h-9 rounded-full bg-white/90 border border-amber-200/80 flex items-center justify-center shadow-xs transition-all ${
               current === 0 ? 'opacity-35 cursor-not-allowed text-slate-400' : 'hover:bg-amber-100 text-slate-700 hover:text-amber-800 cursor-pointer'
@@ -1018,13 +1311,19 @@ export default function LishbosExperience() {
             <ChevronUp className="w-4 h-4" />
           </button>
           <button
-            onClick={nextSlide}
-            disabled={current === totalSlides - 1}
+            onClick={() => {
+              if (current === totalSlides - 1 && !footerOpen) {
+                setFooterOpen(true);
+              } else {
+                nextSlide();
+              }
+            }}
+            disabled={current === totalSlides - 1 && footerOpen}
             className={`w-9 h-9 rounded-full bg-white/90 border border-amber-200/80 flex items-center justify-center shadow-xs transition-all ${
-              current === totalSlides - 1 ? 'opacity-35 cursor-not-allowed text-slate-400' : 'hover:bg-amber-100 text-slate-700 hover:text-amber-800 cursor-pointer'
+              current === totalSlides - 1 && footerOpen ? 'opacity-35 cursor-not-allowed text-slate-400' : 'hover:bg-amber-100 text-slate-700 hover:text-amber-800 cursor-pointer'
             }`}
-            aria-label="Next Slide (Scroll Down)"
-            title="Scroll Down to Next Slide"
+            aria-label="Next Slide / Open Footer (Scroll Down)"
+            title="Scroll Down to Open Footer"
           >
             <ChevronDown className="w-4 h-4" />
           </button>
@@ -1038,7 +1337,7 @@ export default function LishbosExperience() {
             <img
               src="/pranav_mahajan_transparent.png"
               alt="Pranav Mahajan"
-              className="h-10 sm:h-12 w-auto object-contain"
+              className="h-14 sm:h-18 w-auto object-contain drop-shadow-md brightness-90 contrast-125"
             />
             <button
               onClick={() => setMenuOpen(false)}
@@ -1096,6 +1395,16 @@ export default function LishbosExperience() {
               className="block w-full py-3 text-2xl sm:text-3xl font-serif-luxury font-bold text-slate-800 hover:text-amber-700 transition-colors cursor-pointer"
             >
               05 &bull; Get In Touch &bull; Inquiries
+            </button>
+            <button
+              onClick={() => {
+                goToSlide(4);
+                setFooterOpen(true);
+                setMenuOpen(false);
+              }}
+              className="block w-full py-3 text-2xl sm:text-3xl font-serif-luxury font-bold text-slate-800 hover:text-amber-700 transition-colors cursor-pointer"
+            >
+              06 &bull; Master Sanctum &amp; Footer
             </button>
           </div>
 
