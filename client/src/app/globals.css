@@ -101,10 +101,17 @@ body {
   overflow-y: auto;
   overflow-x: hidden;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
   box-sizing: border-box;
   scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+}
+
+@media (min-width: 1024px) {
+  .slide-item {
+    align-items: center;
+  }
 }
 
 /* Slide content entering animation when board sweeps away */

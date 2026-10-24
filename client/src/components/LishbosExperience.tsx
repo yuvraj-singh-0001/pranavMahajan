@@ -291,19 +291,19 @@ export default function LishbosExperience() {
       )}
 
       {/* TOP HEADER: Transparent Gold Logo & Menu Controls (Clean, no big letters) */}
-      <header className="fixed top-0 left-0 right-0 z-50 px-6 sm:px-12 py-4 sm:py-5 flex items-center justify-between pointer-events-none">
+      <header className="fixed top-0 left-0 right-0 z-50 px-4 sm:px-12 py-2.5 sm:py-5 flex items-center justify-between pointer-events-none bg-[#fffcf7]/85 sm:bg-transparent backdrop-blur-md sm:backdrop-blur-none border-b border-amber-200/50 sm:border-b-0 transition-all">
         <button
           onClick={() => goToSlide(0)}
-          className="pointer-events-auto flex items-center gap-3 text-left group cursor-pointer transition-transform hover:scale-105"
+          className="pointer-events-auto flex items-center gap-2 text-left group cursor-pointer transition-transform hover:scale-105"
         >
           <img
             src="/pranav_mahajan_transparent.png"
             alt="Pranav Mahajan"
-            className="h-12 sm:h-16 md:h-20 w-auto object-contain drop-shadow-md brightness-90 contrast-125"
+            className="h-10 sm:h-16 md:h-20 w-auto object-contain drop-shadow-md brightness-90 contrast-125"
           />
         </button>
 
-        <div className="pointer-events-auto flex items-center gap-4">
+        <div className="pointer-events-auto flex items-center gap-2 sm:gap-4">
           <button
             onClick={() => goToSlide(4)}
             className="hidden sm:inline-flex ochre-pill-button py-2 px-5 text-xs font-bold shadow-xs hover:shadow-md"
@@ -313,7 +313,7 @@ export default function LishbosExperience() {
 
           <button
             onClick={() => setMenuOpen(!menuOpen)}
-            className="w-10 h-10 rounded-2xl bg-white/90 border border-amber-200/80 hover:bg-amber-50 flex flex-col items-center justify-center gap-1 cursor-pointer transition-all shadow-xs"
+            className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl bg-white/95 border border-amber-200/80 hover:bg-amber-50 flex flex-col items-center justify-center gap-1 cursor-pointer transition-all shadow-xs"
             aria-label="Toggle Navigation Menu"
           >
             {menuOpen ? (
@@ -340,7 +340,7 @@ export default function LishbosExperience() {
         {/* SLIDE 0: GAUR GOPAL DAS EXACT SCREENSHOT STYLE HERO */}
         {/* SLIDE 0: GAUR GOPAL DAS EXACT SCREENSHOT STYLE HERO */}
         <div className="slide-item bg-[#fffcf7]">
-          <div className={`max-w-6xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-10 items-center px-6 sm:px-12 py-10 sm:py-14 ${current === 0 ? 'slide-content-anim' : ''}`}>
+          <div className={`max-w-6xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-10 items-center px-4 sm:px-12 pt-20 sm:pt-14 pb-28 sm:pb-14 ${current === 0 ? 'slide-content-anim' : ''}`}>
             {/* Left Column: Portrait Energy Card */}
             <div className="lg:col-span-5 flex justify-center">
               <div className="relative w-full max-w-[340px] rounded-3xl bg-gradient-to-tr from-[#f5ede0] via-[#fffbf5] to-[#fdedd5] border-2 border-amber-200/80 p-6 sm:p-7 flex flex-col justify-between shadow-xl shadow-amber-900/[0.06] text-center overflow-hidden">
@@ -377,7 +377,7 @@ export default function LishbosExperience() {
 
             {/* Right Column: Title & Monologue */}
             <div className="lg:col-span-7 space-y-4 text-left">
-              <h1 className="font-serif-luxury text-5xl sm:text-6xl lg:text-7xl font-bold text-[#6d4416] tracking-tight leading-tight">
+              <h1 className="font-serif-luxury text-4xl sm:text-6xl lg:text-7xl font-bold text-[#6d4416] tracking-tight leading-tight">
                 Pranav Mahajan
               </h1>
 
@@ -412,7 +412,7 @@ export default function LishbosExperience() {
 
         {/* SLIDE 1: BOOKS BY PRANAV MAHAJAN */}
         <div className="slide-item bg-[#faf4ea]">
-          <div className={`max-w-6xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-10 items-center px-6 sm:px-12 py-10 sm:py-14 ${current === 1 ? 'slide-content-anim' : ''}`}>
+          <div className={`max-w-6xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-10 items-center px-4 sm:px-12 pt-20 sm:pt-14 pb-28 sm:pb-14 ${current === 1 ? 'slide-content-anim' : ''}`}>
             {/* Left Column: Featured Book Spotlight Card */}
             <div className="lg:col-span-5 flex justify-center">
               <div className="relative w-full max-w-[340px] rounded-3xl bg-gradient-to-tr from-[#f6eee2] via-[#fffdf9] to-[#faeee0] border-2 border-amber-200/80 p-6 sm:p-7 flex flex-col justify-between shadow-xl shadow-amber-900/[0.06] text-center overflow-hidden">
@@ -530,9 +530,8 @@ export default function LishbosExperience() {
         </div>
 
         {/* SLIDE 2: KEYNOTE ADDRESSES */}
-        {/* SLIDE 2: KEYNOTE ADDRESSES */}
         <div className="slide-item bg-[#fcf6ee]">
-          <div className={`max-w-6xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-10 items-center px-6 sm:px-12 py-10 sm:py-14 ${current === 2 ? 'slide-content-anim' : ''}`}>
+          <div className={`max-w-6xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-10 items-center px-4 sm:px-12 pt-20 sm:pt-14 pb-28 sm:pb-14 ${current === 2 ? 'slide-content-anim' : ''}`}>
             <div className="lg:col-span-6 space-y-4 text-left">
               <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-amber-100 text-amber-900 text-xs font-bold uppercase tracking-widest shadow-xs">
                 <Sparkles className="w-3.5 h-3.5 text-amber-700" />
@@ -602,7 +601,7 @@ export default function LishbosExperience() {
 
         {/* SLIDE 3: UPCOMING EVENTS & WORLD TOUR */}
         <div className="slide-item bg-[#f8f1e5]">
-          <div className={`max-w-6xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-10 items-center px-6 sm:px-12 py-10 sm:py-14 ${current === 3 ? 'slide-content-anim' : ''}`}>
+          <div className={`max-w-6xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-10 items-center px-4 sm:px-12 pt-20 sm:pt-14 pb-28 sm:pb-14 ${current === 3 ? 'slide-content-anim' : ''}`}>
             {/* Left Column: Tour Spotlight Card */}
             <div className="lg:col-span-5 flex justify-center">
               <div className="relative w-full max-w-[340px] rounded-3xl bg-gradient-to-tr from-[#f6eee2] via-[#fffdf9] to-[#faeee0] border-2 border-amber-200/80 p-6 sm:p-7 flex flex-col justify-between shadow-xl shadow-amber-900/[0.06] text-center overflow-hidden">
@@ -739,10 +738,8 @@ export default function LishbosExperience() {
         </div>
 
         {/* SLIDE 4: GET IN TOUCH */}
-        <div
-          className="slide-item bg-[#fffbf5] flex items-center justify-center px-6 sm:px-12 py-12 sm:py-16"
-        >
-          <div className={`max-w-6xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-10 items-center ${current === 4 ? 'slide-content-anim' : ''}`}>
+        <div className="slide-item bg-[#fffbf5]">
+          <div className={`max-w-6xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-10 items-center px-4 sm:px-12 pt-20 sm:pt-14 pb-28 sm:pb-14 ${current === 4 ? 'slide-content-anim' : ''}`}>
               {/* Left Column: Direct Contact & Office Details */}
               <div className="lg:col-span-5 flex justify-center">
                 <div className="relative w-full max-w-[340px] rounded-3xl bg-gradient-to-tr from-[#f6eee2] via-[#fffdf9] to-[#faeee0] border-2 border-amber-200/80 p-6 sm:p-7 flex flex-col justify-between shadow-xl shadow-amber-900/[0.06] text-center overflow-hidden">
@@ -908,7 +905,7 @@ export default function LishbosExperience() {
 
       <div
         ref={footerRef}
-        className={`fixed inset-x-0 bottom-0 top-24 sm:top-28 z-45 bg-[#fbf6ee] rounded-t-3xl border-t-2 border-amber-300/90 shadow-[0_-20px_50px_rgba(0,0,0,0.18)] overflow-y-auto px-5 sm:px-10 lg:px-16 pt-5 pb-28 transition-transform duration-500 ease-out select-text ${
+        className={`fixed inset-x-0 bottom-0 top-16 sm:top-24 md:top-28 z-45 bg-[#fbf6ee] rounded-t-3xl border-t-2 border-amber-300/90 shadow-[0_-20px_50px_rgba(0,0,0,0.18)] overflow-y-auto px-4 sm:px-10 lg:px-16 pt-4 sm:pt-5 pb-28 transition-transform duration-500 ease-out select-text ${
           footerOpen ? 'translate-y-0' : 'translate-y-full pointer-events-none'
         }`}
       >
@@ -1279,7 +1276,7 @@ export default function LishbosExperience() {
           </div>
 
       {/* BOTTOM CONTROLLER BAR: Prev / Next & Progress */}
-      <div className="fixed bottom-6 left-6 sm:left-12 right-6 sm:right-12 z-40 flex items-center justify-between pointer-events-none">
+      <div className="fixed bottom-4 left-4 sm:left-12 right-4 sm:right-12 sm:bottom-6 z-40 flex items-center justify-between pointer-events-none">
         <div className="pointer-events-auto flex items-center gap-3">
           <span className="text-xs font-mono font-bold text-amber-900">
             0{current + 1} / 0{totalSlides}
