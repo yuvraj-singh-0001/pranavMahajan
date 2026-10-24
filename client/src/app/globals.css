@@ -122,3 +122,58 @@ html, body {
   background: radial-gradient(circle, rgba(251, 191, 36, 0.25) 0%, rgba(245, 158, 11, 0) 70%);
   pointer-events: none;
 }
+
+/* 
+  Signature Lishbos Sweeping Color Curtain:
+  A warm golden-ochre dawn panel that sweeps across the screen ahead of every slide!
+*/
+.sweep-curtain {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 45;
+  pointer-events: none;
+  background: linear-gradient(115deg, #e5a83b 0%, #f59e0b 45%, #d97706 100%);
+  box-shadow: 0 0 100px rgba(217, 119, 6, 0.45);
+  transform: translateX(105%);
+  opacity: 0;
+}
+
+.sweep-forward {
+  animation: sweepForwardAnim 0.68s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.sweep-backward {
+  animation: sweepBackwardAnim 0.68s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@keyframes sweepForwardAnim {
+  0% {
+    transform: translateX(105%);
+    opacity: 0.98;
+  }
+  48% {
+    transform: translateX(0%);
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(-105%);
+    opacity: 0.98;
+  }
+}
+
+@keyframes sweepBackwardAnim {
+  0% {
+    transform: translateX(-105%);
+    opacity: 0.98;
+  }
+  48% {
+    transform: translateX(0%);
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(105%);
+    opacity: 0.98;
+  }
+}

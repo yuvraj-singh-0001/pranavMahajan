@@ -23,6 +23,7 @@ import {
 
 export default function LishbosExperience() {
   const [current, setCurrent] = useState(0);
+  const [curtainState, setCurtainState] = useState<'idle' | 'sweep-forward' | 'sweep-backward'>('idle');
   const [menuOpen, setMenuOpen] = useState(false);
 
   // Contact form state
@@ -35,31 +36,41 @@ export default function LishbosExperience() {
 
   const totalSlides = 5;
 
-  const goToSlide = useCallback((targetIndex: number) => {
+  const goToSlide = useCallback((targetIndex: number, explicitDirection?: 'forward' | 'backward') => {
     if (isLockedRef.current) return;
     if (targetIndex < 0 || targetIndex >= totalSlides || targetIndex === current) return;
 
     isLockedRef.current = true;
-    setCurrent(targetIndex);
+    const isForward = explicitDirection ? explicitDirection === 'forward' : targetIndex > current;
+    
+    // Step 1: Trigger the signature golden-ochre sweeping color curtain
+    setCurtainState(isForward ? 'sweep-forward' : 'sweep-backward');
 
+    // Step 2: At mid-sweep (~180ms), transition the slide track smoothly
     setTimeout(() => {
+      setCurrent(targetIndex);
+    }, 180);
+
+    // Step 3: Complete transition and release lock
+    setTimeout(() => {
+      setCurtainState('idle');
       isLockedRef.current = false;
-    }, 550);
+    }, 680);
   }, [current, totalSlides]);
 
   const nextSlide = useCallback(() => {
     if (current < totalSlides - 1) {
-      goToSlide(current + 1);
+      goToSlide(current + 1, 'forward');
     } else {
-      goToSlide(0);
+      goToSlide(0, 'forward');
     }
   }, [current, totalSlides, goToSlide]);
 
   const prevSlide = useCallback(() => {
     if (current > 0) {
-      goToSlide(current - 1);
+      goToSlide(current - 1, 'backward');
     } else {
-      goToSlide(totalSlides - 1);
+      goToSlide(totalSlides - 1, 'backward');
     }
   }, [current, totalSlides, goToSlide]);
 
@@ -127,6 +138,29 @@ export default function LishbosExperience() {
       {/* Radiant Sunrise Ambient Glows */}
       <div className="sunrise-glow w-[600px] h-[600px] -top-32 -left-32 opacity-65" />
       <div className="sunrise-glow w-[650px] h-[650px] top-1/2 -right-36 opacity-50" />
+
+      {/* 
+        SIGNATURE LISHBOS SWEEPING COLOR CURTAIN:
+        Sweeps smoothly across from side to side in warm golden-ochre dawn colors ahead of every slide!
+      */}
+      <div
+        className={`sweep-curtain ${
+          curtainState === 'sweep-forward'
+            ? 'sweep-forward'
+            : curtainState === 'sweep-backward'
+            ? 'sweep-backward'
+            : ''
+        }`}
+      >
+        <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none select-none">
+          <span className="font-cursive text-5xl sm:text-7xl font-bold text-white/40 tracking-wider drop-shadow-md">
+            Pranav Mahajan
+          </span>
+          <span className="text-xs font-mono tracking-[0.35em] uppercase text-white/50 mt-1 font-semibold">
+            Wisdom &bull; Leadership &bull; Stillness
+          </span>
+        </div>
+      </div>
 
       {/* TOP HEADER: Transparent Gold Logo & Menu Controls */}
       <header className="fixed top-0 left-0 right-0 z-50 px-6 sm:px-12 py-5 flex items-center justify-between pointer-events-none">
