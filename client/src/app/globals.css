@@ -1,0 +1,124 @@
+@import "tailwindcss";
+
+:root {
+  --background: #fffcf7;
+  --foreground: #2d2a26;
+  --primary-ochre: #e5a83b;
+  --primary-gold: #d97706;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background-color: #fffcf7;
+  color: #2d2a26;
+  font-family: var(--font-geist-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  user-select: none;
+}
+
+/* Calligraphy font from Caveat */
+.font-cursive {
+  font-family: var(--font-caveat), cursive, sans-serif;
+}
+
+.font-serif-luxury {
+  font-family: var(--font-playfair), Georgia, serif;
+}
+
+/* Exact Gaur Gopal Das Ochre Pill Button */
+.ochre-pill-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 2.25rem;
+  border-radius: 9999px;
+  background-color: #e5a83b;
+  color: #ffffff;
+  font-size: 0.95rem;
+  font-weight: 700;
+  box-shadow: 0 4px 15px rgba(229, 168, 59, 0.35);
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  text-decoration: none;
+  border: none;
+}
+
+.ochre-pill-button:hover {
+  background-color: #d6982b;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(229, 168, 59, 0.45);
+}
+
+/* Secondary outline button */
+.outline-pill-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 2rem;
+  border-radius: 9999px;
+  background-color: #ffffff;
+  color: #8a5d28;
+  font-size: 0.95rem;
+  font-weight: 700;
+  border: 1.5px solid rgba(229, 168, 59, 0.5);
+  box-shadow: 0 2px 10px rgba(229, 168, 59, 0.15);
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.outline-pill-button:hover {
+  border-color: #e5a83b;
+  background-color: #fffbf3;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(229, 168, 59, 0.25);
+}
+
+/* Sliding Track System: 100% visible, continuous glide */
+.slide-track {
+  display: flex;
+  flex-direction: row;
+  height: 100vh;
+  width: max-content;
+  will-change: transform;
+  transition: transform 0.75s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.slide-item {
+  width: 100vw;
+  height: 100vh;
+  max-width: 100vw;
+  max-height: 100vh;
+  flex-shrink: 0;
+  position: relative;
+  overflow-y: auto;
+  overflow-x: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+}
+
+/* Custom subtle scrollbar */
+.slide-item::-webkit-scrollbar {
+  width: 4px;
+}
+.slide-item::-webkit-scrollbar-track {
+  background: transparent;
+}
+.slide-item::-webkit-scrollbar-thumb {
+  background: rgba(229, 168, 59, 0.25);
+  border-radius: 4px;
+}
+
+/* Radiant morning sunrise ambient glows */
+.sunrise-glow {
+  position: absolute;
+  filter: blur(140px);
+  background: radial-gradient(circle, rgba(251, 191, 36, 0.25) 0%, rgba(245, 158, 11, 0) 70%);
+  pointer-events: none;
+}
