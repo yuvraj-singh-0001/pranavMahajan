@@ -12,6 +12,7 @@ import {
   Check,
   Sparkles,
 } from 'lucide-react';
+import QuillCursor from './QuillCursor';
 
 export type PersonaType =
   | 'student'
@@ -189,7 +190,14 @@ export default function Identify({
   const currentOption = PERSONAS.find((p) => p.id === selected) || PERSONAS[0];
 
   return (
-    <div className="relative w-full h-full min-h-screen overflow-hidden bg-[#090807] text-slate-100 flex flex-col justify-center items-center pt-12 sm:pt-16 pb-6 px-4 sm:px-8 select-text selection:bg-[#dfa547] selection:text-black">
+    <div
+      className={`relative w-full h-full min-h-screen overflow-hidden bg-[#090807] text-slate-100 flex flex-col justify-center items-center pt-12 sm:pt-16 pb-6 px-4 sm:px-8 select-text selection:bg-[#dfa547] selection:text-black ${
+        isActive ? 'quill-active-slide' : ''
+      }`}
+    >
+      {/* Antique Golden Quill Pen Custom Cursor (Active only on Slide 1) */}
+      <QuillCursor isActive={!!isActive} />
+
       {/* 1. FULL-WIDTH BACKGROUND VIDEO (Full width across all screen sizes like a native video) */}
       <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden flex items-center justify-center w-full h-full">
         <video
@@ -211,11 +219,11 @@ export default function Identify({
           clipPath: headingWriting ? 'inset(0% 0% 0%)' : 'inset(0% 100% 0% 0%)',
           transition: 'clip-path 2.8s cubic-bezier(0.25, 1, 0.5, 1), opacity 2.2s ease-out, transform 2.2s ease-out',
         }}
-        className={`relative z-10 text-center max-w-3xl mx-auto space-y-0.5 sm:space-y-1 flex-shrink-0 mb-2 sm:mb-3 ${
+        className={`relative z-10 text-center max-w-3xl mx-auto flex-shrink-0 mb-2 sm:mb-3 ${
           headingWriting ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-6 pointer-events-none'
         }`}
       >
-        {/* Sub-line: How Do You Want to (Original size) */}
+        {/* Sub-line: How Do You Want to */}
         <div className="flex items-center justify-center gap-3">
           <span className="h-[1px] w-8 sm:w-16 bg-gradient-to-r from-transparent via-white/70 to-transparent" />
           <span className="font-serif italic text-white text-xl sm:text-2xl md:text-3xl tracking-wide font-light">
@@ -224,13 +232,13 @@ export default function Identify({
           <span className="h-[1px] w-8 sm:w-16 bg-gradient-to-r from-transparent via-white/70 to-transparent" />
         </div>
 
-        {/* Grand Headline: Experience? (Original size) */}
-        <h1 className="font-serif-luxury text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-extrabold tracking-tight text-white leading-tight py-0.5">
+        {/* Grand Headline: Experience? */}
+        <h1 className="font-serif-luxury text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-extrabold tracking-tight text-white py-0.5 sm:py-1">
           Experience?
         </h1>
 
         {/* Antique Flourish Divider */}
-        <div className="flex items-center justify-center gap-2.5 text-white/90">
+        <div className="flex items-center justify-center gap-2.5 text-white/90 mt-1 sm:mt-1.5">
           <span className="h-[1px] w-12 sm:w-24 bg-gradient-to-r from-transparent via-white/80 to-transparent" />
           <span className="text-sm tracking-widest text-amber-300 font-serif">❖</span>
           <span className="h-[1px] w-12 sm:w-24 bg-gradient-to-l from-transparent via-white/80 to-transparent" />

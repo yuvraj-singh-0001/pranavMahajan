@@ -409,7 +409,7 @@ export default function PageSlider() {
       )}
 
       {/* TOP HEADER NAVBAR */}
-      <header className="fixed top-0 left-0 right-0 z-50 px-4 sm:px-12 py-2.5 sm:py-5 flex items-center justify-between pointer-events-none bg-black/40 sm:bg-transparent backdrop-blur-md sm:backdrop-blur-none border-b border-amber-500/15 sm:border-b-0 transition-all duration-500">
+      <header data-chrome="true" className="fixed top-0 left-0 right-0 z-50 px-4 sm:px-12 py-2.5 sm:py-5 flex items-center justify-between pointer-events-none bg-black/40 sm:bg-transparent backdrop-blur-md sm:backdrop-blur-none border-b border-amber-500/15 sm:border-b-0 transition-all duration-500">
         <button
           onClick={() => goToSlide(0)}
           className="pointer-events-auto flex items-center gap-2 text-left group cursor-pointer transition-transform hover:scale-105"
@@ -464,7 +464,9 @@ export default function PageSlider() {
         {/* SLIDE 1: EXPERIENCE IDENTITY (Royal Parchment Scroll) */}
         <div
           ref={(el) => { slidesRef.current[1] = el; }}
-          className="slide-item bg-[#090807] text-slate-100 relative overflow-hidden select-text"
+          className={`slide-item bg-[#090807] text-slate-100 relative overflow-hidden select-text ${
+            current === 1 ? 'quill-active-slide' : ''
+          }`}
         >
           <Identify
             isActive={current === 1}
@@ -501,7 +503,7 @@ export default function PageSlider() {
       />
 
       {/* FLOATING CORNER CONTROLS */}
-      <div className="fixed bottom-6 right-6 z-40 flex items-center gap-2">
+      <div data-chrome="true" className="fixed bottom-6 right-6 z-40 flex items-center gap-2">
         <div className="flex flex-col gap-1.5">
           <button
             onClick={() => {
@@ -537,7 +539,7 @@ export default function PageSlider() {
 
       {/* FULLSCREEN OVERLAY MENU */}
       {menuOpen && (
-        <div className="fixed inset-0 z-50 bg-[#090807]/98 backdrop-blur-2xl flex flex-col justify-between p-8 sm:p-14 animate-in fade-in duration-200 text-white">
+        <div data-chrome="true" className="fixed inset-0 z-50 bg-[#090807]/98 backdrop-blur-2xl flex flex-col justify-between p-8 sm:p-14 animate-in fade-in duration-200 text-white">
           <div className="flex items-center justify-between">
             <img
               src="/pranav_mahajan_transparent.png"

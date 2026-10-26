@@ -31,7 +31,9 @@ export default function Footer({ isOpen, onClose, onNavigateSlide }: FooterProps
   };
 
   return (
-    <div
+    <footer
+      data-chrome="true"
+      data-footer="true"
       className={`fixed inset-x-0 bottom-0 z-40 transition-transform duration-500 ease-out ${
         isOpen ? 'translate-y-0' : 'translate-y-full'
       }`}
@@ -204,6 +206,6 @@ export default function Footer({ isOpen, onClose, onNavigateSlide }: FooterProps
           &copy; 2026 Pranav Mahajan Official &bull; Wisdom &bull; Leadership &bull; Stillness. All Rights Reserved.
         </div>
       </div>
-    </div>
+    </footer>
   );
 }
