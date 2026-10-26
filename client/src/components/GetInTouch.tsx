@@ -40,11 +40,17 @@ export default function GetInTouch({
       if (selectedPersona === 'student') {
         defaultMsg = 'Hi Pranav, I am reaching out as a Student seeking guidance on focus, exam confidence, and mental clarity.';
       } else if (selectedPersona === 'school') {
-        defaultMsg = 'Hi Pranav, we would like to invite you for an official Keynote Address / Youth Summit at our Institution.';
+        defaultMsg = 'Hi Pranav, we would like to invite you for an official Keynote Address / Youth Summit at our Educational Institution.';
+      } else if (selectedPersona === 'individual') {
+        defaultMsg = 'Hi Pranav, I am reaching out as an Individual seeking high-level private life architecture & mentorship.';
+      } else if (selectedPersona === 'corporate') {
+        defaultMsg = 'Hi Pranav, we would like to invite you for a Corporate Keynote on Executive Leadership & Burnout Immunity.';
+      } else if (selectedPersona === 'government') {
+        defaultMsg = 'Hi Pranav, we are reaching out regarding an official Keynote Address for our Government Department / Public Sector Summit.';
+      } else if (selectedPersona === 'ngo') {
+        defaultMsg = 'Hi Pranav, we are reaching out from the NGO / Social Sector regarding community & youth transformation.';
       } else if (selectedPersona === 'parent') {
         defaultMsg = 'Hi Pranav, I am reaching out as a Parent seeking counsel on conscious parenting and family harmony.';
-      } else if (selectedPersona === 'individual') {
-        defaultMsg = 'Hi Pranav, I am reaching out as an Executive / Individual seeking high-level private mentorship.';
       }
       setFormData((prev) => ({ ...prev, message: defaultMsg }));
     }
@@ -159,12 +165,14 @@ export default function GetInTouch({
             </div>
 
             {/* Profile Selection Pills */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 pt-1">
               {[
                 { id: 'student' as const, label: 'Student' },
-                { id: 'school' as const, label: 'School/College' },
-                { id: 'parent' as const, label: 'Parent' },
-                { id: 'individual' as const, label: 'Executive' },
+                { id: 'individual' as const, label: 'Individual' },
+                { id: 'school' as const, label: 'Institution' },
+                { id: 'corporate' as const, label: 'Corporate' },
+                { id: 'government' as const, label: 'Government' },
+                { id: 'ngo' as const, label: 'NGO / Social' },
               ].map((p) => (
                 <button
                   key={p.id}

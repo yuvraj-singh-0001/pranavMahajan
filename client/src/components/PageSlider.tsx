@@ -25,6 +25,10 @@ export default function PageSlider() {
   const slidesRef = useRef<(HTMLDivElement | HTMLElement | null)[]>([]);
   const wheelAccumulatorRef = useRef(0);
   const wheelResetTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const bottomPrimedRef = useRef(false);
+  const bottomPrimeTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const topPrimedRef = useRef(false);
+  const topPrimeTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   // 3 Primary Slides:
   // 0: Hero (Want to live your dream life)
@@ -42,6 +46,7 @@ export default function PageSlider() {
 
   const handleRocketApproach = useCallback(() => {
     setCurrent(rocketTargetIndex);
+    slidesRef.current[rocketTargetIndex]?.scrollTo({ top: 0, behavior: 'instant' });
   }, [rocketTargetIndex]);
 
   const handleRocketComplete = useCallback(() => {
@@ -49,6 +54,7 @@ export default function PageSlider() {
     setFooterOpen(false);
     setRocketActive(false);
     isLockedRef.current = false;
+    slidesRef.current[rocketTargetIndex]?.scrollTo({ top: 0, behavior: 'instant' });
   }, [rocketTargetIndex]);
 
   const handleRocketSkip = useCallback(() => {
@@ -56,6 +62,7 @@ export default function PageSlider() {
     setFooterOpen(false);
     setRocketActive(false);
     isLockedRef.current = false;
+    slidesRef.current[rocketTargetIndex]?.scrollTo({ top: 0, behavior: 'instant' });
   }, [rocketTargetIndex]);
 
   const goToSlide = useCallback((targetIndex: number, explicitDirection?: 'forward' | 'backward') => {
@@ -80,6 +87,8 @@ export default function PageSlider() {
     setTimeout(() => {
       setCurrent(targetIndex);
       setFooterOpen(false);
+      bottomPrimedRef.current = false;
+      topPrimedRef.current = false;
       slidesRef.current[targetIndex]?.scrollTo({ top: 0, behavior: 'instant' });
     }, 420);
 
@@ -123,7 +132,7 @@ export default function PageSlider() {
       if (wheelResetTimeoutRef.current) clearTimeout(wheelResetTimeoutRef.current);
       wheelResetTimeoutRef.current = setTimeout(() => {
         wheelAccumulatorRef.current = 0;
-      }, 280);
+      }, 380);
 
       const activeSlide = slidesRef.current[current];
 
@@ -133,17 +142,21 @@ export default function PageSlider() {
           return;
         } else {
           if (activeSlide) {
-            const isScrollable = activeSlide.scrollHeight > activeSlide.clientHeight + 8;
-            const isAtBottom = activeSlide.scrollTop + activeSlide.clientHeight >= activeSlide.scrollHeight - 12;
-            const isAtTop = activeSlide.scrollTop <= 8;
+            const isScrollable = activeSlide.scrollHeight > activeSlide.clientHeight + 16;
+            const isAtBottom = activeSlide.scrollTop + activeSlide.clientHeight >= activeSlide.scrollHeight - 16;
+            const isAtTop = activeSlide.scrollTop <= 12;
 
             if (e.deltaY > 0) {
               if (isScrollable && !isAtBottom) {
                 wheelAccumulatorRef.current = 0;
                 return;
               }
-              e.preventDefault();
-              setFooterOpen(true);
+              wheelAccumulatorRef.current += e.deltaY;
+              if (wheelAccumulatorRef.current >= 220) {
+                wheelAccumulatorRef.current = 0;
+                e.preventDefault();
+                setFooterOpen(true);
+              }
               return;
             } else {
               if (isScrollable && !isAtTop) {
@@ -151,7 +164,7 @@ export default function PageSlider() {
                 return;
               }
               wheelAccumulatorRef.current += e.deltaY;
-              if (wheelAccumulatorRef.current <= -35) {
+              if (wheelAccumulatorRef.current <= -220) {
                 wheelAccumulatorRef.current = 0;
                 e.preventDefault();
                 prevSlide();
@@ -162,43 +175,85 @@ export default function PageSlider() {
         }
       }
 
-      // Slide 1 (Persona Selection):
-      // Allow user to comfortably scroll down and read content
+      // Slide 1 (Identify / Persona Selection):
+      // Allow user to comfortably scroll down, read content smoothly, and only transition on intentional strong scroll
       if (activeSlide) {
-        const isScrollable = activeSlide.scrollHeight > activeSlide.clientHeight + 8;
-        const isAtBottom = activeSlide.scrollTop + activeSlide.clientHeight >= activeSlide.scrollHeight - 12;
-        const isAtTop = activeSlide.scrollTop <= 8;
+        const isScrollable = activeSlide.scrollHeight > activeSlide.clientHeight + 16;
+        const isAtBottom = activeSlide.scrollTop + activeSlide.clientHeight >= activeSlide.scrollHeight - 16;
+        const isAtTop = activeSlide.scrollTop <= 12;
 
         if (e.deltaY > 0) {
+          // If there is scrollable content below, let user scroll naturally and smoothly!
           if (isScrollable && !isAtBottom) {
             wheelAccumulatorRef.current = 0;
-            return; // Natural internal scroll
+            bottomPrimedRef.current = false;
+            return;
           }
+
+          // User is at the bottom!
           wheelAccumulatorRef.current += e.deltaY;
-          if (wheelAccumulatorRef.current >= 40) {
+
+          // Strong deliberate scroll effort (>= 160)
+          if (wheelAccumulatorRef.current >= 160) {
             wheelAccumulatorRef.current = 0;
+
+            if (!bottomPrimedRef.current) {
+              // 1ST TIME AT BOTTOM: Prime it, but DO NOT advance!
+              // User has to scroll a 2nd time to advance!
+              bottomPrimedRef.current = true;
+              if (bottomPrimeTimerRef.current) clearTimeout(bottomPrimeTimerRef.current);
+              bottomPrimeTimerRef.current = setTimeout(() => {
+                bottomPrimedRef.current = false;
+              }, 2200);
+              return;
+            }
+
+            // 2ND TIME AT BOTTOM ("jab dusra baar uper/scroll kare tej tab jakar next page aaye pahali bar me hi nahi")
+            bottomPrimedRef.current = false;
+            if (bottomPrimeTimerRef.current) clearTimeout(bottomPrimeTimerRef.current);
             e.preventDefault();
             nextSlide();
           }
           return;
         } else {
+          // If there is scrollable content above, let user scroll naturally upwards!
           if (isScrollable && !isAtTop) {
             wheelAccumulatorRef.current = 0;
-            return; // Natural internal scroll
+            topPrimedRef.current = false;
+            return;
           }
+
+          // User is at the top!
           wheelAccumulatorRef.current += e.deltaY;
-          if (wheelAccumulatorRef.current <= -40) {
+          if (wheelAccumulatorRef.current <= -160) {
             wheelAccumulatorRef.current = 0;
+
+            if (!topPrimedRef.current) {
+              // 1ST TIME AT TOP: Prime it, do not return yet!
+              topPrimedRef.current = true;
+              if (topPrimeTimerRef.current) clearTimeout(topPrimeTimerRef.current);
+              topPrimeTimerRef.current = setTimeout(() => {
+                topPrimedRef.current = false;
+              }, 2200);
+              return;
+            }
+
+            // 2ND TIME AT TOP:
+            topPrimedRef.current = false;
+            if (topPrimeTimerRef.current) clearTimeout(topPrimeTimerRef.current);
             e.preventDefault();
             prevSlide();
           }
           return;
         }
       } else {
-        if (e.deltaY > 0) {
+        wheelAccumulatorRef.current += e.deltaY;
+        if (wheelAccumulatorRef.current >= 240) {
+          wheelAccumulatorRef.current = 0;
           e.preventDefault();
           nextSlide();
-        } else {
+        } else if (wheelAccumulatorRef.current <= -240) {
+          wheelAccumulatorRef.current = 0;
           e.preventDefault();
           prevSlide();
         }
@@ -287,9 +342,27 @@ export default function PageSlider() {
           else prevSlide();
         }
       } else {
-        if (diffY > 45 && (!isScrollable || isAtBottom)) {
+        if (diffY > 55 && (!isScrollable || isAtBottom)) {
+          if (!bottomPrimedRef.current) {
+            bottomPrimedRef.current = true;
+            if (bottomPrimeTimerRef.current) clearTimeout(bottomPrimeTimerRef.current);
+            bottomPrimeTimerRef.current = setTimeout(() => {
+              bottomPrimedRef.current = false;
+            }, 2200);
+            return;
+          }
+          bottomPrimedRef.current = false;
           nextSlide();
-        } else if (diffY < -45 && (!isScrollable || isAtTop)) {
+        } else if (diffY < -55 && (!isScrollable || isAtTop)) {
+          if (!topPrimedRef.current) {
+            topPrimedRef.current = true;
+            if (topPrimeTimerRef.current) clearTimeout(topPrimeTimerRef.current);
+            topPrimeTimerRef.current = setTimeout(() => {
+              topPrimedRef.current = false;
+            }, 2200);
+            return;
+          }
+          topPrimedRef.current = false;
           prevSlide();
         }
       }
@@ -308,6 +381,8 @@ export default function PageSlider() {
       window.removeEventListener('touchmove', handleTouchMove);
       window.removeEventListener('touchend', handleTouchEnd);
       if (nudgeTimeoutRef.current) clearTimeout(nudgeTimeoutRef.current);
+      if (bottomPrimeTimerRef.current) clearTimeout(bottomPrimeTimerRef.current);
+      if (topPrimeTimerRef.current) clearTimeout(topPrimeTimerRef.current);
     };
   }, [current, totalSlides, footerOpen, nextSlide, prevSlide, triggerButtonNudge]);
 
@@ -383,13 +458,13 @@ export default function PageSlider() {
           buttonNudged={buttonNudged}
         />
 
-        {/* SLIDE 1: PERSONA SELECTION (Please Identify Yourself As) */}
+        {/* SLIDE 1: EXPERIENCE IDENTITY (Royal Parchment Scroll) */}
         <div
           ref={(el) => { slidesRef.current[1] = el; }}
-          className="slide-item bg-[#0a090b] text-slate-100 relative overflow-y-auto overflow-x-hidden select-text"
+          className="slide-item bg-[#090807] text-slate-100 relative overflow-hidden select-text"
         >
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_25%,rgba(223,165,71,0.08),transparent_65%)] pointer-events-none" />
           <Identify
+            isActive={current === 1}
             onSelectPersona={(p) => setSelectedPersona(p)}
             onGoToPersonaPage={(p) => {
               setSelectedPersona(p);
