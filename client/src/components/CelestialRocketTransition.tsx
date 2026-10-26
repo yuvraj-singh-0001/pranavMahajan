@@ -60,16 +60,16 @@ export default function CelestialRocketTransition({
     const duration = video.duration;
     const pct = Math.min(100, Math.round((current / duration) * 100));
 
-    // 1. PRE-ARRIVAL DOCKING: Trigger at ~70% so destination slide activates underneath
-    if (pct >= 70 && !hasTriggeredApproachRef.current) {
+    // 1. PRE-ARRIVAL DOCKING: Trigger early at ~55% so second video is already rolling underneath
+    if (pct >= 55 && !hasTriggeredApproachRef.current) {
       hasTriggeredApproachRef.current = true;
       if (onApproachArrival) {
         onApproachArrival();
       }
     }
 
-    // 2. SEAMLESS DISSOLVE: Starts crisp before end of video
-    if (((duration > 0.35 && current >= duration - 0.28) || pct >= 88) && !isFadingOut) {
+    // 2. SEAMLESS DISSOLVE: Starts dissolving at ~78% so motion connects without freeze
+    if (((duration > 0.35 && current >= duration - 0.35) || pct >= 78) && !isFadingOut) {
       setIsFadingOut(true);
     }
   };

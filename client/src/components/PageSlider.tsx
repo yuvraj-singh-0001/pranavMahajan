@@ -450,7 +450,10 @@ export default function PageSlider() {
       {/* CONTINUOUS HORIZONTAL SLIDING TRACK (3 SLIDES) */}
       <div
         className="slide-track"
-        style={{ transform: `translateX(-${current * 100}vw)` }}
+        style={{
+          transform: `translateX(-${current * 100}vw)`,
+          transition: rocketActive ? 'none' : undefined,
+        }}
       >
         {/* SLIDE 0: HERO (Want to live your dream life) */}
         <Hero

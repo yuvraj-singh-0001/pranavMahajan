@@ -10,7 +10,7 @@ import {
   Users,
   ArrowRight,
   Check,
-  RotateCcw,
+  Sparkles,
 } from 'lucide-react';
 
 export type PersonaType =
@@ -75,48 +75,107 @@ export default function Identify({
   onBackToHero,
 }: IdentifyProps) {
   const [selected, setSelected] = useState<PersonaType>('student');
-  const [contentVisible, setContentVisible] = useState(false);
+  const [headingWriting, setHeadingWriting] = useState(false);
+  // Track sequential one-by-one card emergence (0 to 6 cards formed like magic)
+  const [revealedCardCount, setRevealedCardCount] = useState(0);
+  const [buttonsVisible, setButtonsVisible] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
-  const revealTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const timeoutsRef = useRef<NodeJS.Timeout[]>([]);
+  const hasTriggeredSequenceRef = useRef(false);
 
-  // Play video seamlessly as fullscreen background overlay & freeze on final frame
+  const clearAllTimers = () => {
+    timeoutsRef.current.forEach((t) => clearTimeout(t));
+    timeoutsRef.current = [];
+  };
+
+  const resetAllAnimations = () => {
+    clearAllTimers();
+    hasTriggeredSequenceRef.current = false;
+    setHeadingWriting(false);
+    setRevealedCardCount(0);
+    setButtonsVisible(false);
+  };
+
+  // Magic Sequence: Runs as video reaches 40% progress
+  const triggerMagicFormationSequence = () => {
+    if (hasTriggeredSequenceRef.current) return;
+    hasTriggeredSequenceRef.current = true;
+
+    // 1. Heading begins writing in immediately at 40%
+    setHeadingWriting(true);
+
+    // 2. Cards materialize ONE-BY-ONE in a clean, smooth cascade
+    const initialDelay = 400; // Brief lead time for heading write-in
+    const cardInterval = 320; // Smooth sequential cadence
+
+    PERSONAS.forEach((_, index) => {
+      const cardTimer = setTimeout(() => {
+        setRevealedCardCount(index + 1);
+      }, initialDelay + index * cardInterval);
+      timeoutsRef.current.push(cardTimer);
+    });
+
+    // 3. Bottom button glides in smoothly after the last card
+    const btnTimer = setTimeout(() => {
+      setButtonsVisible(true);
+    }, initialDelay + PERSONAS.length * cardInterval + 350);
+    timeoutsRef.current.push(btnTimer);
+  };
+
+  // Synchronize playback with isActive
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
 
     if (isActive) {
-      setContentVisible(false);
+      resetAllAnimations();
       video.currentTime = 0;
+      // Fast video playback as requested
+      video.playbackRate = 1.65;
 
       const playPromise = video.play();
       if (playPromise !== undefined) {
         playPromise.catch(() => {
-          // If browser restricts autoplay, show content immediately
-          setContentVisible(true);
+          // If browser restricts autoplay, trigger sequence smoothly
+          triggerMagicFormationSequence();
         });
       }
 
-      // Cards smoothly draw in as scroll unrolls (timed at 1.4s)
-      if (revealTimerRef.current) clearTimeout(revealTimerRef.current);
-      revealTimerRef.current = setTimeout(() => {
-        setContentVisible(true);
-      }, 1400);
+      // Safety fallback timer
+      const fallbackTimer = setTimeout(() => {
+        triggerMagicFormationSequence();
+      }, 5000);
+      timeoutsRef.current.push(fallbackTimer);
     } else {
       video.pause();
-      setContentVisible(false);
+      resetAllAnimations();
     }
 
     return () => {
-      if (revealTimerRef.current) clearTimeout(revealTimerRef.current);
+      clearAllTimers();
     };
   }, [isActive]);
 
+  const handleTimeUpdate = () => {
+    const video = videoRef.current;
+    if (!video || !video.duration) return;
+
+    // Start writing text as soon as video reaches 40% progress
+    const progress = video.currentTime / video.duration;
+    if (progress >= 0.40 && !hasTriggeredSequenceRef.current) {
+      triggerMagicFormationSequence();
+    }
+  };
+
   const handleVideoEnded = () => {
-    setContentVisible(true);
     const video = videoRef.current;
     if (video) {
-      // Freeze on final unrolled scroll frame without disappearing or looping
+      // Freeze on final unrolled frame without disappearing or looping
       video.pause();
+    }
+    // If not already triggered, trigger sequence now smoothly
+    if (!hasTriggeredSequenceRef.current) {
+      triggerMagicFormationSequence();
     }
   };
 
@@ -127,92 +186,87 @@ export default function Identify({
     }
   };
 
-  const replayScroll = () => {
-    const video = videoRef.current;
-    if (!video) return;
-    setContentVisible(false);
-    video.currentTime = 0;
-    video.play().catch(() => {});
-    if (revealTimerRef.current) clearTimeout(revealTimerRef.current);
-    revealTimerRef.current = setTimeout(() => {
-      setContentVisible(true);
-    }, 1400);
-  };
-
   const currentOption = PERSONAS.find((p) => p.id === selected) || PERSONAS[0];
 
   return (
-    <div className="relative w-full h-full min-h-screen overflow-hidden bg-[#090807] text-slate-100 flex flex-col justify-between items-center pt-24 sm:pt-28 pb-8 px-4 sm:px-8 select-text selection:bg-[#dfa547] selection:text-black">
-      {/* 1. FULL-SCREEN BACKGROUND VIDEO OVERLAY (No boxes, no frames, 100% immersive) */}
-      <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
+    <div className="relative w-full h-full min-h-screen overflow-hidden bg-[#090807] text-slate-100 flex flex-col justify-center items-center pt-12 sm:pt-16 pb-6 px-4 sm:px-8 select-text selection:bg-[#dfa547] selection:text-black">
+      {/* 1. FULL-WIDTH BACKGROUND VIDEO (Full width across all screen sizes like a native video) */}
+      <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden flex items-center justify-center w-full h-full">
         <video
           ref={videoRef}
           src="/ssecond-screen.mp4"
           playsInline
           muted
           preload="auto"
+          onTimeUpdate={handleTimeUpdate}
           onEnded={handleVideoEnded}
-          className="w-full h-full object-cover object-center brightness-105 contrast-110"
+          className="w-full h-full object-cover object-center brightness-105"
+          style={{ width: '100%', minWidth: '100%' }}
         />
-
-        {/* Ambient Dark Vignette overlay so video blends seamlessly into background */}
-        <div className="absolute inset-0 bg-gradient-to-t from-[#090807] via-transparent to-[#090807]/80 pointer-events-none" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_45%,rgba(9,8,7,0.75)_95%)] pointer-events-none" />
-
-        {/* Left & Right Golden Ambient Rays (matching reference image) */}
-        <div className="absolute top-0 left-0 w-[450px] h-[550px] bg-[radial-gradient(ellipse_at_top_left,rgba(223,165,71,0.22)_0%,transparent_65%)] blur-2xl pointer-events-none" />
-        <div className="absolute top-0 right-0 w-[450px] h-[550px] bg-[radial-gradient(ellipse_at_top_right,rgba(223,165,71,0.22)_0%,transparent_65%)] blur-2xl pointer-events-none" />
       </div>
 
-      {/* 2. TOP HEADING (Safely below fixed navbar, completely visible without any clipping) */}
-      <div className="relative z-10 text-center max-w-3xl mx-auto space-y-1 sm:space-y-1.5 flex-shrink-0 animate-in fade-in duration-500">
-        {/* Sub-line: How Do You Want to */}
+      {/* 2. TOP HEADING (Original majestic size) */}
+      <div
+        style={{
+          clipPath: headingWriting ? 'inset(0% 0% 0%)' : 'inset(0% 100% 0% 0%)',
+          transition: 'clip-path 2.8s cubic-bezier(0.25, 1, 0.5, 1), opacity 2.2s ease-out, transform 2.2s ease-out',
+        }}
+        className={`relative z-10 text-center max-w-3xl mx-auto space-y-0.5 sm:space-y-1 flex-shrink-0 mb-2 sm:mb-3 ${
+          headingWriting ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-6 pointer-events-none'
+        }`}
+      >
+        {/* Sub-line: How Do You Want to (Original size) */}
         <div className="flex items-center justify-center gap-3">
-          <span className="h-[1px] w-8 sm:w-16 bg-gradient-to-r from-transparent via-[#dfa547]/60 to-transparent" />
-          <span className="font-serif italic text-amber-200/90 text-lg sm:text-2xl md:text-3xl tracking-wide font-normal drop-shadow-[0_2px_12px_rgba(223,165,71,0.45)]">
+          <span className="h-[1px] w-8 sm:w-16 bg-gradient-to-r from-transparent via-white/70 to-transparent" />
+          <span className="font-serif italic text-white text-xl sm:text-2xl md:text-3xl tracking-wide font-light">
             How Do You Want to
           </span>
-          <span className="h-[1px] w-8 sm:w-16 bg-gradient-to-r from-transparent via-[#dfa547]/60 to-transparent" />
+          <span className="h-[1px] w-8 sm:w-16 bg-gradient-to-r from-transparent via-white/70 to-transparent" />
         </div>
 
-        {/* Grand Headline: Experience? */}
-        <h1 className="font-serif-luxury text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight bg-gradient-to-r from-[#fff3cf] via-[#dfa547] to-[#ffe29a] bg-clip-text text-transparent drop-shadow-[0_4px_30px_rgba(223,165,71,0.6)] leading-none py-1">
+        {/* Grand Headline: Experience? (Original size) */}
+        <h1 className="font-serif-luxury text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-extrabold tracking-tight text-white leading-tight py-0.5">
           Experience?
         </h1>
 
         {/* Antique Flourish Divider */}
-        <div className="flex items-center justify-center gap-2 text-amber-400/80">
-          <span className="h-[1px] w-12 sm:w-20 bg-gradient-to-r from-transparent to-[#dfa547]/70" />
-          <span className="text-xs tracking-widest text-[#dfa547] font-serif">❖</span>
-          <span className="h-[1px] w-12 sm:w-20 bg-gradient-to-l from-transparent to-[#dfa547]/70" />
+        <div className="flex items-center justify-center gap-2.5 text-white/90">
+          <span className="h-[1px] w-12 sm:w-24 bg-gradient-to-r from-transparent via-white/80 to-transparent" />
+          <span className="text-sm tracking-widest text-amber-300 font-serif">❖</span>
+          <span className="h-[1px] w-12 sm:w-24 bg-gradient-to-l from-transparent via-white/80 to-transparent" />
         </div>
       </div>
 
-      {/* 3. THE 6 PARCHMENT CARDS (Directly overlapping the unrolled scroll in the center) */}
-      <div className="relative z-10 w-full max-w-4xl mx-auto flex-1 flex items-center justify-center my-auto py-2 sm:py-4">
-        <div
-          className={`w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 md:gap-4.5 transition-all duration-700 ease-out ${
-            contentVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-95 pointer-events-none'
-          }`}
-        >
+      {/* 3. THE 6 CARDS: (Spacious gap between cards) */}
+      <div className="relative z-10 w-full max-w-4xl mx-auto py-1 sm:py-2">
+        <div className="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 md:gap-6">
           {PERSONAS.map((persona, index) => {
             const IconComponent = persona.icon;
             const isSelected = selected === persona.id;
-
+            const isFormed = index < revealedCardCount;
+            const isJustForming = index === revealedCardCount - 1;
             return (
               <button
                 key={persona.id}
                 onClick={() => handleSelect(persona.id)}
                 style={{
-                  transitionDelay: `${index * 50}ms`,
+                  transitionDuration: '750ms',
+                  transitionTimingFunction: 'cubic-bezier(0.16, 1, 0.3, 1)',
                 }}
-                className={`group relative text-left rounded-xl p-3 sm:p-3.5 md:p-4 cursor-pointer transition-all duration-300 transform ${
-                  isSelected
-                    ? 'scale-[1.03] shadow-[0_0_25px_rgba(223,165,71,0.7)] ring-2 ring-[#dfa547]'
-                    : 'hover:scale-[1.02] hover:shadow-[0_8px_20px_rgba(60,30,10,0.45)]'
+                className={`group relative text-left rounded-xl p-3 sm:p-3.5 md:p-4 cursor-pointer transition-all transform ${
+                  isFormed
+                    ? isSelected
+                      ? 'opacity-100 scale-[1.03] translate-y-0 shadow-[0_0_25px_rgba(223,165,71,0.7)] ring-2 ring-[#dfa547]'
+                      : 'opacity-100 scale-100 translate-y-0 hover:scale-[1.02] hover:shadow-[0_8px_20px_rgba(60,30,10,0.45)]'
+                    : 'opacity-0 scale-95 translate-y-6 blur-[1px] pointer-events-none'
                 }`}
               >
-                {/* Antique Parchment Plaque Background (Engraved look matching image) */}
+                {/* Golden Magic Birth Shimmer Flare when card materializes */}
+                {isJustForming && (
+                  <div className="absolute -inset-1 rounded-2xl bg-amber-400/20 blur-md pointer-events-none animate-pulse" />
+                )}
+
+                {/* Antique Parchment Plaque Background */}
                 <div
                   className="absolute inset-0 rounded-xl transition-all"
                   style={{
@@ -238,7 +292,7 @@ export default function Identify({
                 <div className="relative z-10 flex flex-col items-center text-center space-y-1 py-0.5">
                   {/* Selected Indicator Badge */}
                   {isSelected && (
-                    <div className="absolute -top-2 -right-2 w-5 h-5 rounded-full bg-[#8c5208] border border-amber-300 text-white flex items-center justify-center shadow-md">
+                    <div className="absolute -top-2 -right-2 w-5 h-5 rounded-full bg-[#8c5208] border border-amber-300 text-white flex items-center justify-center shadow-md animate-in zoom-in-75 duration-200">
                       <Check className="w-3 h-3 stroke-[3]" />
                     </div>
                   )}
@@ -266,43 +320,21 @@ export default function Identify({
         </div>
       </div>
 
-      {/* 4. BOTTOM ACTION & NAVIGATION BAR */}
+      {/* 4. BOTTOM ACTION BUTTON (Shifted to right side directly under cards, lifted slightly higher) */}
       <div
-        className={`relative z-10 w-full max-w-4xl mx-auto flex items-center justify-between gap-4 flex-shrink-0 transition-all duration-500 ${
-          contentVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-3 pointer-events-none'
+        className={`relative z-10 w-full max-w-4xl mx-auto flex items-center justify-end mt-3 sm:mt-4 transition-all duration-700 ease-out ${
+          buttonsVisible
+            ? 'opacity-100 translate-y-0'
+            : 'opacity-0 translate-y-4 pointer-events-none'
         }`}
       >
-        {/* Back button & Replay icon */}
-        <div className="flex items-center gap-2 sm:gap-3">
-          {onBackToHero && (
-            <button
-              onClick={onBackToHero}
-              className="text-xs font-bold uppercase tracking-wider text-slate-400 hover:text-white flex items-center gap-1.5 cursor-pointer py-1.5 px-2.5 rounded-lg hover:bg-white/5 transition-colors"
-            >
-              &larr; Back to Welcome
-            </button>
-          )}
-
-          <button
-            onClick={replayScroll}
-            title="Replay unrolling animation"
-            className="p-1.5 sm:p-2 rounded-full border border-amber-500/30 text-amber-300/80 hover:text-white hover:border-amber-400 bg-[#16110c]/80 transition-all cursor-pointer hover:rotate-180 duration-500"
-            aria-label="Replay Scroll"
-          >
-            <RotateCcw className="w-3.5 h-3.5" />
-          </button>
-        </div>
-
-        {/* Primary Proceed Button */}
-        <div>
-          <button
-            onClick={() => onGoToPersonaPage(selected)}
-            className="ochre-pill-button py-2.5 sm:py-3 px-6 sm:px-8 text-xs sm:text-sm font-bold shadow-xl hover:shadow-[0_0_25px_rgba(223,165,71,0.5)] flex items-center justify-center gap-2 cursor-pointer transition-transform hover:scale-105 active:scale-95"
-          >
-            <span>Continue as {currentOption.title}</span>
-            <ArrowRight className="w-4 h-4" />
-          </button>
-        </div>
+        <button
+          onClick={() => onGoToPersonaPage(selected)}
+          className="ochre-pill-button py-2.5 sm:py-3 px-6 sm:px-8 text-xs sm:text-sm font-bold shadow-xl hover:shadow-[0_0_25px_rgba(223,165,71,0.5)] flex items-center justify-center gap-2 cursor-pointer transition-transform hover:scale-105 active:scale-95"
+        >
+          <span>Continue as {currentOption.title}</span>
+          <ArrowRight className="w-4 h-4" />
+        </button>
       </div>
     </div>
   );
