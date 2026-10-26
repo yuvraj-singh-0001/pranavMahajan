@@ -1,145 +1,209 @@
 'use client';
 
 import React, { useState } from 'react';
-import { ArrowUp, Send, Check, Sun, Globe, Video, MessageCircle } from 'lucide-react';
+import {
+  ChevronDown,
+  Mail,
+  Copy,
+  Check,
+  Compass,
+  Sparkles,
+  ExternalLink,
+  MessageCircle,
+  Building,
+} from 'lucide-react';
 
-export default function Footer() {
-  const [email, setEmail] = useState('');
-  const [subscribed, setSubscribed] = useState(false);
+interface FooterProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onNavigateSlide: (index: number) => void;
+}
 
-  const handleSubscribe = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!email) return;
+export default function Footer({ isOpen, onClose, onNavigateSlide }: FooterProps) {
+  const [copiedEmail, setCopiedEmail] = useState(false);
 
-    try {
-      await fetch('http://localhost:5000/api/newsletter', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email }),
-      });
-    } catch {
-      // offline fallback
+  const copyEmailToClipboard = () => {
+    if (navigator?.clipboard?.writeText) {
+      navigator.clipboard.writeText('speaking@pranavmahajan.com');
+      setCopiedEmail(true);
+      setTimeout(() => setCopiedEmail(false), 2200);
     }
-    setSubscribed(true);
-    setEmail('');
-    setTimeout(() => setSubscribed(false), 4000);
-  };
-
-  const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   return (
-    <footer className="bg-[#f5f1eb] border-t border-amber-200/60 pt-16 pb-12 text-slate-700">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-10 pb-12 border-b border-amber-200/50">
-          {/* Brand & Mission */}
-          <div className="md:col-span-5 space-y-4">
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-amber-500 to-orange-500 flex items-center justify-center text-white shadow-sm">
-                <Sun className="w-5 h-5" />
-              </div>
-              <span className="font-extrabold text-slate-900 text-xl tracking-tight">
-                Pranav Mahajan
-              </span>
-            </div>
-            <p className="text-sm text-slate-600 max-w-sm leading-relaxed">
-              Global Keynote Speaker, Mindset Architect &amp; Spiritual Mentor. Transforming leadership, human consciousness, and peak performance worldwide.
-            </p>
-            <div className="flex items-center gap-3 pt-2">
-              <a
-                href="https://youtube.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-9 h-9 rounded-full bg-white border border-amber-200/70 flex items-center justify-center text-slate-600 hover:text-amber-700 hover:bg-amber-50 transition-colors shadow-xs"
-                aria-label="YouTube Channel"
-              >
-                <Video className="w-4 h-4" />
-              </a>
-              <a
-                href="https://instagram.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-9 h-9 rounded-full bg-white border border-amber-200/70 flex items-center justify-center text-slate-600 hover:text-amber-700 hover:bg-amber-50 transition-colors shadow-xs"
-                aria-label="Instagram Profile"
-              >
-                <Globe className="w-4 h-4" />
-              </a>
-              <a
-                href="https://linkedin.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-9 h-9 rounded-full bg-white border border-amber-200/70 flex items-center justify-center text-slate-600 hover:text-amber-700 hover:bg-amber-50 transition-colors shadow-xs"
-                aria-label="LinkedIn Profile"
-              >
-                <MessageCircle className="w-4 h-4" />
-              </a>
-            </div>
+    <div
+      className={`fixed inset-x-0 bottom-0 z-40 transition-transform duration-500 ease-out ${
+        isOpen ? 'translate-y-0' : 'translate-y-full'
+      }`}
+    >
+      {/* Semi-transparent Backdrop when Drawer is Open */}
+      {isOpen && (
+        <div
+          onClick={onClose}
+          className="fixed inset-0 bg-black/60 backdrop-blur-xs z-30 transition-opacity"
+        />
+      )}
+
+      {/* Main Drawer Container */}
+      <div className="relative z-40 max-h-[85vh] sm:max-h-[82vh] overflow-y-auto bg-gradient-to-b from-[#14100c] via-[#0e0c0a] to-[#090807] border-t-2 border-amber-500/40 text-slate-200 shadow-2xl p-6 sm:p-10 select-text">
+        {/* Top Floating Close Button */}
+        <div className="flex items-center justify-between pb-6 border-b border-amber-500/20">
+          <div className="flex items-center gap-3">
+            <img
+              src="/pranav_mahajan_transparent.png"
+              alt="Pranav Mahajan Logo"
+              className="h-10 sm:h-12 w-auto object-contain drop-shadow-[0_2px_12px_rgba(223,165,71,0.3)]"
+            />
+            <span className="text-xs font-mono font-bold tracking-widest uppercase text-amber-300">
+              Master Sanctum &bull; Global Secretariat
+            </span>
           </div>
 
-          {/* Quick Links */}
-          <div className="md:col-span-3 space-y-3">
-            <h4 className="text-xs font-bold text-slate-900 uppercase tracking-widest">
-              Navigation
+          <button
+            onClick={onClose}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#1b1612] hover:bg-[#251e18] border border-amber-500/35 text-amber-200 hover:text-white text-xs font-mono font-bold transition-colors cursor-pointer"
+          >
+            <span>Close Footer</span>
+            <ChevronDown className="w-4 h-4" />
+          </button>
+        </div>
+
+        {/* 4 Multi-Column Detailed Footer Content */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 sm:gap-10 text-left pt-8">
+          {/* Column 1: Directory Navigation */}
+          <div className="space-y-4">
+            <h4 className="text-xs font-mono font-bold uppercase tracking-widest text-amber-300 flex items-center gap-2">
+              <Compass className="w-4 h-4 text-[#dfa547]" />
+              Sanctum Pathways
             </h4>
-            <ul className="space-y-2 text-sm text-slate-600">
-              <li><a href="#philosophy" className="hover:text-amber-700 transition-colors">Core Philosophy</a></li>
-              <li><a href="#keynotes" className="hover:text-amber-700 transition-colors">Keynote Programs</a></li>
-              <li><a href="#tour" className="hover:text-amber-700 transition-colors">World Tour &amp; Retreats</a></li>
-              <li><a href="#wisdom" className="hover:text-amber-700 transition-colors">Daily Wisdom Spark</a></li>
-              <li><a href="#booking" className="hover:text-amber-700 transition-colors">Booking &amp; Availability</a></li>
+            <ul className="space-y-2.5 text-xs sm:text-sm">
+              <li>
+                <button
+                  onClick={() => onNavigateSlide(0)}
+                  className="text-slate-300 hover:text-[#dfa547] hover:underline transition-colors cursor-pointer text-left flex items-center gap-1.5"
+                >
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#dfa547]" />
+                  01 &bull; Welcome Sanctum (Home)
+                </button>
+              </li>
+              <li>
+                <button
+                  onClick={() => onNavigateSlide(1)}
+                  className="text-slate-300 hover:text-[#dfa547] hover:underline transition-colors cursor-pointer text-left flex items-center gap-1.5"
+                >
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#dfa547]" />
+                  02 &bull; Persona Discovery (Choose Role)
+                </button>
+              </li>
+              <li>
+                <button
+                  onClick={() => onNavigateSlide(2)}
+                  className="text-amber-300 font-bold hover:text-white hover:underline transition-colors cursor-pointer text-left flex items-center gap-1.5"
+                >
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#dfa547] animate-ping" />
+                  03 &bull; Get In Touch &amp; Speaking Desk
+                </button>
+              </li>
             </ul>
           </div>
 
-          {/* Newsletter Box */}
-          <div className="md:col-span-4 space-y-3">
-            <h4 className="text-xs font-bold text-slate-900 uppercase tracking-widest">
-              Daily Morning Consciousness
+          {/* Column 2: Sacred Offerings */}
+          <div className="space-y-4">
+            <h4 className="text-xs font-mono font-bold uppercase tracking-widest text-amber-300 flex items-center gap-2">
+              <Sparkles className="w-4 h-4 text-[#dfa547]" />
+              Sacred Offerings
             </h4>
-            <p className="text-xs text-slate-600">
-              Receive Pranav’s morning reflections on discipline, stillness, and relentless high performance.
-            </p>
-            <form onSubmit={handleSubscribe} className="flex items-center gap-2">
-              <input
-                type="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="Enter your email"
-                className="px-4 py-2.5 rounded-xl bg-white border border-amber-200/80 text-xs text-slate-900 outline-none flex-1 focus:border-amber-500"
-              />
-              <button
-                type="submit"
-                className="px-4 py-2.5 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold transition-colors cursor-pointer"
+            <ul className="space-y-2.5 text-xs sm:text-sm text-slate-300">
+              <li className="hover:text-white transition-colors flex items-center gap-1.5">
+                <span className="w-1 h-1 rounded-full bg-amber-500/60" />
+                Vedic Mindfulness Executive Circles
+              </li>
+              <li className="hover:text-white transition-colors flex items-center gap-1.5">
+                <span className="w-1 h-1 rounded-full bg-amber-500/60" />
+                Keynote: The Unstoppable Mind In Chaos
+              </li>
+              <li className="hover:text-white transition-colors flex items-center gap-1.5">
+                <span className="w-1 h-1 rounded-full bg-amber-500/60" />
+                Awaken 3-Day Himalayan Stillness
+              </li>
+              <li className="hover:text-white transition-colors flex items-center gap-1.5">
+                <span className="w-1 h-1 rounded-full bg-amber-500/60" />
+                Youth Mental Mastery Initiative
+              </li>
+              <li className="hover:text-white transition-colors flex items-center gap-1.5">
+                <span className="w-1 h-1 rounded-full bg-amber-500/60" />
+                Corporate Cognitive Burnout Audit
+              </li>
+            </ul>
+          </div>
+
+          {/* Column 3: Executive Email & Direct Desk */}
+          <div className="space-y-4">
+            <h4 className="text-xs font-mono font-bold uppercase tracking-widest text-amber-300 flex items-center gap-2">
+              <Mail className="w-4 h-4 text-[#dfa547]" />
+              Executive Desk
+            </h4>
+            <div className="p-3.5 rounded-2xl bg-[#191511] border border-amber-500/30 shadow-md space-y-2">
+              <div className="text-[10px] font-bold uppercase tracking-wider text-amber-300">
+                Official Direct Email:
+              </div>
+              <a
+                href="mailto:speaking@pranavmahajan.com"
+                className="font-bold text-amber-200 hover:text-white text-xs sm:text-sm break-all block"
               >
-                {subscribed ? <Check className="w-4 h-4" /> : <Send className="w-4 h-4" />}
+                speaking@pranavmahajan.com
+              </a>
+              <button
+                onClick={copyEmailToClipboard}
+                className="w-full py-1.5 px-3 rounded-lg bg-[#221b14] hover:bg-[#2b2219] border border-amber-500/25 text-[11px] font-bold text-amber-200 hover:text-white flex items-center justify-center gap-1.5 cursor-pointer transition-colors"
+              >
+                {copiedEmail ? (
+                  <>
+                    <Check className="w-3.5 h-3.5 text-emerald-400" />
+                    <span>Copied to Clipboard!</span>
+                  </>
+                ) : (
+                  <>
+                    <Copy className="w-3.5 h-3.5 text-[#dfa547]" />
+                    <span>Copy Official Email</span>
+                  </>
+                )}
               </button>
-            </form>
-            {subscribed && (
-              <span className="text-xs text-emerald-700 block font-medium">
-                ✓ Subscribed to Daily Morning Consciousness.
-              </span>
-            )}
+            </div>
+          </div>
+
+          {/* Column 4: Quick WhatsApp & Bureau */}
+          <div className="space-y-4">
+            <h4 className="text-xs font-mono font-bold uppercase tracking-widest text-amber-300 flex items-center gap-2">
+              <Building className="w-4 h-4 text-[#dfa547]" />
+              Direct Bureau Connect
+            </h4>
+            <a
+              href="https://wa.me"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="p-3.5 rounded-2xl bg-[#1a1511] hover:bg-[#231b14] border border-amber-500/25 hover:border-amber-400/60 transition-all flex items-center gap-3 group shadow-lg"
+            >
+              <div className="w-10 h-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
+                <MessageCircle className="w-5 h-5" />
+              </div>
+              <div className="text-left overflow-hidden">
+                <div className="text-xs font-bold text-white group-hover:text-amber-200 truncate">WhatsApp Desk</div>
+                <div className="text-[10px] text-slate-400 truncate">Keynote Coordinator</div>
+              </div>
+              <ExternalLink className="w-3 h-3 text-slate-400 group-hover:text-amber-300 ml-auto flex-shrink-0" />
+            </a>
+            <p className="text-[11px] text-slate-400 leading-relaxed">
+              Global representations in New Delhi, Mumbai, Dubai, and Singapore.
+            </p>
           </div>
         </div>
 
-        {/* Bottom Strip */}
-        <div className="pt-8 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-4">
-          <p>
-            &copy; 2026 Pranav Mahajan. All rights reserved. Designed for transcendent impact.
-          </p>
-          <div className="flex items-center gap-4">
-            <span>Powered by Next.js &bull; Node.js Fullstack</span>
-            <button
-              onClick={scrollToTop}
-              className="p-2 rounded-full bg-white border border-amber-200/70 text-slate-600 hover:text-amber-700 shadow-xs cursor-pointer"
-              aria-label="Back to top"
-            >
-              <ArrowUp className="w-4 h-4" />
-            </button>
-          </div>
+        {/* Copyright */}
+        <div className="text-center text-xs text-slate-500 pt-8 mt-8 border-t border-amber-500/20">
+          &copy; 2026 Pranav Mahajan Official &bull; Wisdom &bull; Leadership &bull; Stillness. All Rights Reserved.
         </div>
       </div>
-    </footer>
+    </div>
   );
 }
