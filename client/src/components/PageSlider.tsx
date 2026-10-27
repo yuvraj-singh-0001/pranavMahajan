@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Hero from './Hero';
 import Identify, { PersonaType } from './Identify';
 import GetInTouch from './GetInTouch';
+import PersonaSalesComingSoon from './PersonaSalesComingSoon';
 import CelestialRocketTransition from './CelestialRocketTransition';
 import Footer from './Footer';
 import { X, ChevronUp, ChevronDown } from 'lucide-react';
@@ -479,15 +480,15 @@ export default function PageSlider() {
           />
         </div>
 
-        {/* SLIDE 2: GET IN TOUCH (Direct Speaking Desk & Booking) */}
+        {/* SLIDE 2: PERSONA SALES & HUB (Heading: [Role] Page, Text: Coming Soon...) */}
         <div
           ref={(el) => { slidesRef.current[2] = el; }}
           className="slide-item bg-[#090807] text-slate-100 relative overflow-y-auto overflow-x-hidden select-text"
         >
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(223,165,71,0.06),transparent_65%)] pointer-events-none" />
-          <GetInTouch
-            selectedPersona={selectedPersona}
-            onBackToPathway={() => goToSlide(1, 'backward')}
+          <PersonaSalesComingSoon
+            persona={selectedPersona}
+            onBack={() => goToSlide(1, 'backward')}
+            onOpenContact={() => setFooterOpen(true)}
           />
         </div>
       </div>

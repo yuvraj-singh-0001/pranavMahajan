@@ -120,12 +120,6 @@ body {
   -webkit-overflow-scrolling: touch;
 }
 
-@media (min-width: 1024px) {
-  .slide-item {
-    align-items: center;
-  }
-}
-
 /* Slide content entering animation when board sweeps away */
 .slide-content-anim {
   animation: slideContentGlide 0.68s cubic-bezier(0.22, 1, 0.36, 1) both;
