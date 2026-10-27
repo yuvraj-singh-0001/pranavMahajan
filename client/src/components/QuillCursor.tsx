@@ -55,11 +55,11 @@ export default function QuillCursor({ isActive }: QuillCursorProps) {
     }
 
     const checkSpecialChrome = (e: MouseEvent) => {
-      const target = document.elementFromPoint(e.clientX, e.clientY) as HTMLElement | null;
+      const target = (e.target as HTMLElement | null);
       // Only special external navigation chrome (top navbar / header, footer drawer, corner chevrons)
       // shows the real pointer hand. Everywhere else (all text, cards, buttons, parchment), only the Quill pen is visible!
       const isChrome = Boolean(
-        target?.closest('header, nav, footer, [data-chrome="true"], [data-footer="true"]')
+        target?.closest?.('header, nav, footer, [data-chrome="true"], [data-footer="true"]')
       );
       setIsOverSpecialChrome(isChrome);
       if (typeof document !== 'undefined') {
@@ -83,9 +83,9 @@ export default function QuillCursor({ isActive }: QuillCursorProps) {
       resetIdleTimer();
 
       // Golden ink ripple on click at the nib tip
-      const target = document.elementFromPoint(e.clientX, e.clientY) as HTMLElement | null;
+      const target = (e.target as HTMLElement | null);
       const isChrome = Boolean(
-        target?.closest('header, nav, footer, [data-chrome="true"], [data-footer="true"]')
+        target?.closest?.('header, nav, footer, [data-chrome="true"], [data-footer="true"]')
       );
       if (!isChrome) {
         const newRipple = {

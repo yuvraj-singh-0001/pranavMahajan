@@ -4,7 +4,6 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Hero from './Hero';
 import Identify, { PersonaType } from './Identify';
 import GetInTouch from './GetInTouch';
-import PersonaSalesComingSoon from './PersonaSalesComingSoon';
 import CelestialRocketTransition from './CelestialRocketTransition';
 import Footer from './Footer';
 import { X, ChevronUp, ChevronDown } from 'lucide-react';
@@ -18,6 +17,8 @@ export default function PageSlider() {
   const [buttonNudged, setButtonNudged] = useState(false);
   const [footerOpen, setFooterOpen] = useState(false);
   const [selectedPersona, setSelectedPersona] = useState<PersonaType>('student');
+  const [identifyMode, setIdentifyMode] = useState<'cards' | 'coming-soon'>('cards');
+  const identifyBackRef = useRef<(() => void) | null>(null);
 
   const nudgeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const isLockedRef = useRef(false);
@@ -106,10 +107,15 @@ export default function PageSlider() {
   }, [current, totalSlides, goToSlide]);
 
   const prevSlide = useCallback(() => {
+    // If on Slide 1 in Coming Soon view, return to 6 Cards instead of leaving to Hero
+    if (current === 1 && identifyMode === 'coming-soon' && identifyBackRef.current) {
+      identifyBackRef.current();
+      return;
+    }
     if (current > 0) {
       goToSlide(current - 1, 'backward');
     }
-  }, [current, goToSlide]);
+  }, [current, identifyMode, goToSlide]);
 
   // Wheel listener: user can read down page before slide transition triggers!
   useEffect(() => {
@@ -217,6 +223,15 @@ export default function PageSlider() {
           }
           return;
         } else {
+          // If on Slide 1 in Coming Soon view, scroll UP returns directly to 6 Cards!
+          if (current === 1 && identifyMode === 'coming-soon' && identifyBackRef.current) {
+            wheelAccumulatorRef.current = 0;
+            topPrimedRef.current = false;
+            e.preventDefault();
+            identifyBackRef.current();
+            return;
+          }
+
           // If there is scrollable content above, let user scroll naturally upwards!
           if (isScrollable && !isAtTop) {
             wheelAccumulatorRef.current = 0;
@@ -303,6 +318,10 @@ export default function PageSlider() {
         }
         prevSlide();
       } else if (e.key === 'Escape') {
+        if (current === 1 && identifyMode === 'coming-soon' && identifyBackRef.current) {
+          identifyBackRef.current();
+          return;
+        }
         if (footerOpen) setFooterOpen(false);
         else setMenuOpen(false);
       }
@@ -477,18 +496,20 @@ export default function PageSlider() {
               goToSlide(2, 'forward');
             }}
             onBackToHero={() => goToSlide(0, 'backward')}
+            onViewModeChange={setIdentifyMode}
+            backRef={identifyBackRef}
           />
         </div>
 
-        {/* SLIDE 2: PERSONA SALES & HUB (Heading: [Role] Page, Text: Coming Soon...) */}
+        {/* SLIDE 2: GET IN TOUCH (Direct Speaking Desk & Booking) */}
         <div
           ref={(el) => { slidesRef.current[2] = el; }}
           className="slide-item bg-[#090807] text-slate-100 relative overflow-y-auto overflow-x-hidden select-text"
         >
-          <PersonaSalesComingSoon
-            persona={selectedPersona}
-            onBack={() => goToSlide(1, 'backward')}
-            onOpenContact={() => setFooterOpen(true)}
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(223,165,71,0.06),transparent_65%)] pointer-events-none" />
+          <GetInTouch
+            selectedPersona={selectedPersona}
+            onBackToPathway={() => goToSlide(1, 'backward')}
           />
         </div>
       </div>
