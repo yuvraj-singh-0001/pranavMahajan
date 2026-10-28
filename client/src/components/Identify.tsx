@@ -330,8 +330,14 @@ export default function Identify({
       {/* Antique Golden Quill Pen Custom Cursor (Active only on Slide 1) */}
       <QuillCursor isActive={!!isActive} />
 
-      {/* 1. FULL-WIDTH BACKGROUND VIDEO (Full width across all screen sizes like a native video) */}
-      <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden flex items-center justify-center w-full h-full">
+      {/* 1. FULL-WIDTH BACKGROUND VIDEO (Immediately fades out on flip so it never lingers) */}
+      <div
+        className={`absolute inset-0 z-0 pointer-events-none overflow-hidden flex items-center justify-center w-full h-full transition-opacity duration-300 ease-out ${
+          viewMode === 'coming-soon' || flipState === 'flipping-forward'
+            ? 'opacity-0 pointer-events-none'
+            : 'opacity-100'
+        }`}
+      >
         <video
           ref={videoRef}
           src="/ssecond-screen.mp4"
@@ -345,8 +351,24 @@ export default function Identify({
         />
       </div>
 
-      {/* 2. AUTHENTIC BOOK PAGE TURN CONTAINER (Directly on the Royal Scroll) */}
-      <div className="book-turn-stage relative z-10 w-full flex items-center justify-center">
+      {/* Home-Page Style Ambient Golden Atmosphere (Active when on Coming Soon view) */}
+      <div
+        className={`absolute inset-0 pointer-events-none transition-opacity duration-700 ease-in-out z-0 ${
+          viewMode === 'coming-soon' ? 'opacity-100' : 'opacity-0'
+        }`}
+      >
+        <div className="absolute top-1/4 left-1/4 w-[650px] h-[650px] rounded-full bg-[#dfa547]/10 blur-[160px]" />
+        <div className="absolute bottom-10 right-1/4 w-[550px] h-[550px] rounded-full bg-[#b8731b]/10 blur-[150px]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_45%,rgba(223,165,71,0.12)_0%,transparent_70%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(#dfa547_1px,transparent_1px)] [background-size:32px_32px] opacity-15" />
+      </div>
+
+      {/* 2. AUTHENTIC BOOK PAGE TURN CONTAINER */}
+      <div
+        className={`relative z-10 w-full flex items-center justify-center ${
+          viewMode === 'coming-soon' && flipState === 'idle' ? 'max-w-4xl' : 'book-turn-stage'
+        }`}
+      >
         {/* PAGE 1: 6 CARDS & HEADING (The 3D Turning Leaf) */}
         {(viewMode === 'cards' || flipState !== 'idle') && (
           <div
@@ -482,57 +504,90 @@ export default function Identify({
           </div>
         )}
 
-        {/* PAGE 2: COMING SOON PAGE */}
+        {/* PAGE 2: COMING SOON PAGE (Normal Home-Page Style Screen) */}
         {(viewMode === 'coming-soon' || flipState !== 'idle') && (
           <div
-            className={`w-full max-w-2xl mx-auto py-8 sm:py-14 flex flex-col items-center justify-center text-center space-y-6 ${
-              flipState !== 'idle' ? 'absolute inset-0 z-10 my-auto pointer-events-none' : 'relative z-10'
+            className={`w-full max-w-3xl mx-auto py-10 sm:py-16 px-6 flex flex-col items-center justify-center text-center space-y-6 sm:space-y-8 ${
+              flipState !== 'idle' ? 'absolute inset-0 z-10 my-auto pointer-events-none' : 'relative z-20'
             } ${
               flipState === 'flipping-forward'
                 ? 'animate-leaf-reveal-forward'
                 : flipState === 'flipping-backward'
                 ? 'animate-leaf-conceal-backward'
-                : 'animate-in fade-in duration-300'
+                : 'animate-in fade-in duration-500'
             }`}
           >
             {/* Back Button */}
             <div>
               <button
                 onClick={handleBackToCards}
-                className="inline-flex items-center gap-2 text-xs sm:text-sm font-bold text-[#542d0a] hover:text-[#2b1405] px-4 py-1.5 rounded-full border border-[#7a4817]/40 bg-[#fcebc7]/90 hover:bg-[#f6dfab] transition-all cursor-pointer shadow-md hover:scale-105 active:scale-95"
+                className="group inline-flex items-center gap-2.5 text-xs sm:text-sm font-bold text-amber-200/90 hover:text-white px-5 py-2.5 rounded-full border border-[#dfa547]/40 bg-[#dfa547]/10 hover:bg-[#dfa547]/20 transition-all cursor-pointer shadow-lg hover:shadow-[0_0_20px_rgba(223,165,71,0.3)] hover:scale-105 active:scale-95"
               >
-                <ArrowLeft className="w-4 h-4 text-[#7a4817]" />
+                <ArrowLeft className="w-4 h-4 text-[#dfa547] group-hover:-translate-x-1 transition-transform" />
                 <span>← Back to Choose Role</span>
               </button>
             </div>
 
-            {/* Grand Headline: [Role] Page */}
-            <h1
-              className="font-serif-luxury text-4xl sm:text-6xl md:text-7xl font-extrabold tracking-tight leading-tight py-1 select-text"
-              style={{
-                background: 'linear-gradient(135deg, #ffffff 0%, #fbe6af 35%, #dfa547 70%, #b8731b 100%)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                filter: 'drop-shadow(0 2px 28px rgba(223, 165, 71, 0.4))',
-              }}
-            >
-              {currentOption.title} Page
-            </h1>
+            {/* Persona Icon Badge */}
+            <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-gradient-to-br from-[#dfa547]/20 via-[#c58525]/10 to-transparent border border-[#dfa547]/40 flex items-center justify-center text-[#dfa547] shadow-[0_0_35px_rgba(223,165,71,0.25)]">
+              {React.createElement(currentOption.icon, {
+                className: 'w-8 h-8 sm:w-10 sm:h-10 stroke-[1.75]',
+              })}
+            </div>
+
+            {/* Grand Metallic Satin Gold Headline Matching Home Page - Letter-by-Letter Calligraphy Write-in */}
+            <div className="space-y-2.5">
+              <h1
+                key={currentOption.id}
+                className="font-serif-luxury text-4xl sm:text-6xl md:text-7xl font-bold tracking-tight leading-[1.12] select-text"
+                style={{
+                  background: 'linear-gradient(135deg, #ffffff 0%, #fbe6af 35%, #dfa547 70%, #b8731b 100%)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  filter: 'drop-shadow(0 2px 28px rgba(223, 165, 71, 0.35))',
+                }}
+              >
+                {`${currentOption.title} Page`.split('').map((char, index) => (
+                  <span
+                    key={index}
+                    style={{
+                      animationDelay: `${60 + index * 36}ms`,
+                    }}
+                    className="animate-letter-write-in"
+                  >
+                    {char === ' ' ? '\u00A0' : char}
+                  </span>
+                ))}
+              </h1>
+
+              <p
+                style={{ animationDelay: `${120 + `${currentOption.title} Page`.length * 36}ms` }}
+                className="font-serif italic text-amber-200/70 text-sm sm:text-lg max-w-xl mx-auto animate-letter-write-in"
+              >
+                Exclusive keynote sessions, transformation frameworks, and tailored mentorship for {currentOption.title}s.
+              </p>
+            </div>
 
             {/* Antique Flourish Divider */}
-            <div className="flex items-center justify-center gap-3 text-amber-300/80 w-full max-w-xs mx-auto">
+            <div
+              style={{ animationDelay: `${220 + `${currentOption.title} Page`.length * 36}ms` }}
+              className="flex items-center justify-center gap-3 text-amber-300/80 w-full max-w-xs mx-auto animate-letter-write-in"
+            >
               <span className="h-[1px] flex-1 bg-gradient-to-r from-transparent via-[#dfa547]/80 to-transparent" />
               <span className="text-xs font-serif leading-none text-amber-300">❖</span>
               <span className="h-[1px] flex-1 bg-gradient-to-l from-transparent via-[#dfa547]/80 to-transparent" />
             </div>
 
             {/* Glowing Royal Coming Soon Badge */}
-            <div className="inline-flex items-center gap-3 px-6 py-2.5 sm:px-8 sm:py-3 rounded-full bg-gradient-to-r from-amber-500/20 via-amber-400/30 to-amber-500/20 border border-amber-400/60 text-amber-200 shadow-[0_0_30px_rgba(223,165,71,0.35)]">
+            <div
+              style={{ animationDelay: `${320 + `${currentOption.title} Page`.length * 36}ms` }}
+              className="inline-flex items-center gap-3 px-7 py-3 sm:px-9 sm:py-3.5 rounded-full bg-gradient-to-r from-[#dfa547]/15 via-[#dfa547]/25 to-[#dfa547]/15 border border-[#dfa547]/50 text-amber-200 shadow-[0_0_35px_rgba(223,165,71,0.3)] animate-letter-write-in"
+            >
               <Clock className="w-5 h-5 text-[#dfa547] animate-pulse" />
               <span className="font-serif-luxury text-xl sm:text-3xl font-bold tracking-wide text-amber-100">
                 Coming Soon...
               </span>
-              <Sparkles className="w-4 h-4 text-amber-300/80" />
+              <Sparkles className="w-4 h-4 text-amber-300/90" />
             </div>
           </div>
         )}

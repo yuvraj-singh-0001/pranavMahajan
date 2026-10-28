@@ -822,3 +822,28 @@ html.quill-mode [data-chrome="true"] a * {
     transform: scale(0.97) translate3d(20px, 0, 0);
   }
 }
+
+/* Golden Calligraphy Letter-by-Letter Write-in Effect */
+@keyframes letterWriteIn {
+  0% {
+    opacity: 0;
+    transform: translateY(14px) scale(0.85);
+    filter: blur(4px);
+  }
+  60% {
+    opacity: 1;
+    transform: translateY(-2px) scale(1.04);
+    filter: blur(0);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0);
+  }
+}
+
+.animate-letter-write-in {
+  display: inline-block;
+  opacity: 0;
+  animation: letterWriteIn 0.38s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}

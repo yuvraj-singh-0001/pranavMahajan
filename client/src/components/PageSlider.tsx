@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
+import Link from 'next/link';
 import Hero from './Hero';
 import Identify, { PersonaType } from './Identify';
 import GetInTouch from './GetInTouch';
@@ -441,7 +442,14 @@ export default function PageSlider() {
           />
         </button>
 
-        <div className="pointer-events-auto flex items-center gap-2 sm:gap-4">
+        <div className="pointer-events-auto flex items-center gap-2 sm:gap-3">
+          <Link
+            href="/signup"
+            className="inline-flex items-center justify-center gap-1.5 py-1.5 sm:py-2 px-3.5 sm:px-5 text-xs font-bold tracking-wide rounded-full text-amber-200 border border-amber-500/50 bg-[#1e1710]/80 hover:bg-[#2e2318] hover:border-amber-400 hover:text-white transition-all shadow-[0_4px_16px_rgba(223,165,71,0.2)] hover:scale-105 active:scale-95 backdrop-blur-md"
+          >
+            Sign Up
+          </Link>
+
           <button
             onClick={() => goToSlide(2)}
             className="hidden sm:inline-flex ochre-pill-button py-2 px-5 text-xs font-bold shadow-md hover:shadow-lg"
@@ -607,14 +615,21 @@ export default function PageSlider() {
             >
               03 &bull; Get In Touch
             </button>
+            <Link
+              href="/signup"
+              onClick={() => setMenuOpen(false)}
+              className="block w-full py-3 text-2xl sm:text-3xl font-serif-luxury font-bold text-amber-300 hover:text-white transition-colors cursor-pointer"
+            >
+              04 &bull; Sign Up / Register
+            </Link>
             <button
               onClick={() => {
                 setFooterOpen(true);
                 setMenuOpen(false);
               }}
-              className="block w-full py-3 text-2xl sm:text-3xl font-serif-luxury font-bold text-amber-300 hover:text-white transition-colors cursor-pointer"
+              className="block w-full py-3 text-2xl sm:text-3xl font-serif-luxury font-bold text-slate-300 hover:text-white transition-colors cursor-pointer"
             >
-              04 &bull; Master Sanctum &amp; Footer
+              05 &bull; Master Sanctum &amp; Footer
             </button>
           </div>
 
