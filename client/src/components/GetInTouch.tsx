@@ -15,16 +15,16 @@ import {
 import { PersonaType } from './Identify';
 
 interface GetInTouchProps {
-  selectedPersona?: PersonaType;
+  selectedPersona?: PersonaType | null;
   onBackToPathway?: () => void;
 }
 
 export default function GetInTouch({
-  selectedPersona = 'student',
+  selectedPersona,
   onBackToPathway,
 }: GetInTouchProps) {
   const [copiedEmail, setCopiedEmail] = useState(false);
-  const [role, setRole] = useState<PersonaType>(selectedPersona);
+  const [role, setRole] = useState<PersonaType | null>(selectedPersona || null);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -53,6 +53,9 @@ export default function GetInTouch({
         defaultMsg = 'Hi Pranav, I am reaching out as a Parent seeking counsel on conscious parenting and family harmony.';
       }
       setFormData((prev) => ({ ...prev, message: defaultMsg }));
+    } else {
+      setRole(null);
+      setFormData((prev) => ({ ...prev, message: '' }));
     }
   }, [selectedPersona]);
 

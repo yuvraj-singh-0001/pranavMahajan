@@ -17,9 +17,15 @@ export default function PageSlider() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [buttonNudged, setButtonNudged] = useState(false);
   const [footerOpen, setFooterOpen] = useState(false);
-  const [selectedPersona, setSelectedPersona] = useState<PersonaType>('student');
+  const [selectedPersona, setSelectedPersona] = useState<PersonaType | null>(null);
   const [identifyMode, setIdentifyMode] = useState<'cards' | 'coming-soon'>('cards');
   const identifyBackRef = useRef<(() => void) | null>(null);
+  const identifyPromptRef = useRef<(() => void) | null>(null);
+  const identifyResetRef = useRef<(() => void) | null>(null);
+  const isFirstGestureActiveRef = useRef(false);
+  const isPrimedForSecondScrollRef = useRef(false);
+  const firstGestureTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const secondScrollExpireTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   const nudgeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const isLockedRef = useRef(false);
@@ -54,6 +60,10 @@ export default function PageSlider() {
 
   const handleRocketComplete = useCallback(() => {
     setCurrent(rocketTargetIndex);
+    if (rocketTargetIndex === 1) {
+      setSelectedPersona(null);
+      identifyResetRef.current?.();
+    }
     setFooterOpen(false);
     setRocketActive(false);
     isLockedRef.current = false;
@@ -62,6 +72,10 @@ export default function PageSlider() {
 
   const handleRocketSkip = useCallback(() => {
     setCurrent(rocketTargetIndex);
+    if (rocketTargetIndex === 1) {
+      setSelectedPersona(null);
+      identifyResetRef.current?.();
+    }
     setFooterOpen(false);
     setRocketActive(false);
     isLockedRef.current = false;
@@ -89,9 +103,17 @@ export default function PageSlider() {
     // Switch slide halfway through board sweep
     setTimeout(() => {
       setCurrent(targetIndex);
+      if (targetIndex === 1) {
+        setSelectedPersona(null);
+        identifyResetRef.current?.();
+      }
       setFooterOpen(false);
       bottomPrimedRef.current = false;
       topPrimedRef.current = false;
+      isFirstGestureActiveRef.current = false;
+      isPrimedForSecondScrollRef.current = false;
+      if (firstGestureTimerRef.current) clearTimeout(firstGestureTimerRef.current);
+      if (secondScrollExpireTimerRef.current) clearTimeout(secondScrollExpireTimerRef.current);
       slidesRef.current[targetIndex]?.scrollTo({ top: 0, behavior: 'instant' });
     }, 420);
 
@@ -194,31 +216,53 @@ export default function PageSlider() {
           // If there is scrollable content below, let user scroll naturally and smoothly!
           if (isScrollable && !isAtBottom) {
             wheelAccumulatorRef.current = 0;
-            bottomPrimedRef.current = false;
+            isFirstGestureActiveRef.current = false;
+            isPrimedForSecondScrollRef.current = false;
             return;
           }
 
-          // User is at the bottom!
-          wheelAccumulatorRef.current += e.deltaY;
+          // Case 1: First scroll gesture
+          // Show "Please choose your identity" prompt and trap the entire 1st flick
+          if (!isPrimedForSecondScrollRef.current) {
+            isFirstGestureActiveRef.current = true;
 
-          // Strong deliberate scroll effort (>= 160)
-          if (wheelAccumulatorRef.current >= 160) {
-            wheelAccumulatorRef.current = 0;
-
-            if (!bottomPrimedRef.current) {
-              // 1ST TIME AT BOTTOM: Prime it, but DO NOT advance!
-              // User has to scroll a 2nd time to advance!
-              bottomPrimedRef.current = true;
-              if (bottomPrimeTimerRef.current) clearTimeout(bottomPrimeTimerRef.current);
-              bottomPrimeTimerRef.current = setTimeout(() => {
-                bottomPrimedRef.current = false;
-              }, 2200);
-              return;
+            if (!selectedPersona) {
+              identifyPromptRef.current?.();
             }
 
-            // 2ND TIME AT BOTTOM ("jab dusra baar uper/scroll kare tej tab jakar next page aaye pahali bar me hi nahi")
-            bottomPrimedRef.current = false;
-            if (bottomPrimeTimerRef.current) clearTimeout(bottomPrimeTimerRef.current);
+            // While the 1st flick is ongoing, keep extending gesture timer
+            if (firstGestureTimerRef.current) clearTimeout(firstGestureTimerRef.current);
+            firstGestureTimerRef.current = setTimeout(() => {
+              // 1st scroll motion has completely stopped! Now ready for 2nd scroll.
+              isFirstGestureActiveRef.current = false;
+              isPrimedForSecondScrollRef.current = true;
+              wheelAccumulatorRef.current = 0;
+
+              // Give user 3.8 seconds to perform their 2nd scroll
+              if (secondScrollExpireTimerRef.current) clearTimeout(secondScrollExpireTimerRef.current);
+              secondScrollExpireTimerRef.current = setTimeout(() => {
+                isPrimedForSecondScrollRef.current = false;
+              }, 3800);
+            }, 300);
+
+            // 1st scroll NEVER advances!
+            return;
+          }
+
+          // If the 1st scroll flick events are still trickling in, ignore
+          if (isFirstGestureActiveRef.current) {
+            return;
+          }
+
+          // Case 2: Genuine 2ND SCROLL GESTURE! ("phir agar dusre baar scroll karta hai to next page aayega")
+          wheelAccumulatorRef.current += e.deltaY;
+
+          if (wheelAccumulatorRef.current >= 50 || Math.abs(e.deltaY) >= 40) {
+            wheelAccumulatorRef.current = 0;
+            isPrimedForSecondScrollRef.current = false;
+            isFirstGestureActiveRef.current = false;
+            if (firstGestureTimerRef.current) clearTimeout(firstGestureTimerRef.current);
+            if (secondScrollExpireTimerRef.current) clearTimeout(secondScrollExpireTimerRef.current);
             e.preventDefault();
             nextSlide();
           }
@@ -287,6 +331,23 @@ export default function PageSlider() {
       }
 
       if (e.key === 'ArrowRight' || e.key === 'PageDown') {
+        if (current === 1) {
+          if (!isPrimedForSecondScrollRef.current) {
+            isPrimedForSecondScrollRef.current = true;
+            if (!selectedPersona) {
+              identifyPromptRef.current?.();
+            }
+            if (secondScrollExpireTimerRef.current) clearTimeout(secondScrollExpireTimerRef.current);
+            secondScrollExpireTimerRef.current = setTimeout(() => {
+              isPrimedForSecondScrollRef.current = false;
+            }, 3800);
+            return;
+          }
+          isPrimedForSecondScrollRef.current = false;
+          if (secondScrollExpireTimerRef.current) clearTimeout(secondScrollExpireTimerRef.current);
+          nextSlide();
+          return;
+        }
         if (current === totalSlides - 1) {
           setFooterOpen(true);
         } else {
@@ -302,6 +363,23 @@ export default function PageSlider() {
             activeSlide.scrollBy({ top: 120, behavior: 'smooth' });
             return;
           }
+        }
+        if (current === 1) {
+          if (!isPrimedForSecondScrollRef.current) {
+            isPrimedForSecondScrollRef.current = true;
+            if (!selectedPersona) {
+              identifyPromptRef.current?.();
+            }
+            if (secondScrollExpireTimerRef.current) clearTimeout(secondScrollExpireTimerRef.current);
+            secondScrollExpireTimerRef.current = setTimeout(() => {
+              isPrimedForSecondScrollRef.current = false;
+            }, 3800);
+            return;
+          }
+          isPrimedForSecondScrollRef.current = false;
+          if (secondScrollExpireTimerRef.current) clearTimeout(secondScrollExpireTimerRef.current);
+          nextSlide();
+          return;
         }
         if (current === totalSlides - 1) {
           setFooterOpen(true);
@@ -364,6 +442,23 @@ export default function PageSlider() {
         }
       } else {
         if (diffY > 55 && (!isScrollable || isAtBottom)) {
+          if (current === 1) {
+            if (!isPrimedForSecondScrollRef.current) {
+              isPrimedForSecondScrollRef.current = true;
+              if (!selectedPersona) {
+                identifyPromptRef.current?.();
+              }
+              if (secondScrollExpireTimerRef.current) clearTimeout(secondScrollExpireTimerRef.current);
+              secondScrollExpireTimerRef.current = setTimeout(() => {
+                isPrimedForSecondScrollRef.current = false;
+              }, 3800);
+              return;
+            }
+            isPrimedForSecondScrollRef.current = false;
+            if (secondScrollExpireTimerRef.current) clearTimeout(secondScrollExpireTimerRef.current);
+            nextSlide();
+            return;
+          }
           if (!bottomPrimedRef.current) {
             bottomPrimedRef.current = true;
             if (bottomPrimeTimerRef.current) clearTimeout(bottomPrimeTimerRef.current);
@@ -506,6 +601,8 @@ export default function PageSlider() {
             onBackToHero={() => goToSlide(0, 'backward')}
             onViewModeChange={setIdentifyMode}
             backRef={identifyBackRef}
+            promptRef={identifyPromptRef}
+            resetRef={identifyResetRef}
           />
         </div>
 
@@ -551,6 +648,23 @@ export default function PageSlider() {
             onClick={() => {
               if (current === 0) {
                 triggerButtonNudge();
+                return;
+              }
+              if (current === 1) {
+                if (!isPrimedForSecondScrollRef.current) {
+                  isPrimedForSecondScrollRef.current = true;
+                  if (!selectedPersona) {
+                    identifyPromptRef.current?.();
+                  }
+                  if (secondScrollExpireTimerRef.current) clearTimeout(secondScrollExpireTimerRef.current);
+                  secondScrollExpireTimerRef.current = setTimeout(() => {
+                    isPrimedForSecondScrollRef.current = false;
+                  }, 3800);
+                  return;
+                }
+                isPrimedForSecondScrollRef.current = false;
+                if (secondScrollExpireTimerRef.current) clearTimeout(secondScrollExpireTimerRef.current);
+                nextSlide();
                 return;
               }
               if (current === totalSlides - 1 && !footerOpen) {

@@ -32,6 +32,8 @@ interface IdentifyProps {
   onBackToHero?: () => void;
   onViewModeChange?: (mode: 'cards' | 'coming-soon') => void;
   backRef?: React.MutableRefObject<(() => void) | null>;
+  promptRef?: React.MutableRefObject<(() => void) | null>;
+  resetRef?: React.MutableRefObject<(() => void) | null>;
 }
 
 interface PersonaOption {
@@ -80,8 +82,14 @@ export default function Identify({
   onBackToHero,
   onViewModeChange,
   backRef,
+  promptRef,
+  resetRef,
 }: IdentifyProps) {
-  const [selected, setSelected] = useState<PersonaType>('student');
+  const [selected, setSelected] = useState<PersonaType | null>(null);
+  const [showPrompt, setShowPrompt] = useState(false);
+  const [shakePrompt, setShakePrompt] = useState(false);
+  const promptTimerRef = useRef<NodeJS.Timeout | null>(null);
+
   const [viewMode, setViewMode] = useState<'cards' | 'coming-soon'>('cards');
   const [flipState, setFlipState] = useState<'idle' | 'flipping-forward' | 'flipping-backward'>('idle');
   const [headingWriting, setHeadingWriting] = useState(false);
@@ -152,7 +160,21 @@ export default function Identify({
     }
   };
 
+  const triggerPrompt = () => {
+    setShowPrompt(true);
+    setShakePrompt(true);
+    if (promptTimerRef.current) clearTimeout(promptTimerRef.current);
+    promptTimerRef.current = setTimeout(() => {
+      setShowPrompt(false);
+      setShakePrompt(false);
+    }, 2800);
+  };
+
   const handleContinue = () => {
+    if (!selected) {
+      triggerPrompt();
+      return;
+    }
     if (flipState !== 'idle') return;
     setFlipState('flipping-forward');
     playPaperTurnSound();
@@ -167,6 +189,10 @@ export default function Identify({
     setFlipState('flipping-backward');
     playPaperTurnSound();
     setTimeout(() => {
+      setSelected(null);
+      if (onSelectPersona) {
+        onSelectPersona(null as any);
+      }
       setViewMode('cards');
       setFlipState('idle');
     }, 880);
@@ -183,6 +209,35 @@ export default function Identify({
       }
     };
   }, [backRef, handleBackToCards]);
+
+  // Sync promptRef to allow parent container (PageSlider) to trigger "Please choose your identity" prompt
+  useEffect(() => {
+    if (promptRef) {
+      promptRef.current = triggerPrompt;
+    }
+    return () => {
+      if (promptRef) {
+        promptRef.current = null;
+      }
+    };
+  }, [promptRef]);
+
+  // Sync resetRef to allow parent container (PageSlider) to reset card selection when navigating back
+  useEffect(() => {
+    if (resetRef) {
+      resetRef.current = () => {
+        setSelected(null);
+        setShowPrompt(false);
+        setShakePrompt(false);
+        setViewMode('cards');
+      };
+    }
+    return () => {
+      if (resetRef) {
+        resetRef.current = null;
+      }
+    };
+  }, [resetRef]);
 
   // Sync viewMode changes to parent
   useEffect(() => {
@@ -223,6 +278,11 @@ export default function Identify({
 
   const resetAllAnimations = () => {
     clearAllTimers();
+    if (promptTimerRef.current) clearTimeout(promptTimerRef.current);
+    setSelected(null);
+    setShowPrompt(false);
+    setShakePrompt(false);
+    setViewMode('cards');
     hasTriggeredSequenceRef.current = false;
     setHeadingWriting(false);
     setRevealedCardCount(0);
@@ -286,6 +346,9 @@ export default function Identify({
 
     return () => {
       clearAllTimers();
+      if (promptTimerRef.current) clearTimeout(promptTimerRef.current);
+      setShowPrompt(false);
+      setShakePrompt(false);
     };
   }, [isActive]);
 
@@ -314,12 +377,16 @@ export default function Identify({
 
   const handleSelect = (id: PersonaType) => {
     setSelected(id);
+    setShowPrompt(false);
+    setShakePrompt(false);
+    if (promptTimerRef.current) clearTimeout(promptTimerRef.current);
     if (onSelectPersona) {
       onSelectPersona(id);
     }
   };
 
-  const currentOption = PERSONAS.find((p) => p.id === selected) || PERSONAS[0];
+  const currentOption = selected ? PERSONAS.find((p) => p.id === selected) : null;
+  const comingSoonOption = currentOption || PERSONAS[0];
 
   return (
     <div
@@ -442,41 +509,43 @@ export default function Identify({
                       <div
                         className="absolute inset-0 rounded-xl transition-all"
                         style={{
-                          background: isSelected
-                            ? 'linear-gradient(180deg, #fcebc7 0%, #f6dfab 50%, #eecf93 100%)'
-                            : 'linear-gradient(180deg, rgba(247, 233, 199, 0.94) 0%, rgba(239, 219, 175, 0.94) 50%, rgba(228, 203, 153, 0.94) 100%)',
-                          boxShadow:
-                            'inset 0 1px 3px rgba(255, 255, 255, 0.8), inset 0 -1px 3px rgba(110, 60, 20, 0.25), 0 4px 14px rgba(40, 20, 5, 0.35)',
+                          backgroundImage: isSelected
+                            ? 'linear-gradient(180deg, #b56b3e 0%, #9D5A31 50%, #854722 100%)'
+                            : 'linear-gradient(180deg, #aa6338 0%, #9D5A31 50%, #8c4e28 100%)',
+                          backgroundColor: '#9D5A31',
+                          boxShadow: isSelected
+                            ? 'inset 0 1px 2px rgba(255, 255, 255, 0.45), inset 0 -1px 2px rgba(0, 0, 0, 0.35), 0 0 25px rgba(223, 165, 71, 0.65)'
+                            : 'inset 0 1px 2px rgba(255, 255, 255, 0.28), inset 0 -1px 2px rgba(0, 0, 0, 0.35), 0 6px 18px rgba(0, 0, 0, 0.35)',
                         }}
                       />
 
-                      <div className="absolute inset-1 rounded-lg border border-[#7a4817]/70 pointer-events-none group-hover:border-[#96581c]" />
-                      <div className="absolute inset-1.5 rounded-md border border-[#8f561f]/40 pointer-events-none" />
+                      <div className="absolute inset-1 rounded-lg border border-[#fde68a]/35 pointer-events-none group-hover:border-[#fde68a]/75 transition-colors" />
+                      <div className="absolute inset-1.5 rounded-md border border-amber-300/20 pointer-events-none" />
 
-                      <div className="absolute top-1 left-1 w-1.5 h-1.5 border-t-2 border-l-2 border-[#542d0a] pointer-events-none" />
-                      <div className="absolute top-1 right-1 w-1.5 h-1.5 border-t-2 border-r-2 border-[#542d0a] pointer-events-none" />
-                      <div className="absolute bottom-1 left-1 w-1.5 h-1.5 border-b-2 border-l-2 border-[#542d0a] pointer-events-none" />
-                      <div className="absolute bottom-1 right-1 w-1.5 h-1.5 border-b-2 border-r-2 border-[#542d0a] pointer-events-none" />
+                      <div className="absolute top-1 left-1 w-1.5 h-1.5 border-t-2 border-l-2 border-[#fde68a]/85 pointer-events-none" />
+                      <div className="absolute top-1 right-1 w-1.5 h-1.5 border-t-2 border-r-2 border-[#fde68a]/85 pointer-events-none" />
+                      <div className="absolute bottom-1 left-1 w-1.5 h-1.5 border-b-2 border-l-2 border-[#fde68a]/85 pointer-events-none" />
+                      <div className="absolute bottom-1 right-1 w-1.5 h-1.5 border-b-2 border-r-2 border-[#fde68a]/85 pointer-events-none" />
 
                       <div className="relative z-10 flex flex-col items-center text-center space-y-1 py-0.5">
                         {isSelected && (
-                          <div className="absolute -top-2 -right-2 w-5 h-5 rounded-full bg-[#8c5208] border border-amber-300 text-white flex items-center justify-center shadow-md animate-in zoom-in-75 duration-200">
+                          <div className="absolute -top-2 -right-2 w-5 h-5 rounded-full bg-[#dfa547] border border-amber-200 text-black flex items-center justify-center shadow-md animate-in zoom-in-75 duration-200">
                             <Check className="w-3 h-3 stroke-[3]" />
                           </div>
                         )}
 
-                        <div className="w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center text-[#2b1405] group-hover:scale-110 transition-transform">
+                        <div className="w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center text-amber-100 group-hover:text-white group-hover:scale-110 transition-all drop-shadow-xs">
                           <IconComponent className="w-6 h-6 sm:w-7 sm:h-7 stroke-[1.75]" />
                         </div>
 
-                        <h3 className="font-serif font-bold text-sm sm:text-base text-[#231104] tracking-tight leading-snug">
+                        <h3 className="font-serif font-bold text-sm sm:text-base text-white tracking-tight leading-snug drop-shadow-xs transition-colors">
                           {persona.title}
                         </h3>
 
-                        <div className="flex items-center justify-center gap-1.5 w-full max-w-[100px] text-[#784415]/65 pt-0.5">
-                          <span className="h-[1px] flex-1 bg-[#784415]/50" />
-                          <span className="text-[8px] leading-none">❖</span>
-                          <span className="h-[1px] flex-1 bg-[#784415]/50" />
+                        <div className="flex items-center justify-center gap-1.5 w-full max-w-[100px] text-amber-200/80 pt-0.5">
+                          <span className="h-[1px] flex-1 bg-amber-200/40" />
+                          <span className="text-[8px] leading-none text-amber-200">❖</span>
+                          <span className="h-[1px] flex-1 bg-amber-200/40" />
                         </div>
                       </div>
                     </button>
@@ -495,10 +564,23 @@ export default function Identify({
             >
               <button
                 onClick={handleContinue}
-                className="ochre-pill-button py-2.5 sm:py-3 px-6 sm:px-8 text-xs sm:text-sm font-bold shadow-xl hover:shadow-[0_0_25px_rgba(223,165,71,0.5)] flex items-center justify-center gap-2 cursor-pointer transition-transform hover:scale-105 active:scale-95"
+                className={`py-2.5 sm:py-3 px-6 sm:px-8 text-xs sm:text-sm font-bold shadow-xl flex items-center justify-center gap-2 cursor-pointer transition-all duration-300 hover:scale-105 active:scale-95 rounded-full ${
+                  selected
+                    ? 'ochre-pill-button hover:shadow-[0_0_25px_rgba(223,165,71,0.5)]'
+                    : 'bg-gradient-to-r from-[#2a1c0d]/90 via-[#3a2712]/90 to-[#2a1c0d]/90 border border-[#dfa547]/60 text-amber-200/90 hover:text-white hover:border-[#dfa547] shadow-[0_4px_20px_rgba(0,0,0,0.5)]'
+                } ${shakePrompt && !selected ? 'animate-button-attention' : ''}`}
               >
-                <span>Continue as {currentOption.title}</span>
-                <ArrowRight className="w-4 h-4" />
+                {selected && currentOption ? (
+                  <>
+                    <span>Continue as {currentOption.title}</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="w-4 h-4 text-amber-400" />
+                    <span>First choose your identity</span>
+                  </>
+                )}
               </button>
             </div>
           </div>
@@ -530,7 +612,7 @@ export default function Identify({
 
             {/* Persona Icon Badge */}
             <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-gradient-to-br from-[#dfa547]/20 via-[#c58525]/10 to-transparent border border-[#dfa547]/40 flex items-center justify-center text-[#dfa547] shadow-[0_0_35px_rgba(223,165,71,0.25)]">
-              {React.createElement(currentOption.icon, {
+              {React.createElement(comingSoonOption.icon, {
                 className: 'w-8 h-8 sm:w-10 sm:h-10 stroke-[1.75]',
               })}
             </div>
@@ -538,7 +620,7 @@ export default function Identify({
             {/* Grand Metallic Satin Gold Headline Matching Home Page - Letter-by-Letter Calligraphy Write-in */}
             <div className="space-y-2.5">
               <h1
-                key={currentOption.id}
+                key={comingSoonOption.id}
                 className="font-serif-luxury text-4xl sm:text-6xl md:text-7xl font-bold tracking-tight leading-[1.12] select-text"
                 style={{
                   background: 'linear-gradient(135deg, #ffffff 0%, #fbe6af 35%, #dfa547 70%, #b8731b 100%)',
@@ -547,7 +629,7 @@ export default function Identify({
                   filter: 'drop-shadow(0 2px 28px rgba(223, 165, 71, 0.35))',
                 }}
               >
-                {`${currentOption.title} Page`.split('').map((char, index) => (
+                {`${comingSoonOption.title} Page`.split('').map((char, index) => (
                   <span
                     key={index}
                     style={{
@@ -561,16 +643,16 @@ export default function Identify({
               </h1>
 
               <p
-                style={{ animationDelay: `${120 + `${currentOption.title} Page`.length * 36}ms` }}
+                style={{ animationDelay: `${120 + `${comingSoonOption.title} Page`.length * 36}ms` }}
                 className="font-serif italic text-amber-200/70 text-sm sm:text-lg max-w-xl mx-auto animate-letter-write-in"
               >
-                Exclusive keynote sessions, transformation frameworks, and tailored mentorship for {currentOption.title}s.
+                Exclusive keynote sessions, transformation frameworks, and tailored mentorship for {comingSoonOption.title}s.
               </p>
             </div>
 
             {/* Antique Flourish Divider */}
             <div
-              style={{ animationDelay: `${220 + `${currentOption.title} Page`.length * 36}ms` }}
+              style={{ animationDelay: `${220 + `${comingSoonOption.title} Page`.length * 36}ms` }}
               className="flex items-center justify-center gap-3 text-amber-300/80 w-full max-w-xs mx-auto animate-letter-write-in"
             >
               <span className="h-[1px] flex-1 bg-gradient-to-r from-transparent via-[#dfa547]/80 to-transparent" />
@@ -580,7 +662,7 @@ export default function Identify({
 
             {/* Glowing Royal Coming Soon Badge */}
             <div
-              style={{ animationDelay: `${320 + `${currentOption.title} Page`.length * 36}ms` }}
+              style={{ animationDelay: `${320 + `${comingSoonOption.title} Page`.length * 36}ms` }}
               className="inline-flex items-center gap-3 px-7 py-3 sm:px-9 sm:py-3.5 rounded-full bg-gradient-to-r from-[#dfa547]/15 via-[#dfa547]/25 to-[#dfa547]/15 border border-[#dfa547]/50 text-amber-200 shadow-[0_0_35px_rgba(223,165,71,0.3)] animate-letter-write-in"
             >
               <Clock className="w-5 h-5 text-[#dfa547] animate-pulse" />
@@ -591,6 +673,23 @@ export default function Identify({
             </div>
           </div>
         )}
+      </div>
+
+      {/* "Please choose your identity" prompt notification banner */}
+      <div
+        className={`fixed bottom-20 sm:bottom-24 left-1/2 -translate-x-1/2 z-50 transition-all duration-300 pointer-events-none ${
+          showPrompt
+            ? 'opacity-100 translate-y-0 scale-100'
+            : 'opacity-0 translate-y-4 scale-95 pointer-events-none'
+        }`}
+      >
+        <div className="flex items-center gap-2.5 px-5 sm:px-7 py-2.5 sm:py-3 rounded-full bg-[#18120b]/95 border border-[#dfa547]/90 text-amber-100 shadow-[0_0_35px_rgba(223,165,71,0.6)] backdrop-blur-md">
+          <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-[#dfa547] animate-pulse flex-shrink-0" />
+          <span className="font-serif text-xs sm:text-sm md:text-base font-semibold tracking-wide text-amber-100 whitespace-nowrap">
+            Please choose your identity
+          </span>
+          <span className="text-[10px] text-amber-400/80">❖</span>
+        </div>
       </div>
     </div>
   );
