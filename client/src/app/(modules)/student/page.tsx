@@ -1,5 +1,5 @@
 import { Metadata } from 'next';
-import PersonaSalesComingSoon from '@/components/PersonaSalesComingSoon';
+import PageSlider from '@/components/PageSlider';
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://pranavmahajan.com';
 
@@ -48,5 +48,5 @@ export const metadata: Metadata = {
 };
 
 export default function StudentPage() {
-  return <PersonaSalesComingSoon persona="student" />;
+  return <PageSlider initialPersona="student" />;
 }

@@ -30,6 +30,7 @@ export type PersonaType =
   | 'parent';
 
 interface IdentifyProps {
+  initialPersona?: PersonaType;
   isActive?: boolean;
   onSelectPersona?: (persona: PersonaType) => void;
   onGoToPersonaPage?: (persona: PersonaType) => void;
@@ -80,6 +81,7 @@ const PERSONAS: PersonaOption[] = [
 ];
 
 export default function Identify({
+  initialPersona,
   isActive = true,
   onSelectPersona,
   onGoToPersonaPage,
@@ -89,12 +91,12 @@ export default function Identify({
   promptRef,
   resetRef,
 }: IdentifyProps) {
-  const [selected, setSelected] = useState<PersonaType | null>(null);
+  const [selected, setSelected] = useState<PersonaType | null>(initialPersona ?? null);
   const [showPrompt, setShowPrompt] = useState(false);
   const [shakePrompt, setShakePrompt] = useState(false);
   const promptTimerRef = useRef<NodeJS.Timeout | null>(null);
 
-  const [viewMode, setViewMode] = useState<'cards' | 'coming-soon'>('cards');
+  const [viewMode, setViewMode] = useState<'cards' | 'coming-soon'>(initialPersona ? 'coming-soon' : 'cards');
   const [flipState, setFlipState] = useState<'idle' | 'flipping-forward' | 'flipping-backward'>('idle');
   const [headingWriting, setHeadingWriting] = useState(false);
   // Track sequential one-by-one card emergence (0 to 6 cards formed like magic)
@@ -102,6 +104,9 @@ export default function Identify({
   const [buttonsVisible, setButtonsVisible] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const studentVideoRef = useRef<HTMLVideoElement>(null);
+  const individualVideoRef = useRef<HTMLVideoElement>(null);
+  const governmentVideoRef = useRef<HTMLVideoElement>(null);
+  const corporateVideoRef = useRef<HTMLVideoElement>(null);
   const [studentAudioMuted, setStudentAudioMuted] = useState(true);
   const [studentVideoPlaying, setStudentVideoPlaying] = useState(false);
   const [studentVideoEnded, setStudentVideoEnded] = useState(false);
@@ -207,16 +212,14 @@ export default function Identify({
     }
     setStudentVideoPlaying(false);
     setStudentVideoEnded(false);
-    setFlipState('flipping-backward');
-    playPaperTurnSound();
-    setTimeout(() => {
-      setSelected(null);
-      if (onSelectPersona) {
-        onSelectPersona(null as any);
-      }
-      setViewMode('cards');
-      setFlipState('idle');
-    }, 880);
+    setSelected(null);
+    if (onSelectPersona) {
+      onSelectPersona(null as any);
+    }
+    setViewMode('cards');
+    setFlipState('idle');
+    setRevealedCardCount(PERSONAS.length);
+    setButtonsVisible(true);
   };
 
   backToCardsRef.current = handleBackToCards;
@@ -271,7 +274,7 @@ export default function Identify({
 
   // When on Coming Soon page, scrolling UP (mouse wheel or trackpad) returns to Choose Role (6 Cards)
   useEffect(() => {
-    if (!isActive || viewMode !== 'coming-soon' || flipState !== 'idle') return;
+    if (!isActive || viewMode !== 'coming-soon' || flipState !== 'idle' || selected === 'individual' || selected === 'government') return;
 
     let accumulatedDelta = 0;
     const onWheel = (e: WheelEvent) => {
@@ -292,7 +295,7 @@ export default function Identify({
     return () => {
       window.removeEventListener('wheel', onWheel);
     };
-  }, [isActive, viewMode, flipState]);
+  }, [isActive, viewMode, flipState, selected]);
 
   const clearAllTimers = () => {
     timeoutsRef.current.forEach((t) => clearTimeout(t));
@@ -350,6 +353,10 @@ export default function Identify({
     if (!video) return;
 
     if (isActive) {
+      if (viewMode === 'coming-soon') {
+        video.pause();
+        return;
+      }
       resetAllAnimations();
       video.currentTime = 0;
       // Fast video playback as requested
@@ -370,7 +377,6 @@ export default function Identify({
       timeoutsRef.current.push(fallbackTimer);
     } else {
       video.pause();
-      resetAllAnimations();
     }
 
     return () => {
@@ -379,7 +385,7 @@ export default function Identify({
       setShowPrompt(false);
       setShakePrompt(false);
     };
-  }, [isActive]);
+  }, [isActive, viewMode]);
 
   const handleTimeUpdate = () => {
     const video = videoRef.current;
@@ -451,6 +457,50 @@ export default function Identify({
       setStudentVideoEnded(false);
     }
   }, [viewMode, selected, flipState, comingSoonOption.id]);
+
+  // Play a role showcase once while its persona page is visible.
+  useEffect(() => {
+    const shouldPlay = isActive && viewMode === 'coming-soon' && flipState === 'idle';
+    const roleVideos = [
+      { id: 'individual', video: individualVideoRef.current },
+      { id: 'government', video: governmentVideoRef.current },
+      { id: 'corporate', video: corporateVideoRef.current },
+    ];
+    roleVideos.forEach(({ id, video }) => {
+      if (!video) return;
+      if (shouldPlay && selected === id) {
+        video.currentTime = 0;
+        video.playbackRate = 0.9;
+        video.play().catch(() => {});
+      } else {
+        video.pause();
+        if (viewMode === 'cards') video.currentTime = 0;
+      }
+    });
+  }, [isActive, viewMode, selected, flipState]);
+
+  // A downward scroll from the Individual showcase returns to the role cards.
+  useEffect(() => {
+    const isShowcasePage = isActive && viewMode === 'coming-soon' && (selected === 'individual' || selected === 'government') && flipState === 'idle';
+    if (!isShowcasePage) return;
+
+    let wheelDistance = 0;
+    const onWheel = (event: WheelEvent) => {
+      if (event.deltaY <= 0) return;
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      wheelDistance += event.deltaY;
+      if (wheelDistance >= 60) {
+        wheelDistance = 0;
+        backToCardsRef.current?.();
+      }
+    };
+
+    window.addEventListener('wheel', onWheel, { passive: false, capture: true });
+    return () => {
+      window.removeEventListener('wheel', onWheel, true);
+    };
+  }, [isActive, viewMode, selected, flipState]);
 
   // Scroll through the supplied full-HD campus frames instead of auto-playing them.
   useEffect(() => {
@@ -610,7 +660,9 @@ export default function Identify({
 
   return (
     <div
-      className={`relative w-full h-full min-h-screen overflow-hidden bg-[#090807] text-slate-100 flex flex-col justify-center items-center pt-12 sm:pt-16 pb-6 px-4 sm:px-8 select-text selection:bg-[#dfa547] selection:text-black ${
+      className={`relative w-full h-full min-h-screen overflow-hidden ${
+        initialPersona === 'student' ? 'bg-transparent' : 'bg-[#090807]'
+      } text-slate-100 flex flex-col justify-center items-center pt-12 sm:pt-16 pb-6 px-4 sm:px-8 select-text selection:bg-[#dfa547] selection:text-black ${
         isActive ? 'quill-active-slide' : ''
       } ${
         isActive && viewMode === 'coming-soon' && comingSoonOption.id === 'student'
@@ -669,29 +721,79 @@ export default function Identify({
             muted={studentAudioMuted}
             preload="auto"
             onEnded={handleStudentVideoEnded}
-            className={`w-full h-full object-cover object-center filter brightness-[0.88] contrast-[1.10] saturate-[1.08] transition-all duration-1000 ease-out ${
+            className={`w-full h-full object-cover object-center filter brightness-100 contrast-[1.10] saturate-[1.08] transition-all duration-1000 ease-out ${
               studentVideoPlaying ? 'scale-100' : 'scale-105'
             }`}
-            style={{
-              WebkitMaskImage:
-                'radial-gradient(ellipse 90% 85% at 50% 50%, black 50%, rgba(0,0,0,0.6) 78%, transparent 100%)',
-              maskImage:
-                'radial-gradient(ellipse 90% 85% at 50% 50%, black 50%, rgba(0,0,0,0.6) 78%, transparent 100%)',
-            }}
           />
-
-          {/* Seamless Obsidian Vignette Blends (Zero hard edges anywhere) */}
-          <div className="absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-[#090807] via-[#090807]/75 to-transparent pointer-events-none" />
-          <div className="absolute inset-x-0 bottom-0 h-44 bg-gradient-to-t from-[#090807] via-[#090807]/85 to-transparent pointer-events-none" />
-          <div className="absolute inset-y-0 left-0 w-32 sm:w-64 bg-gradient-to-r from-[#090807] via-[#090807]/70 to-transparent pointer-events-none" />
-          <div className="absolute inset-y-0 right-0 w-32 sm:w-64 bg-gradient-to-l from-[#090807] via-[#090807]/70 to-transparent pointer-events-none" />
-
-          {/* Ambient Radial Shading for High-Contrast Typography */}
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(9,8,7,0.30)_0%,rgba(9,8,7,0.70)_80%,#090807_100%)] pointer-events-none" />
 
           {/* Golden Mesh Shimmer matching site theme */}
           <div className="absolute inset-0 bg-[radial-gradient(#dfa547_1px,transparent_1px)] [background-size:32px_32px] opacity-15 pointer-events-none" />
         </div>
+      </div>
+
+      {/* Government Department persona video showcase. */}
+      <div
+        className={`absolute inset-0 z-0 overflow-hidden pointer-events-none transition-opacity duration-700 ease-out ${
+          viewMode === 'coming-soon' && selected === 'government' ? 'opacity-100' : 'opacity-0'
+        }`}
+        aria-hidden="true"
+      >
+        <video
+          ref={governmentVideoRef}
+          src="/gvtanimetion.mp4"
+          autoPlay
+          muted
+          playsInline
+          preload="auto"
+          onLoadedMetadata={(event) => { event.currentTarget.playbackRate = 0.9; }}
+          onEnded={(event) => event.currentTarget.pause()}
+          className="absolute inset-0 h-full w-full object-cover object-top"
+          style={{ objectPosition: 'center top' }}
+        />
+      </div>
+
+      {/* Individual persona video showcase. */}
+      <div
+        className={`absolute inset-0 z-0 overflow-hidden pointer-events-none transition-opacity duration-700 ease-out ${
+          viewMode === 'coming-soon' && selected === 'individual' ? 'opacity-100' : 'opacity-0'
+        }`}
+        aria-hidden="true"
+      >
+        <video
+          ref={individualVideoRef}
+          src="/Individual.mp4"
+          autoPlay
+          muted
+          playsInline
+          preload="auto"
+          onLoadedMetadata={(event) => {
+            event.currentTarget.playbackRate = 0.9;
+          }}
+          onEnded={(event) => event.currentTarget.pause()}
+          className="absolute inset-0 h-full w-full object-cover object-center"
+        />
+      </div>
+
+      {/* Corporate / Business showcase video. */}
+      <div
+        className={`absolute inset-0 z-0 overflow-hidden transition-opacity duration-700 ease-out ${
+          viewMode === 'coming-soon' && selected === 'corporate' ? 'opacity-100' : 'opacity-0'
+        }`}
+        aria-hidden="true"
+      >
+        <div className="absolute inset-x-0 top-0 h-1/2 bg-[#090807] md:inset-y-0 md:left-auto md:right-0 md:h-auto md:w-[58%]">
+          <video
+            ref={corporateVideoRef}
+            src="/Video_prompt_for_collage_animation_40b3e6b1_1080p%20(online-video-cutter.com).mp4"
+            muted
+            playsInline
+            preload="metadata"
+            onEnded={(event) => event.currentTarget.pause()}
+            className="absolute inset-0 h-full w-full object-cover object-center"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#090807] via-[#090807]/25 to-transparent md:bg-gradient-to-r md:from-[#090807] md:via-[#090807]/20 md:to-transparent" />
+        </div>
+        <div className="absolute inset-0 bg-gradient-to-b from-[#090807]/20 via-transparent to-[#090807]/35" />
       </div>
 
       {/* Full-HD campus sequence provided in the motivation and growth folder. */}
@@ -715,7 +817,7 @@ export default function Identify({
       {/* 3. Home-Page Style Ambient Golden Atmosphere (Active when on Coming Soon view for other personas) */}
       <div
         className={`absolute inset-0 pointer-events-none transition-opacity duration-700 ease-in-out z-0 ${
-          viewMode === 'coming-soon' && selected !== 'school' && (selected !== 'student' && comingSoonOption.id !== 'student') ? 'opacity-100' : 'opacity-0'
+          viewMode === 'coming-soon' && selected !== 'school' && selected !== 'individual' && selected !== 'government' && selected !== 'corporate' && (selected !== 'student' && comingSoonOption.id !== 'student') ? 'opacity-100' : 'opacity-0'
         }`}
       >
         <div className="absolute top-1/4 left-1/4 w-[650px] h-[650px] rounded-full bg-[#dfa547]/10 blur-[160px]" />
@@ -1006,7 +1108,7 @@ export default function Identify({
                   <Sparkles className="w-4 h-4 text-amber-300/90" />
                 </div>
               </div>
-            ) : comingSoonOption.id === 'school' ? (
+            ) : comingSoonOption.id === 'individual' || comingSoonOption.id === 'government' || comingSoonOption.id === 'corporate' ? null : comingSoonOption.id === 'school' ? (
               <div className="fixed inset-x-0 top-5 z-30 flex flex-col items-center gap-4 px-5 text-center sm:top-8">
                 <button
                   onClick={handleBackToCards}
@@ -1112,6 +1214,51 @@ export default function Identify({
           </div>
         )}
       </div>
+
+      {/* Individual title is a top-level overlay so it always renders above the video. */}
+      {isActive && viewMode === 'coming-soon' && (selected === 'individual' || selected === 'government' || selected === 'corporate') && flipState === 'idle' ? (
+        <div className={`absolute inset-0 z-[60] flex px-5 pointer-events-none sm:px-10 ${selected === 'corporate' ? 'items-end justify-start pb-16 sm:pb-20 md:items-center md:px-[6vw] md:pb-0' : 'items-center md:px-[7vw]'}`}>
+          <div className={`w-full text-left ${selected === 'corporate' ? 'mb-2 max-w-full md:mb-0 md:max-w-[39%]' : 'max-w-[52vw] sm:max-w-[48vw]'}`}>
+            {selected === 'government' ? (
+              <p className="mb-3 text-xs font-bold uppercase tracking-[0.3em] text-amber-100/90 drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)] sm:mb-5 sm:text-sm">
+                Government Department
+              </p>
+            ) : null}
+            {selected === 'corporate' ? (
+              <p className="mb-3 text-xs font-bold uppercase tracking-[0.3em] text-amber-100/90 drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)] sm:mb-5 sm:text-sm">
+                Corporate / Business
+              </p>
+            ) : null}
+            <h1
+              className={`individual-ink-glow font-bold leading-[0.9] text-[#f5c66d] drop-shadow-[0_2px_10px_rgba(0,0,0,0.65)] ${selected === 'corporate' ? 'text-[2.6rem] sm:text-5xl md:text-6xl' : 'text-5xl sm:text-7xl md:text-8xl'}`}
+              style={{ fontFamily: 'var(--font-caveat), cursive' }}
+              aria-label={selected === 'government' ? 'This is my Government Page' : selected === 'corporate' ? 'This is my Corporate Business page' : 'This is my Individual page'}
+            >
+              {(selected === 'government' ? ['This is my', 'Government Page'] : selected === 'corporate' ? ['This is my', 'Corporate', 'Business page'] : ['This is my', 'Individual page']).map((line, lineIndex) => (
+                <React.Fragment key={`${selected}-line-${lineIndex}`}>
+                  {lineIndex > 0 ? <br /> : null}
+                  {line.split('').map((char, index) => (
+                    <span
+                      key={`${selected}-${lineIndex}-${index}`}
+                      className="animate-letter-write-in"
+                      style={{ animationDelay: `${(lineIndex * 10 + index) * 75}ms` }}
+                    >
+                      {char === ' ' ? '\u00A0' : char}
+                    </span>
+                  ))}
+                </React.Fragment>
+              ))}
+            </h1>
+            <button
+              onClick={handleBackToCards}
+              className="pointer-events-auto group mt-8 inline-flex items-center gap-2 rounded-full border border-amber-100/55 px-4 py-2 text-xs font-semibold text-white/90 transition hover:bg-white/10 sm:mt-10 sm:px-5 sm:py-2.5 sm:text-sm"
+            >
+              <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-1" />
+              Back to Choose Role
+            </button>
+          </div>
+        </div>
+      ) : null}
 
       {/* "Please choose your identity" prompt notification banner */}
       <div

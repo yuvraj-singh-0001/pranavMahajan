@@ -1,5 +1,5 @@
 import { Metadata } from 'next';
-import PersonaSalesComingSoon from '@/components/PersonaSalesComingSoon';
+import PageSlider from '@/components/PageSlider';
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://pranavmahajan.com';
 
@@ -28,5 +28,5 @@ export const metadata: Metadata = {
 };
 
 export default function GovernmentPage() {
-  return <PersonaSalesComingSoon persona="government" />;
+  return <PageSlider initialPersona="government" />;
 }

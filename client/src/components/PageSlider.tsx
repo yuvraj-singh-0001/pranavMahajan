@@ -9,16 +9,20 @@ import CelestialRocketTransition from './CelestialRocketTransition';
 import Footer from './Footer';
 import { X, ChevronUp, ChevronDown } from 'lucide-react';
 
-export default function PageSlider() {
-  const [current, setCurrent] = useState(0);
+interface PageSliderProps {
+  initialPersona?: PersonaType;
+}
+
+export default function PageSlider({ initialPersona }: PageSliderProps) {
+  const [current, setCurrent] = useState(initialPersona ? 1 : 0);
   const [boardState, setBoardState] = useState<'idle' | 'sweeping-forward' | 'sweeping-backward'>('idle');
   const [rocketActive, setRocketActive] = useState(false);
   const [rocketTargetIndex, setRocketTargetIndex] = useState(1);
   const [menuOpen, setMenuOpen] = useState(false);
   const [buttonNudged, setButtonNudged] = useState(false);
   const [footerOpen, setFooterOpen] = useState(false);
-  const [selectedPersona, setSelectedPersona] = useState<PersonaType | null>(null);
-  const [identifyMode, setIdentifyMode] = useState<'cards' | 'coming-soon'>('cards');
+  const [selectedPersona, setSelectedPersona] = useState<PersonaType | null>(initialPersona ?? null);
+  const [identifyMode, setIdentifyMode] = useState<'cards' | 'coming-soon'>(initialPersona ? 'coming-soon' : 'cards');
   const identifyBackRef = useRef<(() => void) | null>(null);
   const identifyPromptRef = useRef<(() => void) | null>(null);
   const identifyResetRef = useRef<(() => void) | null>(null);
@@ -38,6 +42,19 @@ export default function PageSlider() {
   const bottomPrimeTimerRef = useRef<NodeJS.Timeout | null>(null);
   const topPrimedRef = useRef(false);
   const topPrimeTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  // A hard refresh from a role URL starts the full site cleanly at Home.
+  useEffect(() => {
+    if (!initialPersona) return;
+    const navigation = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming | undefined;
+    if (navigation?.type !== 'reload') return;
+
+    window.history.replaceState(null, '', '/');
+    setCurrent(0);
+    setSelectedPersona(null);
+    setIdentifyMode('cards');
+    identifyResetRef.current?.();
+  }, [initialPersona]);
 
   // 3 Primary Slides:
   // 0: Hero (Want to live your dream life)
@@ -103,7 +120,7 @@ export default function PageSlider() {
     // Switch slide halfway through board sweep
     setTimeout(() => {
       setCurrent(targetIndex);
-      if (targetIndex === 1) {
+      if (targetIndex === 1 && current === 0) {
         setSelectedPersona(null);
         identifyResetRef.current?.();
       }
@@ -185,7 +202,7 @@ export default function PageSlider() {
               if (wheelAccumulatorRef.current >= 220) {
                 wheelAccumulatorRef.current = 0;
                 e.preventDefault();
-                setFooterOpen(true);
+                prevSlide();
               }
               return;
             } else {
@@ -273,6 +290,10 @@ export default function PageSlider() {
             wheelAccumulatorRef.current = 0;
             topPrimedRef.current = false;
             e.preventDefault();
+            if (selectedPersona === 'individual' || selectedPersona === 'government') {
+              nextSlide();
+              return;
+            }
             identifyBackRef.current();
             return;
           }
@@ -365,6 +386,10 @@ export default function PageSlider() {
           }
         }
         if (current === 1) {
+          if (identifyMode === 'coming-soon' && (selectedPersona === 'individual' || selectedPersona === 'government')) {
+            identifyBackRef.current?.();
+            return;
+          }
           if (!isPrimedForSecondScrollRef.current) {
             isPrimedForSecondScrollRef.current = true;
             if (!selectedPersona) {
@@ -387,6 +412,10 @@ export default function PageSlider() {
           nextSlide();
         }
       } else if (e.key === 'ArrowUp') {
+        if (current === 1 && identifyMode === 'coming-soon' && (selectedPersona === 'individual' || selectedPersona === 'government')) {
+          nextSlide();
+          return;
+        }
         const activeSlide = slidesRef.current[current];
         if (activeSlide && activeSlide.scrollHeight > activeSlide.clientHeight + 8) {
           const isAtTop = activeSlide.scrollTop <= 8;
@@ -431,9 +460,24 @@ export default function PageSlider() {
       const diffY = touchStartYRef.current - e.changedTouches[0].clientY;
 
       const activeSlide = slidesRef.current[current];
+      if (current === 1 && identifyMode === 'coming-soon' && (selectedPersona === 'individual' || selectedPersona === 'government')) {
+        if (diffY > 55) {
+          identifyBackRef.current?.();
+          return;
+        }
+        if (diffY < -55) {
+          nextSlide();
+          return;
+        }
+      }
       const isScrollable = activeSlide ? (activeSlide.scrollHeight > activeSlide.clientHeight + 8) : false;
       const isAtBottom = activeSlide ? (activeSlide.scrollTop + activeSlide.clientHeight >= activeSlide.scrollHeight - 10) : true;
       const isAtTop = activeSlide ? (activeSlide.scrollTop <= 8) : true;
+
+      if (current === totalSlides - 1 && diffY > 55 && (!isScrollable || isAtBottom)) {
+        prevSlide();
+        return;
+      }
 
       if (Math.abs(diffX) > Math.abs(diffY)) {
         if (Math.abs(diffX) > 28) {
@@ -500,7 +544,7 @@ export default function PageSlider() {
       if (bottomPrimeTimerRef.current) clearTimeout(bottomPrimeTimerRef.current);
       if (topPrimeTimerRef.current) clearTimeout(topPrimeTimerRef.current);
     };
-  }, [current, totalSlides, footerOpen, nextSlide, prevSlide, triggerButtonNudge]);
+  }, [current, identifyMode, selectedPersona, totalSlides, footerOpen, nextSlide, prevSlide, triggerButtonNudge]);
 
   return (
     <div className="relative w-screen h-screen overflow-hidden bg-[#090807] text-slate-100 select-text">
@@ -592,8 +636,15 @@ export default function PageSlider() {
           }`}
         >
           <Identify
+            initialPersona={initialPersona}
             isActive={current === 1}
-            onSelectPersona={(p) => setSelectedPersona(p)}
+            onSelectPersona={(persona) => {
+              setSelectedPersona(persona);
+              const rolePath = persona ? `/${persona}` : '/';
+              if (window.location.pathname !== rolePath) {
+                window.history.replaceState(null, '', rolePath);
+              }
+            }}
             onGoToPersonaPage={(p) => {
               setSelectedPersona(p);
               goToSlide(2, 'forward');

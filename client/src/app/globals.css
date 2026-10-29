@@ -848,4 +848,14 @@ html.quill-mode [data-chrome="true"] a * {
   animation: letterWriteIn 0.38s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
+@keyframes individualInkGlow {
+  to {
+    text-shadow: 0 0 10px rgba(245, 198, 109, 0.42), 0 0 26px rgba(223, 165, 71, 0.22);
+  }
+}
+
+.individual-ink-glow {
+  animation: individualInkGlow 1.4s ease-out 4s forwards;
+}
+
 
