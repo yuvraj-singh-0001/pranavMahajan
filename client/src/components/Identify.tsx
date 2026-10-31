@@ -9,16 +9,23 @@ import {
   Landmark,
   Users,
   ArrowRight,
-  ArrowLeft,
   Check,
   Sparkles,
   Clock,
   Volume2,
   VolumeX,
   RotateCcw,
+  ShieldAlert,
+  Lightbulb,
+  Target,
+  ChevronRight,
+  Brain,
+  CheckCircle2,
 } from 'lucide-react';
 import QuillCursor from './QuillCursor';
 import ScholarPenCursor from './ScholarPenCursor';
+import RoleCursor from './RoleCursor';
+import Footer from './Footer';
 
 export type PersonaType =
   | 'student'
@@ -83,12 +90,14 @@ const PERSONAS: PersonaOption[] = [
 export interface RoleExperienceConfig {
   id: PersonaType;
   title: string;
-  icon: React.ComponentType<{ className?: string }>;
+  icon: React.ComponentType<{ className?: string; style?: React.CSSProperties }>;
   videoSrc: string;
   badgeLabel: string;
   headingLines: string[];
   subtitle: string;
   storageKey: string;
+  themeColor: string;
+  themeGlow: string;
 }
 
 export const ROLE_EXPERIENCES: Record<PersonaType, RoleExperienceConfig> = {
@@ -101,6 +110,8 @@ export const ROLE_EXPERIENCES: Record<PersonaType, RoleExperienceConfig> = {
     headingLines: ['This is the', 'student pages'],
     subtitle: "Pushing open the doors to excellence, leadership, and boundless possibilities with Pranav Mahajan's youth masterclasses.",
     storageKey: 'pravan_student_video_watched',
+    themeColor: '#dfa547',
+    themeGlow: 'rgba(223, 165, 71, 0.4)',
   },
   school: {
     id: 'school',
@@ -111,6 +122,8 @@ export const ROLE_EXPERIENCES: Record<PersonaType, RoleExperienceConfig> = {
     headingLines: ['This is my', 'edu page'],
     subtitle: 'Empowering academic excellence, youth leadership culture, and transformative teacher-student synergy.',
     storageKey: 'pravan_school_video_watched',
+    themeColor: '#10b981',
+    themeGlow: 'rgba(16, 185, 129, 0.4)',
   },
   individual: {
     id: 'individual',
@@ -121,16 +134,20 @@ export const ROLE_EXPERIENCES: Record<PersonaType, RoleExperienceConfig> = {
     headingLines: ['This is my', 'Individual page'],
     subtitle: 'Personal transformation, peak subconscious focus, and life-changing self-mastery frameworks.',
     storageKey: 'pravan_individual_video_watched',
+    themeColor: '#c084fc',
+    themeGlow: 'rgba(192, 132, 252, 0.4)',
   },
   corporate: {
     id: 'corporate',
     title: 'Corporate / Business',
     icon: Building,
     videoSrc: '/Video_prompt_for_collage_animation_40b3e6b1_1080p%20(online-video-cutter.com).mp4',
-    badgeLabel: 'Corporate / Business',
+    badgeLabel: 'Corporate & Business',
     headingLines: ['This is my', 'Corporate', 'Business page'],
     subtitle: 'Executive peak performance, high-impact leadership culture, and organizational breakthrough mastery.',
     storageKey: 'pravan_corporate_video_watched',
+    themeColor: '#94a3b8',
+    themeGlow: 'rgba(148, 163, 184, 0.4)',
   },
   government: {
     id: 'government',
@@ -141,16 +158,20 @@ export const ROLE_EXPERIENCES: Record<PersonaType, RoleExperienceConfig> = {
     headingLines: ['This is my', 'Government Page'],
     subtitle: 'Strategic institutional vision, nation-building synergy, and transformative public governance keynote programs.',
     storageKey: 'pravan_government_video_watched',
+    themeColor: '#f59e0b',
+    themeGlow: 'rgba(245, 158, 11, 0.4)',
   },
   ngo: {
     id: 'ngo',
     title: 'NGO / Social Sector',
     icon: Users,
     videoSrc: '/animetion%20video%20(2)%20(online-video-cutter.com).mp4',
-    badgeLabel: 'NGO / Social Sector',
+    badgeLabel: 'NGO & Social Sector',
     headingLines: ['This is my', 'NGO Page'],
     subtitle: 'Grassroots empowerment, sustainable social impact, and uplifting community transformation.',
     storageKey: 'pravan_ngo_video_watched',
+    themeColor: '#fb7185',
+    themeGlow: 'rgba(251, 113, 133, 0.4)',
   },
   parent: {
     id: 'parent',
@@ -161,6 +182,8 @@ export const ROLE_EXPERIENCES: Record<PersonaType, RoleExperienceConfig> = {
     headingLines: ['This is my', 'Parenting Page'],
     subtitle: 'Nurturing conscious families, mindful communication, and emotional resilience for modern parents.',
     storageKey: 'pravan_parent_video_watched',
+    themeColor: '#f472b6',
+    themeGlow: 'rgba(244, 114, 182, 0.4)',
   },
 };
 
@@ -188,11 +211,15 @@ export default function Identify({
   const [buttonsVisible, setButtonsVisible] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const roleVideoRef = useRef<HTMLVideoElement>(null);
+  const startedRoleExperienceRef = useRef<PersonaType | null>(null);
+  const explicitlySelectedRoleRef = useRef<PersonaType | null>(null);
+  const allowRoleVideoPlaybackRef = useRef(false);
   const [isAudioMuted, setIsAudioMuted] = useState(false);
   const [hasWatchedRoleVideo, setHasWatchedRoleVideo] = useState(false);
   const [hasWatchedVideo, setHasWatchedVideo] = useState<Record<string, boolean>>({});
   const [roleVideoPlaying, setRoleVideoPlaying] = useState(false);
   const [roleVideoEnded, setRoleVideoEnded] = useState(false);
+  const [activeCard, setActiveCard] = useState<number>(1);
 
   useEffect(() => {
     try {
@@ -206,7 +233,7 @@ export default function Identify({
         }
       });
       setHasWatchedVideo(watchedMap);
-    } catch {}
+    } catch { }
   }, []);
 
   const toggleGlobalAudio = () => {
@@ -236,7 +263,7 @@ export default function Identify({
       try {
         localStorage.setItem(config.storageKey, 'true');
         setHasWatchedVideo((prev) => ({ ...prev, [config.id]: true }));
-      } catch {}
+      } catch { }
     }
     const v = roleVideoRef.current;
     if (v) {
@@ -401,31 +428,6 @@ export default function Identify({
     }
   }, [viewMode, onViewModeChange]);
 
-  // When on Coming Soon page, scrolling UP (mouse wheel or trackpad) returns to Choose Role (6 Cards)
-  useEffect(() => {
-    if (!isActive || viewMode !== 'coming-soon' || flipState !== 'idle') return;
-
-    let accumulatedDelta = 0;
-    const onWheel = (e: WheelEvent) => {
-      if (e.deltaY < 0) {
-        accumulatedDelta += e.deltaY;
-        if (accumulatedDelta <= -50) {
-          accumulatedDelta = 0;
-          e.preventDefault();
-          e.stopPropagation();
-          handleBackToCards();
-        }
-      } else {
-        accumulatedDelta = 0;
-      }
-    };
-
-    window.addEventListener('wheel', onWheel, { passive: false });
-    return () => {
-      window.removeEventListener('wheel', onWheel);
-    };
-  }, [isActive, viewMode, flipState]);
-
   const clearAllTimers = () => {
     timeoutsRef.current.forEach((t) => clearTimeout(t));
     timeoutsRef.current = [];
@@ -540,6 +542,7 @@ export default function Identify({
   };
 
   const handleSelect = (id: PersonaType) => {
+    explicitlySelectedRoleRef.current = id;
     if (selected === id) {
       handleContinue();
       return;
@@ -561,6 +564,27 @@ export default function Identify({
   // Synchronize Role video playback when entering/exiting coming-soon view
   useEffect(() => {
     if (viewMode === 'coming-soon' && flipState === 'idle' && activeRole) {
+      const playedKey = `pravan_role_experience_started_${activeRole.id}`;
+      try {
+        // A role URL can be revisited with browser Back/Forward. Keep the
+        // completed experience on its page instead of replaying its video.
+        if (
+          sessionStorage.getItem(playedKey) === 'true' &&
+          startedRoleExperienceRef.current !== activeRole.id &&
+          explicitlySelectedRoleRef.current !== activeRole.id
+        ) {
+          allowRoleVideoPlaybackRef.current = false;
+          setRoleVideoEnded(true);
+          setRoleVideoPlaying(false);
+          roleVideoRef.current?.pause();
+          return;
+        }
+        explicitlySelectedRoleRef.current = null;
+        startedRoleExperienceRef.current = activeRole.id;
+        allowRoleVideoPlaybackRef.current = true;
+        sessionStorage.setItem(playedKey, 'true');
+      } catch { }
+
       setRoleVideoEnded(false);
       setRoleVideoPlaying(true);
       const v = roleVideoRef.current;
@@ -572,11 +596,12 @@ export default function Identify({
           playPromise.catch(() => {
             v.muted = true;
             setIsAudioMuted(true);
-            v.play().catch(() => {});
+            v.play().catch(() => { });
           });
         }
       }
     } else if (viewMode === 'cards') {
+      allowRoleVideoPlaybackRef.current = false;
       const v = roleVideoRef.current;
       if (v) {
         v.pause();
@@ -595,7 +620,7 @@ export default function Identify({
         try {
           localStorage.setItem(activeRole.storageKey, 'true');
           setHasWatchedVideo((prev) => ({ ...prev, [activeRole.id]: true }));
-        } catch {}
+        } catch { }
       }
     }
   };
@@ -609,7 +634,7 @@ export default function Identify({
       try {
         localStorage.setItem(activeRole.storageKey, 'true');
         setHasWatchedVideo((prev) => ({ ...prev, [activeRole.id]: true }));
-      } catch {}
+      } catch { }
     }
     if (v) {
       v.pause();
@@ -617,26 +642,38 @@ export default function Identify({
     setRoleVideoEnded(true);
   };
 
+  const handleGoToPersonaPage = (persona: PersonaType) => {
+    // Contact navigation leaves the role experience, so stop its audio/video
+    // before the outgoing slide begins moving away.
+    allowRoleVideoPlaybackRef.current = false;
+    roleVideoRef.current?.pause();
+    videoRef.current?.pause();
+    setRoleVideoEnded(true);
+    onGoToPersonaPage?.(persona);
+  };
+
   return (
     <div
-      className={`relative w-full h-full min-h-screen overflow-hidden ${
-        initialPersona === 'student' ? 'bg-transparent' : 'bg-[#090807]'
-      } text-slate-100 flex flex-col justify-center items-center pt-12 sm:pt-16 pb-6 px-4 sm:px-8 select-text selection:bg-[#dfa547] selection:text-black ${
-        isActive ? 'quill-active-slide' : ''
-      } ${
-        isActive && viewMode === 'coming-soon' && comingSoonOption.id === 'student'
+      className={`relative w-full ${viewMode === 'cards' ? 'h-auto' : 'h-full'} min-h-screen overflow-x-hidden ${initialPersona === 'student' ? 'bg-transparent' : 'bg-[#090807]'
+        } text-slate-100 flex flex-col ${viewMode === 'cards' ? 'justify-start' : 'justify-center'} items-center pt-12 sm:pt-16 pb-6 px-4 sm:px-8 select-text selection:bg-[#dfa547] selection:text-black ${isActive ? 'quill-active-slide' : ''
+        } ${isActive && viewMode === 'coming-soon' && comingSoonOption.id === 'student'
           ? 'student-scholar-mode'
           : ''
-      }`}
+        }`}
     >
-      {/* Antique Golden Quill Pen Custom Cursor (Active only on Slide 1 Cards view & other personas) */}
+      {/* Antique Golden Quill Pen Custom Cursor (Active only on Slide 1 Cards view) */}
       <QuillCursor
-        isActive={!!isActive && (viewMode === 'cards' || comingSoonOption.id !== 'student')}
+        isActive={!!isActive && viewMode === 'cards'}
       />
 
       {/* Real Education Scholar's Golden Fountain Pen Nib (Active exclusively on Student Experience) */}
       {isActive && viewMode === 'coming-soon' && comingSoonOption.id === 'student' ? (
         <ScholarPenCursor isActive />
+      ) : null}
+
+      {/* Dynamic Glowing Role Cursor (Active on Other Roles: Individual, School, Corporate, Government, NGO, Parent) */}
+      {isActive && viewMode === 'coming-soon' && comingSoonOption.id !== 'student' ? (
+        <RoleCursor role={comingSoonOption.id} isActive />
       ) : null}
 
       {/* TOP CONTROLS: EXACTLY TWO BUTTONS - UNMUTE & SKIP (Skip only on 2nd time onwards / return) */}
@@ -673,8 +710,8 @@ export default function Identify({
             </button>
           )}
 
-          {/* 2. Skip Button on Role Experience (Only 2nd time onwards / return) */}
-          {viewMode === 'coming-soon' && activeRole && hasWatchedVideo[activeRole.id] && !roleVideoEnded && (
+          {/* 2. Skip Button on Role Experience */}
+          {viewMode === 'coming-soon' && activeRole && !roleVideoEnded && (
             <button
               onClick={handleSkipRoleExperience}
               className="inline-flex items-center gap-1.5 px-4 sm:px-5 py-2 rounded-full bg-[#140e09]/90 hover:bg-[#24170d] backdrop-blur-md border border-[#dfa547]/60 text-amber-200 hover:text-white transition-all shadow-xl hover:shadow-[0_0_20px_rgba(223,165,71,0.4)] cursor-pointer hover:scale-105 active:scale-95 text-xs font-serif font-bold uppercase tracking-wider animate-in fade-in zoom-in-95 duration-300"
@@ -689,11 +726,10 @@ export default function Identify({
 
       {/* 1. FULL-WIDTH BACKGROUND VIDEO (Immediately fades out on flip so it never lingers) */}
       <div
-        className={`absolute inset-0 z-0 pointer-events-none overflow-hidden flex items-center justify-center w-full h-full transition-opacity duration-300 ease-out ${
-          viewMode === 'coming-soon' || flipState === 'flipping-forward'
+        className={`absolute inset-0 z-0 pointer-events-none overflow-hidden flex items-center justify-center w-full h-full transition-opacity duration-300 ease-out ${viewMode === 'coming-soon' || flipState === 'flipping-forward'
             ? 'opacity-0 pointer-events-none'
             : 'opacity-100'
-        }`}
+          }`}
       >
         <video
           ref={videoRef}
@@ -731,28 +767,27 @@ export default function Identify({
                 key={activeRole.videoSrc}
                 ref={roleVideoRef}
                 src={activeRole.videoSrc}
-                autoPlay
+                autoPlay={false}
                 playsInline
                 muted={isAudioMuted}
                 preload="auto"
                 onCanPlay={(e) => {
                   const vid = e.currentTarget;
-                  if (!roleVideoEnded && viewMode === 'coming-soon') {
+                  if (allowRoleVideoPlaybackRef.current && !roleVideoEnded && viewMode === 'coming-soon') {
                     const p = vid.play();
                     if (p !== undefined) {
                       p.catch(() => {
                         vid.muted = true;
                         setIsAudioMuted(true);
-                        vid.play().catch(() => {});
+                        vid.play().catch(() => { });
                       });
                     }
                   }
                 }}
                 onTimeUpdate={handleRoleTimeUpdate}
                 onEnded={handleRoleVideoEnded}
-                className={`w-full h-full object-cover object-center filter brightness-100 contrast-[1.10] saturate-[1.08] transition-all duration-1000 ease-out ${
-                  roleVideoPlaying ? 'scale-100' : 'scale-105'
-                }`}
+                className={`w-full h-full object-cover object-center filter brightness-100 contrast-[1.10] saturate-[1.08] transition-all duration-1000 ease-out ${roleVideoPlaying ? 'scale-100' : 'scale-105'
+                  }`}
               />
 
               {/* Golden Mesh Shimmer matching site theme */}
@@ -762,71 +797,230 @@ export default function Identify({
 
             {/* PANEL 2: ROLE FULL PAGE (100vw, slides in from right side simultaneously) */}
             <div
-              className="relative w-screen min-w-[100vw] max-w-[100vw] h-full flex-shrink-0 flex items-center justify-start px-6 sm:px-12 md:px-20 overflow-hidden bg-[#090807]"
+              data-role-panel="true"
+              className="relative w-screen min-w-[100vw] max-w-[100vw] h-full flex-shrink-0 overflow-y-auto overflow-x-hidden flex flex-col items-stretch justify-start pt-16 sm:pt-20 pb-0 bg-[#090807] scroll-smooth"
               style={{ width: '100vw', minWidth: '100vw', maxWidth: '100vw' }}
             >
-              {/* Ambient Golden Core Light Orb */}
-              <div className="absolute top-1/2 left-1/3 -translate-x-1/2 -translate-y-1/2 w-[700px] sm:w-[950px] h-[500px] sm:h-[650px] rounded-full bg-[radial-gradient(ellipse_at_center,rgba(223,165,71,0.22)_0%,rgba(197,133,37,0.12)_45%,transparent_75%)] blur-[90px] sm:blur-[130px] pointer-events-none" />
+              {/* Dynamic Theme Glow Orb */}
+              <div
+                className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] sm:w-[1050px] h-[500px] sm:h-[750px] rounded-full blur-[100px] sm:blur-[140px] pointer-events-none transition-colors duration-1000"
+                style={{
+                  background: `radial-gradient(ellipse at center, ${activeRole.themeGlow} 0%, rgba(9,8,7,0) 75%)`,
+                }}
+              />
 
               {/* Golden Mesh Shimmer */}
               <div className="absolute inset-0 bg-[radial-gradient(#dfa547_1px,transparent_1px)] [background-size:32px_32px] opacity-15 pointer-events-none" />
 
               {/* Vignette Gradients */}
-              <div className="absolute inset-0 bg-gradient-to-t from-[#090807] via-transparent to-[#090807]/70 pointer-events-none" />
-              <div className="absolute inset-0 bg-gradient-to-r from-[#090807]/90 via-[#090807]/40 to-transparent pointer-events-none" />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#090807] via-transparent to-[#090807]/80 pointer-events-none" />
+              <div className="absolute inset-0 bg-gradient-to-r from-[#090807]/90 via-transparent to-[#090807]/90 pointer-events-none" />
 
-              {/* Page Content */}
-              <div className="relative z-10 max-w-2xl text-left pointer-events-auto">
-                {/* Category Subtitle Pill */}
-                <div className="mb-4 inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#18120b]/90 border border-[#dfa547]/50 text-amber-200/90 text-xs font-serif font-bold tracking-wider uppercase shadow-[0_0_20px_rgba(223,165,71,0.25)]">
-                  {React.createElement(activeRole.icon, {
-                    className: 'w-3.5 h-3.5 text-[#dfa547]',
-                  })}
-                  <span>{activeRole.badgeLabel}</span>
-                </div>
+              {/* Page Content Container */}
+              <div className="relative z-10 w-full max-w-6xl mx-auto px-4 sm:px-8 md:px-12 lg:px-16 flex flex-col gap-6 sm:gap-8 pointer-events-auto text-left flex-1">
+                {/* Header Row */}
+                <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-amber-200/15 pb-6">
+                  <div className="max-w-2xl">
+                    {/* Category Subtitle Pill */}
+                    <div
+                      className="mb-3 inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#18120b]/90 border text-xs font-serif font-bold tracking-wider uppercase shadow-lg transition-all"
+                      style={{
+                        borderColor: `${activeRole.themeColor}88`,
+                        color: activeRole.themeColor,
+                        boxShadow: `0 0 20px ${activeRole.themeGlow}`,
+                      }}
+                    >
+                      {React.createElement(activeRole.icon, {
+                        className: 'w-3.5 h-3.5',
+                        style: { color: activeRole.themeColor },
+                      })}
+                      <span>{activeRole.badgeLabel}</span>
+                      <span className="w-1.5 h-1.5 rounded-full animate-ping" style={{ backgroundColor: activeRole.themeColor }} />
+                    </div>
 
-                {/* Handwritten Caveat Headline */}
-                <h1
-                  className="individual-ink-glow font-bold leading-[0.9] text-[#f5c66d] drop-shadow-[0_2px_14px_rgba(0,0,0,0.85)] text-5xl sm:text-7xl md:text-8xl py-1 select-text"
-                  style={{ fontFamily: 'var(--font-caveat), cursive' }}
-                  aria-label={activeRole.headingLines.join(' ')}
-                >
-                  {activeRole.headingLines.map((line, lineIndex) => (
-                    <React.Fragment key={`${activeRole.id}-track-line-${lineIndex}`}>
-                      {lineIndex > 0 ? <br /> : null}
-                      {line.split('').map((char, index) => (
-                        <span
-                          key={`${activeRole.id}-track-char-${lineIndex}-${index}`}
-                          className="animate-letter-write-in"
-                          style={{ animationDelay: `${(lineIndex * 10 + index) * 75}ms` }}
-                        >
-                          {char === ' ' ? '\u00A0' : char}
-                        </span>
+                    {/* Handwritten Caveat Headline */}
+                    <h1
+                      className="individual-ink-glow font-bold leading-[0.9] text-[#f5c66d] drop-shadow-[0_2px_14px_rgba(0,0,0,0.85)] text-4xl sm:text-6xl md:text-7xl py-1 select-text"
+                      style={{ fontFamily: 'var(--font-caveat), cursive' }}
+                      aria-label={activeRole.headingLines.join(' ')}
+                    >
+                      {activeRole.headingLines.map((line, lineIndex) => (
+                        <React.Fragment key={`${activeRole.id}-track-line-${lineIndex}`}>
+                          {lineIndex > 0 ? <br /> : null}
+                          {line.split('').map((char, index) => (
+                            <span
+                              key={`${activeRole.id}-track-char-${lineIndex}-${index}`}
+                              className="animate-letter-write-in"
+                              style={{ animationDelay: `${(lineIndex * 10 + index) * 75}ms` }}
+                            >
+                              {char === ' ' ? '\u00A0' : char}
+                            </span>
+                          ))}
+                        </React.Fragment>
                       ))}
-                    </React.Fragment>
-                  ))}
-                </h1>
+                    </h1>
 
-                {/* Antique Flourish Divider */}
-                <div className="my-5 flex items-center gap-3 text-amber-300/80 w-full max-w-xs">
-                  <span className="h-[1px] flex-1 bg-gradient-to-r from-transparent via-[#dfa547]/80 to-transparent" />
-                  <span className="text-xs font-serif leading-none text-amber-300">❖</span>
-                  <span className="h-[1px] flex-1 bg-gradient-to-l from-transparent via-[#dfa547]/80 to-transparent" />
+                    {/* Inspiring Subtitle */}
+                    <p className="font-serif italic text-amber-200/80 text-sm sm:text-base md:text-lg max-w-xl leading-relaxed mt-2">
+                      {activeRole.subtitle}
+                    </p>
+                  </div>
+
                 </div>
 
-                {/* Inspiring Subtitle */}
-                <p className="font-serif italic text-amber-200/80 text-sm sm:text-base md:text-lg max-w-xl leading-relaxed mb-8">
-                  {activeRole.subtitle}
-                </p>
+                {/* MODERN CARDS SECTION (Card 1, Card 2, Card 3) */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-5 sm:gap-6">
+                  {/* CARD 1 */}
+                  <div
+                    onClick={() => setActiveCard(1)}
+                    className={`group relative rounded-3xl p-6 sm:p-8 transition-all duration-300 flex flex-col justify-between overflow-hidden bg-gradient-to-b from-[#18120c]/90 via-[#120e0a]/90 to-[#0c0906]/95 border hover:border-amber-400 hover:scale-[1.02] hover:-translate-y-1.5 shadow-[0_10px_30px_rgba(0,0,0,0.6)] hover:shadow-[0_15px_40px_rgba(223,165,71,0.25)] cursor-pointer ${
+                      activeCard === 1
+                        ? 'border-amber-400 ring-2 ring-amber-400/30 shadow-[0_0_30px_rgba(223,165,71,0.35)] scale-[1.01]'
+                        : 'border-amber-500/30'
+                    }`}
+                  >
+                    <div className="absolute top-0 right-0 w-32 h-32 rounded-full blur-2xl pointer-events-none bg-amber-400/10 group-hover:bg-amber-400/20 transition-all" />
 
-                {/* Back to Choose Role Button */}
-                <button
-                  onClick={handleBackToCards}
-                  className="group inline-flex items-center gap-2.5 rounded-full border border-amber-200/60 bg-[#140e09]/90 hover:bg-[#24170d] px-5 sm:px-6 py-2.5 sm:py-3 text-xs sm:text-sm font-serif font-bold text-amber-100 hover:text-white transition-all shadow-xl hover:shadow-[0_0_25px_rgba(223,165,71,0.4)] cursor-pointer hover:scale-105 active:scale-95 uppercase tracking-wider"
-                >
-                  <ArrowLeft className="h-4 w-4 text-[#dfa547] transition-transform group-hover:-translate-x-1" />
-                  <span>Back to Choose Role</span>
-                </button>
+                    <div>
+                      {/* Step Tag */}
+                      <div className="flex items-center justify-between mb-4">
+                        <span className="text-xs font-mono font-bold tracking-widest px-3 py-1 rounded-full border border-amber-500/40 bg-amber-400/10 text-amber-300">
+                          01
+                        </span>
+                        <span className="text-[10px] font-mono uppercase tracking-wider text-amber-200/60">
+                          {activeRole.badgeLabel}
+                        </span>
+                      </div>
+
+                      {/* Icon & Title */}
+                      <div className="flex items-center gap-3.5 mb-4">
+                        <div className="w-12 h-12 rounded-2xl bg-[#24170e] border border-amber-500/40 text-amber-300 flex items-center justify-center shadow-inner group-hover:scale-110 transition-transform">
+                          <Sparkles className="w-6 h-6 stroke-[1.8]" />
+                        </div>
+                        <h2 className="font-serif font-bold text-2xl sm:text-3xl text-white tracking-wide">
+                          Card 1
+                        </h2>
+                      </div>
+
+                      <p className="text-xs sm:text-sm text-slate-400 font-sans leading-relaxed">
+                        Card 1 content description goes here.
+                      </p>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => handleGoToPersonaPage(activeRole.id)}
+                      className="mt-6 w-full py-3 px-4 rounded-xl text-xs sm:text-sm font-serif font-bold uppercase tracking-wider flex items-center justify-center gap-2 bg-[#1f150e] hover:bg-[#2c1d12] border border-amber-500/40 text-amber-200 hover:text-white transition-all shadow-md group-hover:border-amber-400 cursor-pointer"
+                    >
+                      <span>Explore</span>
+                      <ChevronRight className="w-4 h-4 text-amber-300" />
+                    </button>
+                  </div>
+
+                  {/* CARD 2 */}
+                  <div
+                    onClick={() => setActiveCard(2)}
+                    className={`group relative rounded-3xl p-6 sm:p-8 transition-all duration-300 flex flex-col justify-between overflow-hidden bg-gradient-to-b from-[#18120c]/90 via-[#120e0a]/90 to-[#0c0906]/95 border hover:border-amber-400 hover:scale-[1.02] hover:-translate-y-1.5 shadow-[0_10px_30px_rgba(0,0,0,0.6)] hover:shadow-[0_15px_40px_rgba(223,165,71,0.25)] cursor-pointer ${
+                      activeCard === 2
+                        ? 'border-amber-400 ring-2 ring-amber-400/30 shadow-[0_0_30px_rgba(223,165,71,0.35)] scale-[1.01]'
+                        : 'border-amber-500/30'
+                    }`}
+                  >
+                    <div className="absolute top-0 right-0 w-32 h-32 rounded-full blur-2xl pointer-events-none bg-amber-400/10 group-hover:bg-amber-400/20 transition-all" />
+
+                    <div>
+                      {/* Step Tag */}
+                      <div className="flex items-center justify-between mb-4">
+                        <span className="text-xs font-mono font-bold tracking-widest px-3 py-1 rounded-full border border-amber-500/40 bg-amber-400/10 text-amber-300">
+                          02
+                        </span>
+                        <span className="text-[10px] font-mono uppercase tracking-wider text-amber-200/60">
+                          {activeRole.badgeLabel}
+                        </span>
+                      </div>
+
+                      {/* Icon & Title */}
+                      <div className="flex items-center gap-3.5 mb-4">
+                        <div className="w-12 h-12 rounded-2xl bg-[#24170e] border border-amber-500/40 text-amber-300 flex items-center justify-center shadow-inner group-hover:scale-110 transition-transform">
+                          <Target className="w-6 h-6 stroke-[1.8]" />
+                        </div>
+                        <h2 className="font-serif font-bold text-2xl sm:text-3xl text-white tracking-wide">
+                          Card 2
+                        </h2>
+                      </div>
+
+                      <p className="text-xs sm:text-sm text-slate-400 font-sans leading-relaxed">
+                        Card 2 content description goes here.
+                      </p>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => handleGoToPersonaPage(activeRole.id)}
+                      className="mt-6 w-full py-3 px-4 rounded-xl text-xs sm:text-sm font-serif font-bold uppercase tracking-wider flex items-center justify-center gap-2 bg-[#1f150e] hover:bg-[#2c1d12] border border-amber-500/40 text-amber-200 hover:text-white transition-all shadow-md group-hover:border-amber-400 cursor-pointer"
+                    >
+                      <span>Explore</span>
+                      <ChevronRight className="w-4 h-4 text-amber-300" />
+                    </button>
+                  </div>
+
+                  {/* CARD 3 */}
+                  <div
+                    onClick={() => setActiveCard(3)}
+                    className={`group relative rounded-3xl p-6 sm:p-8 transition-all duration-300 flex flex-col justify-between overflow-hidden bg-gradient-to-b from-[#18120c]/90 via-[#120e0a]/90 to-[#0c0906]/95 border hover:border-amber-400 hover:scale-[1.02] hover:-translate-y-1.5 shadow-[0_10px_30px_rgba(0,0,0,0.6)] hover:shadow-[0_15px_40px_rgba(223,165,71,0.25)] cursor-pointer ${
+                      activeCard === 3
+                        ? 'border-amber-400 ring-2 ring-amber-400/30 shadow-[0_0_30px_rgba(223,165,71,0.35)] scale-[1.01]'
+                        : 'border-amber-500/30'
+                    }`}
+                  >
+                    <div className="absolute top-0 right-0 w-32 h-32 rounded-full blur-2xl pointer-events-none bg-amber-400/10 group-hover:bg-amber-400/20 transition-all" />
+
+                    <div>
+                      {/* Step Tag */}
+                      <div className="flex items-center justify-between mb-4">
+                        <span className="text-xs font-mono font-bold tracking-widest px-3 py-1 rounded-full border border-amber-500/40 bg-amber-400/10 text-amber-300">
+                          03
+                        </span>
+                        <span className="text-[10px] font-mono uppercase tracking-wider text-amber-200/60">
+                          {activeRole.badgeLabel}
+                        </span>
+                      </div>
+
+                      {/* Icon & Title */}
+                      <div className="flex items-center gap-3.5 mb-4">
+                        <div className="w-12 h-12 rounded-2xl bg-[#24170e] border border-amber-500/40 text-amber-300 flex items-center justify-center shadow-inner group-hover:scale-110 transition-transform">
+                          <Brain className="w-6 h-6 stroke-[1.8]" />
+                        </div>
+                        <h2 className="font-serif font-bold text-2xl sm:text-3xl text-white tracking-wide">
+                          Card 3
+                        </h2>
+                      </div>
+
+                      <p className="text-xs sm:text-sm text-slate-400 font-sans leading-relaxed">
+                        Card 3 content description goes here.
+                      </p>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => handleGoToPersonaPage(activeRole.id)}
+                      className="mt-6 w-full py-3 px-4 rounded-xl text-xs sm:text-sm font-serif font-bold uppercase tracking-wider flex items-center justify-center gap-2 bg-[#1f150e] hover:bg-[#2c1d12] border border-amber-500/40 text-amber-200 hover:text-white transition-all shadow-md group-hover:border-amber-400 cursor-pointer"
+                    >
+                      <span>Explore</span>
+                      <ChevronRight className="w-4 h-4 text-amber-300" />
+                    </button>
+                  </div>
+                </div>
+
+              </div>
+
+              {/* Full Viewport Width Official Master Sanctum Footer */}
+              <div className="w-full min-w-full max-w-none mt-16 sm:mt-24">
+                <Footer
+                  onNavigateHome={onBackToHero}
+                  onNavigateRoles={handleBackToCards}
+                  onNavigateContact={() => handleGoToPersonaPage(activeRole.id)}
+                />
               </div>
             </div>
           </div>
@@ -835,20 +1029,18 @@ export default function Identify({
 
       {/* 2. AUTHENTIC BOOK PAGE TURN CONTAINER */}
       <div
-        className={`relative z-30 w-full flex items-center justify-center ${
-          viewMode === 'coming-soon' && flipState === 'idle' ? 'max-w-4xl' : 'book-turn-stage'
-        }`}
+        className={`relative z-30 w-full flex items-center justify-center ${viewMode === 'coming-soon' && flipState === 'idle' ? 'max-w-4xl' : 'book-turn-stage'
+          }`}
       >
         {/* PAGE 1: 6 CARDS & HEADING (The 3D Turning Leaf) */}
         {(viewMode === 'cards' || flipState !== 'idle') && (
           <div
-            className={`w-full flex flex-col items-center justify-center relative z-20 ${
-              flipState === 'flipping-forward'
+            className={`w-full flex flex-col items-center justify-center relative z-20 ${flipState === 'flipping-forward'
                 ? 'animate-leaf-turn-forward'
                 : flipState === 'flipping-backward'
-                ? 'animate-leaf-turn-backward'
-                : ''
-            }`}
+                  ? 'animate-leaf-turn-backward'
+                  : ''
+              }`}
           >
             {/* Curled Paper Specular Sheen during flip */}
             {flipState !== 'idle' && <div className="book-leaf-curl-shine" />}
@@ -858,9 +1050,8 @@ export default function Identify({
                 clipPath: headingWriting ? 'inset(0% 0% 0%)' : 'inset(0% 100% 0% 0%)',
                 transition: 'clip-path 2.8s cubic-bezier(0.25, 1, 0.5, 1), opacity 2.2s ease-out, transform 2.2s ease-out',
               }}
-              className={`relative z-10 text-center max-w-3xl mx-auto flex-shrink-0 mb-2 sm:mb-3 ${
-                headingWriting ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-6 pointer-events-none'
-              }`}
+              className={`relative z-10 text-center max-w-3xl mx-auto flex-shrink-0 mb-2 sm:mb-3 ${headingWriting ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-6 pointer-events-none'
+                }`}
             >
               <div className="flex items-center justify-center gap-3">
                 <span className="h-[1px] w-8 sm:w-16 bg-gradient-to-r from-transparent via-white/70 to-transparent" />
@@ -897,13 +1088,12 @@ export default function Identify({
                         transitionDuration: '750ms',
                         transitionTimingFunction: 'cubic-bezier(0.16, 1, 0.3, 1)',
                       }}
-                      className={`group relative text-left rounded-xl p-3 sm:p-3.5 md:p-4 cursor-pointer transition-all transform ${
-                        isFormed
+                      className={`group relative text-left rounded-xl p-3 sm:p-3.5 md:p-4 cursor-pointer transition-all transform ${isFormed
                           ? isSelected
                             ? 'opacity-100 scale-[1.03] translate-y-0 shadow-[0_0_25px_rgba(223,165,71,0.7)] ring-2 ring-[#dfa547]'
                             : 'opacity-100 scale-100 translate-y-0 hover:scale-[1.02] hover:shadow-[0_8px_20px_rgba(60,30,10,0.45)]'
                           : 'opacity-0 scale-95 translate-y-6 blur-[1px] pointer-events-none'
-                      }`}
+                        }`}
                     >
                       {isJustForming && (
                         <div className="absolute -inset-1 rounded-2xl bg-amber-400/20 blur-md pointer-events-none animate-pulse" />
@@ -959,19 +1149,17 @@ export default function Identify({
 
             {/* Bottom Button */}
             <div
-              className={`relative z-10 w-full max-w-4xl mx-auto flex items-center justify-end mt-3 sm:mt-4 transition-all duration-700 ease-out ${
-                buttonsVisible
+              className={`relative z-10 w-full max-w-4xl mx-auto flex items-center justify-end mt-3 sm:mt-4 transition-all duration-700 ease-out ${buttonsVisible
                   ? 'opacity-100 translate-y-0'
                   : 'opacity-0 translate-y-4 pointer-events-none'
-              }`}
+                }`}
             >
               <button
                 onClick={handleContinue}
-                className={`py-2.5 sm:py-3 px-6 sm:px-8 text-xs sm:text-sm font-bold shadow-xl flex items-center justify-center gap-2 cursor-pointer transition-all duration-300 hover:scale-105 active:scale-95 rounded-full ${
-                  selected
+                className={`py-2.5 sm:py-3 px-6 sm:px-8 text-xs sm:text-sm font-bold shadow-xl flex items-center justify-center gap-2 cursor-pointer transition-all duration-300 hover:scale-105 active:scale-95 rounded-full ${selected
                     ? 'ochre-pill-button hover:shadow-[0_0_25px_rgba(223,165,71,0.5)]'
                     : 'bg-gradient-to-r from-[#2a1c0d]/90 via-[#3a2712]/90 to-[#2a1c0d]/90 border border-[#dfa547]/60 text-amber-200/90 hover:text-white hover:border-[#dfa547] shadow-[0_4px_20px_rgba(0,0,0,0.5)]'
-                } ${shakePrompt && !selected ? 'animate-button-attention' : ''}`}
+                  } ${shakePrompt && !selected ? 'animate-button-attention' : ''}`}
               >
                 {selected && currentOption ? (
                   <>
@@ -992,22 +1180,20 @@ export default function Identify({
         {/* PAGE 2: BOOK LEAF REVEAL EFFECT DURING FLIP */}
         {flipState !== 'idle' && (
           <div
-            className={`w-full max-w-3xl mx-auto py-5 sm:py-16 px-3 sm:px-6 flex flex-col items-center justify-center text-center space-y-4 sm:space-y-8 absolute inset-0 z-10 my-auto pointer-events-none ${
-              flipState === 'flipping-forward'
+            className={`w-full max-w-3xl mx-auto py-5 sm:py-16 px-3 sm:px-6 flex flex-col items-center justify-center text-center space-y-4 sm:space-y-8 absolute inset-0 z-10 my-auto pointer-events-none ${flipState === 'flipping-forward'
                 ? 'animate-leaf-reveal-forward'
                 : 'animate-leaf-conceal-backward'
-            }`}
+              }`}
           />
         )}
       </div>
 
       {/* "Please choose your identity" prompt notification banner */}
       <div
-        className={`absolute bottom-20 sm:bottom-24 left-1/2 -translate-x-1/2 z-50 transition-all duration-300 pointer-events-none ${
-          showPrompt
+        className={`absolute bottom-20 sm:bottom-24 left-1/2 -translate-x-1/2 z-50 transition-all duration-300 pointer-events-none ${showPrompt
             ? 'opacity-100 translate-y-0 scale-100'
             : 'opacity-0 translate-y-4 scale-95 pointer-events-none'
-        }`}
+          }`}
       >
         <div className="flex items-center gap-2.5 px-5 sm:px-7 py-2.5 sm:py-3 rounded-full bg-[#18120b]/95 border border-[#dfa547]/90 text-amber-100 shadow-[0_0_35px_rgba(223,165,71,0.6)] backdrop-blur-md">
           <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-[#dfa547] animate-pulse flex-shrink-0" />

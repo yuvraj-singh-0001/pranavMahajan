@@ -1,210 +1,120 @@
 'use client';
 
-import React, { useState } from 'react';
-import {
-  ChevronDown,
-  Mail,
-  Copy,
-  Check,
-  Compass,
-  Sparkles,
-  ExternalLink,
-  MessageCircle,
-  Building,
-} from 'lucide-react';
+import React from 'react';
+import { ArrowUpRight } from 'lucide-react';
 
 interface FooterProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onNavigateSlide: (index: number) => void;
+  onNavigateSlide?: (index: number) => void;
+  className?: string;
+  onNavigateHome?: () => void;
+  onNavigateRoles?: () => void;
+  onNavigateContact?: () => void;
 }
 
-export default function Footer({ isOpen, onClose, onNavigateSlide }: FooterProps) {
-  const [copiedEmail, setCopiedEmail] = useState(false);
+const SOCIAL_LINKS = [
+  {
+    name: 'YouTube',
+    url: 'https://youtube.com/@pranavmahajan',
+    icon: <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />,
+    color: 'text-red-500',
+  },
+  {
+    name: 'Instagram',
+    url: 'https://instagram.com/pranavmahajan',
+    icon: <path d="M7 2h10a5 5 0 0 1 5 5v10a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5V7a5 5 0 0 1 5-5zm0 2a3 3 0 0 0-3 3v10a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3V7a3 3 0 0 0-3-3H7zm5 3a5 5 0 1 1 0 10 5 5 0 0 1 0-10zm0 2a3 3 0 1 0 0 6 3 3 0 0 0 0-6zm5.5-3a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3z" />,
+    color: 'text-pink-400',
+  },
+  {
+    name: 'LinkedIn',
+    url: 'https://linkedin.com/in/pranavmahajan',
+    icon: <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zM8 19H5V8h3v11zM6.5 6.7a1.75 1.75 0 1 1 0-3.5 1.75 1.75 0 0 1 0 3.5zM20 19h-3v-5.6c0-3.37-4-3.11-4 0V19h-3V8h3v1.8c1.4-2.6 7-2.8 7 2.5V19z" />,
+    color: 'text-sky-400',
+  },
+  {
+    name: 'X',
+    url: 'https://x.com/pranavmahajan',
+    icon: <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />,
+    color: 'text-white',
+  },
+  {
+    name: 'Facebook',
+    url: 'https://facebook.com/pranavmahajanofficial',
+    icon: <path d="M24 12.073C24 5.405 18.627 0 12 0S0 5.405 0 12.073c0 6.023 4.388 11.03 10.125 11.927v-8.438H7.078v-3.49h3.047V9.41c0-3.03 1.792-4.708 4.533-4.708 1.312 0 2.686.236 2.686.236v2.97H15.83c-1.491 0-1.956.93-1.956 1.884v2.28h3.328l-.532 3.49h-2.796V24C19.612 23.103 24 18.096 24 12.073z" />,
+    color: 'text-blue-500',
+  },
+];
 
-  const copyEmailToClipboard = () => {
-    if (navigator?.clipboard?.writeText) {
-      navigator.clipboard.writeText('speaking@pranavmahajan.com');
-      setCopiedEmail(true);
-      setTimeout(() => setCopiedEmail(false), 2200);
-    }
+export default function Footer({
+  onNavigateSlide,
+  className = '',
+  onNavigateHome,
+  onNavigateRoles,
+  onNavigateContact,
+}: FooterProps) {
+  const navigate = (index: number) => {
+    if (onNavigateSlide) onNavigateSlide(index);
+    else if (index === 0) onNavigateHome?.();
+    else if (index === 1) onNavigateRoles?.();
+    else if (index === 2) onNavigateContact?.();
   };
 
   return (
     <footer
       data-chrome="true"
       data-footer="true"
-      className={`fixed inset-x-0 bottom-0 z-40 transition-transform duration-500 ease-out ${
-        isOpen ? 'translate-y-0' : 'translate-y-full'
-      }`}
+      className={`relative w-full overflow-hidden border-t border-amber-500/25 bg-[#090807] px-6 py-8 text-slate-200 sm:px-10 sm:py-10 ${className}`}
     >
-      {/* Semi-transparent Backdrop when Drawer is Open */}
-      {isOpen && (
-        <div
-          onClick={onClose}
-          className="fixed inset-0 bg-black/60 backdrop-blur-xs z-30 transition-opacity"
-        />
-      )}
-
-      {/* Main Drawer Container */}
-      <div className="relative z-40 max-h-[85vh] sm:max-h-[82vh] overflow-y-auto bg-gradient-to-b from-[#14100c] via-[#0e0c0a] to-[#090807] border-t-2 border-amber-500/40 text-slate-200 shadow-2xl p-6 sm:p-10 select-text">
-        {/* Top Floating Close Button */}
-        <div className="flex items-center justify-between pb-6 border-b border-amber-500/20">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_50%_0%,rgba(223,165,71,0.12),transparent_65%)]" />
+      <div className="relative mx-auto flex w-full max-w-7xl flex-col gap-8 sm:flex-row sm:items-center sm:justify-between">
+        <div className="min-w-0">
           <div className="flex items-center gap-3">
             <img
               src="/pranav_mahajan_transparent.png"
-              alt="Pranav Mahajan Logo"
-              className="h-10 sm:h-12 w-auto object-contain drop-shadow-[0_2px_12px_rgba(223,165,71,0.3)]"
+              alt="Pranav Mahajan logo"
+              className="h-12 w-auto object-contain sm:h-14"
             />
-            <span className="text-xs font-mono font-bold tracking-widest uppercase text-amber-300">
-              Master Sanctum &bull; Global Secretariat
-            </span>
           </div>
-
-          <button
-            onClick={onClose}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#1b1612] hover:bg-[#251e18] border border-amber-500/35 text-amber-200 hover:text-white text-xs font-mono font-bold transition-colors cursor-pointer"
-          >
-            <span>Close Footer</span>
-            <ChevronDown className="w-4 h-4" />
-          </button>
-        </div>
-
-        {/* 4 Multi-Column Detailed Footer Content */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 sm:gap-10 text-left pt-8">
-          {/* Column 1: Directory Navigation */}
-          <div className="space-y-4">
-            <h4 className="text-xs font-mono font-bold uppercase tracking-widest text-amber-300 flex items-center gap-2">
-              <Compass className="w-4 h-4 text-[#dfa547]" />
-              Sanctum Pathways
-            </h4>
-            <ul className="space-y-2.5 text-xs sm:text-sm">
-              <li>
-                <button
-                  onClick={() => onNavigateSlide(0)}
-                  className="text-slate-300 hover:text-[#dfa547] hover:underline transition-colors cursor-pointer text-left flex items-center gap-1.5"
-                >
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#dfa547]" />
-                  01 &bull; Welcome Sanctum (Home)
-                </button>
-              </li>
-              <li>
-                <button
-                  onClick={() => onNavigateSlide(1)}
-                  className="text-slate-300 hover:text-[#dfa547] hover:underline transition-colors cursor-pointer text-left flex items-center gap-1.5"
-                >
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#dfa547]" />
-                  02 &bull; Persona Discovery (Choose Role)
-                </button>
-              </li>
-              <li>
-                <button
-                  onClick={() => onNavigateSlide(2)}
-                  className="text-amber-300 font-bold hover:text-white hover:underline transition-colors cursor-pointer text-left flex items-center gap-1.5"
-                >
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#dfa547] animate-ping" />
-                  03 &bull; Get In Touch &amp; Speaking Desk
-                </button>
-              </li>
-            </ul>
-          </div>
-
-          {/* Column 2: Sacred Offerings */}
-          <div className="space-y-4">
-            <h4 className="text-xs font-mono font-bold uppercase tracking-widest text-amber-300 flex items-center gap-2">
-              <Sparkles className="w-4 h-4 text-[#dfa547]" />
-              Sacred Offerings
-            </h4>
-            <ul className="space-y-2.5 text-xs sm:text-sm text-slate-300">
-              <li className="hover:text-white transition-colors flex items-center gap-1.5">
-                <span className="w-1 h-1 rounded-full bg-amber-500/60" />
-                Vedic Mindfulness Executive Circles
-              </li>
-              <li className="hover:text-white transition-colors flex items-center gap-1.5">
-                <span className="w-1 h-1 rounded-full bg-amber-500/60" />
-                Keynote: The Unstoppable Mind In Chaos
-              </li>
-              <li className="hover:text-white transition-colors flex items-center gap-1.5">
-                <span className="w-1 h-1 rounded-full bg-amber-500/60" />
-                Awaken 3-Day Himalayan Stillness
-              </li>
-              <li className="hover:text-white transition-colors flex items-center gap-1.5">
-                <span className="w-1 h-1 rounded-full bg-amber-500/60" />
-                Youth Mental Mastery Initiative
-              </li>
-              <li className="hover:text-white transition-colors flex items-center gap-1.5">
-                <span className="w-1 h-1 rounded-full bg-amber-500/60" />
-                Corporate Cognitive Burnout Audit
-              </li>
-            </ul>
-          </div>
-
-          {/* Column 3: Executive Email & Direct Desk */}
-          <div className="space-y-4">
-            <h4 className="text-xs font-mono font-bold uppercase tracking-widest text-amber-300 flex items-center gap-2">
-              <Mail className="w-4 h-4 text-[#dfa547]" />
-              Executive Desk
-            </h4>
-            <div className="p-3.5 rounded-2xl bg-[#191511] border border-amber-500/30 shadow-md space-y-2">
-              <div className="text-[10px] font-bold uppercase tracking-wider text-amber-300">
-                Official Direct Email:
-              </div>
+          <p className="mt-2 text-xs font-medium tracking-wide text-amber-100/75 sm:text-sm">
+            Global Keynote Speaker <span className="px-1 text-amber-500">•</span> Mindset Architect
+          </p>
+          <nav aria-label="Social media" className="mt-5 flex flex-wrap items-center gap-2.5">
+            {SOCIAL_LINKS.map((social) => (
               <a
-                href="mailto:speaking@pranavmahajan.com"
-                className="font-bold text-amber-200 hover:text-white text-xs sm:text-sm break-all block"
+                key={social.name}
+                href={social.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={social.name}
+                title={social.name}
+                className="flex h-10 w-10 items-center justify-center rounded-full border border-amber-500/30 bg-[#140e09] transition hover:border-amber-300 hover:bg-[#24190f]"
               >
-                speaking@pranavmahajan.com
+                <svg viewBox="0 0 24 24" className={`h-4 w-4 fill-current ${social.color}`} aria-hidden="true">
+                  {social.icon}
+                </svg>
               </a>
-              <button
-                onClick={copyEmailToClipboard}
-                className="w-full py-1.5 px-3 rounded-lg bg-[#221b14] hover:bg-[#2b2219] border border-amber-500/25 text-[11px] font-bold text-amber-200 hover:text-white flex items-center justify-center gap-1.5 cursor-pointer transition-colors"
-              >
-                {copiedEmail ? (
-                  <>
-                    <Check className="w-3.5 h-3.5 text-emerald-400" />
-                    <span>Copied to Clipboard!</span>
-                  </>
-                ) : (
-                  <>
-                    <Copy className="w-3.5 h-3.5 text-[#dfa547]" />
-                    <span>Copy Official Email</span>
-                  </>
-                )}
-              </button>
-            </div>
-          </div>
-
-          {/* Column 4: Quick WhatsApp & Bureau */}
-          <div className="space-y-4">
-            <h4 className="text-xs font-mono font-bold uppercase tracking-widest text-amber-300 flex items-center gap-2">
-              <Building className="w-4 h-4 text-[#dfa547]" />
-              Direct Bureau Connect
-            </h4>
-            <a
-              href="https://wa.me"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="p-3.5 rounded-2xl bg-[#1a1511] hover:bg-[#231b14] border border-amber-500/25 hover:border-amber-400/60 transition-all flex items-center gap-3 group shadow-lg"
-            >
-              <div className="w-10 h-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
-                <MessageCircle className="w-5 h-5" />
-              </div>
-              <div className="text-left overflow-hidden">
-                <div className="text-xs font-bold text-white group-hover:text-amber-200 truncate">WhatsApp Desk</div>
-                <div className="text-[10px] text-slate-400 truncate">Keynote Coordinator</div>
-              </div>
-              <ExternalLink className="w-3 h-3 text-slate-400 group-hover:text-amber-300 ml-auto flex-shrink-0" />
-            </a>
-            <p className="text-[11px] text-slate-400 leading-relaxed">
-              Global representations in New Delhi, Mumbai, Dubai, and Singapore.
-            </p>
-          </div>
+            ))}
+          </nav>
         </div>
 
-        {/* Copyright */}
-        <div className="text-center text-xs text-slate-500 pt-8 mt-8 border-t border-amber-500/20">
-          &copy; 2026 Pranav Mahajan Official &bull; Wisdom &bull; Leadership &bull; Stillness. All Rights Reserved.
-        </div>
+        <nav aria-label="Footer links" className="flex flex-wrap items-center gap-x-7 gap-y-3 sm:justify-end">
+          <button
+            type="button"
+            onClick={() => navigate(0)}
+            className="inline-flex items-center gap-1.5 text-sm font-semibold text-slate-200 transition hover:text-amber-300"
+          >
+            About pravan  <ArrowUpRight className="h-4 w-4" />
+          </button>
+          <button
+            type="button"
+            onClick={() => navigate(2)}
+            className="inline-flex items-center gap-1.5 text-sm font-semibold text-slate-200 transition hover:text-amber-300"
+          >
+            Contact Us <ArrowUpRight className="h-4 w-4" />
+          </button>
+        </nav>
+      </div>
+      <div className="relative mx-auto mt-7 w-full max-w-7xl border-t border-amber-500/15 pt-4 text-center text-[11px] text-slate-500 sm:text-left">
+        © 2026 Pranav Mahajan. All rights reserved.
       </div>
     </footer>
   );

@@ -13,6 +13,7 @@ import {
   CheckCircle2,
 } from 'lucide-react';
 import { PersonaType } from './Identify';
+import SiteFooter from './SiteFooter';
 
 interface GetInTouchProps {
   selectedPersona?: PersonaType | null;
@@ -251,9 +252,9 @@ export default function GetInTouch({
         </div>
       </div>
 
-      {/* Navigation Back */}
+      {/* Navigation To Pathways */}
       {onBackToPathway && (
-        <div className="pt-6 flex items-center justify-start text-xs">
+        <div className="pt-8 pb-4 flex items-center justify-start text-xs text-slate-400 border-t border-amber-500/20 mt-12">
           <button
             onClick={onBackToPathway}
             className="text-slate-400 hover:text-white uppercase font-bold tracking-wider cursor-pointer flex items-center gap-1.5"

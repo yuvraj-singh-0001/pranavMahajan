@@ -20,16 +20,23 @@ export default function PageSlider({ initialPersona }: PageSliderProps) {
   const [rocketTargetIndex, setRocketTargetIndex] = useState(1);
   const [menuOpen, setMenuOpen] = useState(false);
   const [buttonNudged, setButtonNudged] = useState(false);
-  const [footerOpen, setFooterOpen] = useState(false);
   const [selectedPersona, setSelectedPersona] = useState<PersonaType | null>(initialPersona ?? null);
   const [identifyMode, setIdentifyMode] = useState<'cards' | 'coming-soon'>(initialPersona ? 'coming-soon' : 'cards');
   const identifyBackRef = useRef<(() => void) | null>(null);
   const identifyPromptRef = useRef<(() => void) | null>(null);
   const identifyResetRef = useRef<(() => void) | null>(null);
-  const isFirstGestureActiveRef = useRef(false);
-  const isPrimedForSecondScrollRef = useRef(false);
-  const firstGestureTimerRef = useRef<NodeJS.Timeout | null>(null);
-  const secondScrollExpireTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Gesture & Priming Refs for Bottom Navigation (Forward)
+  const isBottomPrimedRef = useRef(false);
+  const isBottomGestureActiveRef = useRef(false);
+  const bottomGestureTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const bottomExpireTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Gesture & Priming Refs for Top Navigation (Backward)
+  const isTopPrimedRef = useRef(false);
+  const isTopGestureActiveRef = useRef(false);
+  const topGestureTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const topExpireTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   const nudgeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const isLockedRef = useRef(false);
@@ -38,10 +45,6 @@ export default function PageSlider({ initialPersona }: PageSliderProps) {
   const slidesRef = useRef<(HTMLDivElement | HTMLElement | null)[]>([]);
   const wheelAccumulatorRef = useRef(0);
   const wheelResetTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const bottomPrimedRef = useRef(false);
-  const bottomPrimeTimerRef = useRef<NodeJS.Timeout | null>(null);
-  const topPrimedRef = useRef(false);
-  const topPrimeTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   // A hard refresh from a role URL starts the full site cleanly at Home.
   useEffect(() => {
@@ -59,7 +62,7 @@ export default function PageSlider({ initialPersona }: PageSliderProps) {
   // 3 Primary Slides:
   // 0: Hero (Want to live your dream life)
   // 1: Persona Selection (Please Identify Yourself As)
-  // 2: Get In Touch (Executive Speaking & Inquiry Desk)
+  // 2: Get In Touch (Executive Speaking Desk & Golden Light Footer)
   const totalSlides = 3;
 
   const triggerButtonNudge = useCallback(() => {
@@ -81,7 +84,6 @@ export default function PageSlider({ initialPersona }: PageSliderProps) {
       setSelectedPersona(null);
       identifyResetRef.current?.();
     }
-    setFooterOpen(false);
     setRocketActive(false);
     isLockedRef.current = false;
     slidesRef.current[rocketTargetIndex]?.scrollTo({ top: 0, behavior: 'instant' });
@@ -93,7 +95,6 @@ export default function PageSlider({ initialPersona }: PageSliderProps) {
       setSelectedPersona(null);
       identifyResetRef.current?.();
     }
-    setFooterOpen(false);
     setRocketActive(false);
     isLockedRef.current = false;
     slidesRef.current[rocketTargetIndex]?.scrollTo({ top: 0, behavior: 'instant' });
@@ -124,13 +125,14 @@ export default function PageSlider({ initialPersona }: PageSliderProps) {
         setSelectedPersona(null);
         identifyResetRef.current?.();
       }
-      setFooterOpen(false);
-      bottomPrimedRef.current = false;
-      topPrimedRef.current = false;
-      isFirstGestureActiveRef.current = false;
-      isPrimedForSecondScrollRef.current = false;
-      if (firstGestureTimerRef.current) clearTimeout(firstGestureTimerRef.current);
-      if (secondScrollExpireTimerRef.current) clearTimeout(secondScrollExpireTimerRef.current);
+      isBottomPrimedRef.current = false;
+      isBottomGestureActiveRef.current = false;
+      isTopPrimedRef.current = false;
+      isTopGestureActiveRef.current = false;
+      if (bottomGestureTimerRef.current) clearTimeout(bottomGestureTimerRef.current);
+      if (bottomExpireTimerRef.current) clearTimeout(bottomExpireTimerRef.current);
+      if (topGestureTimerRef.current) clearTimeout(topGestureTimerRef.current);
+      if (topExpireTimerRef.current) clearTimeout(topExpireTimerRef.current);
       slidesRef.current[targetIndex]?.scrollTo({ top: 0, behavior: 'instant' });
     }, 420);
 
@@ -159,8 +161,25 @@ export default function PageSlider({ initialPersona }: PageSliderProps) {
 
   // Wheel listener: user can read down page before slide transition triggers!
   useEffect(() => {
+    const getEffectiveScrollContainer = (): HTMLElement | null => {
+      const slide = slidesRef.current[current];
+      if (!slide) return null;
+      if (current === 1 && identifyMode === 'coming-soon') {
+        const rolePanel = slide.querySelector<HTMLElement>('[data-role-panel="true"]');
+        if (rolePanel) return rolePanel;
+      }
+      if (slide.scrollHeight > slide.clientHeight + 16) {
+        return slide as HTMLElement;
+      }
+      const inner = slide.querySelector<HTMLElement>('.overflow-y-auto, [data-role-panel="true"]');
+      if (inner && inner.scrollHeight > inner.clientHeight + 16) {
+        return inner;
+      }
+      return slide as HTMLElement;
+    };
+
     const handleWheel = (e: WheelEvent) => {
-      // Slide 0: Absolute Lock
+      // Slide 0: Absolute Lock on Hero
       if (current === 0) {
         e.preventDefault();
         if (Math.abs(e.deltaY) > 2 || Math.abs(e.deltaX) > 2) {
@@ -179,162 +198,174 @@ export default function PageSlider({ initialPersona }: PageSliderProps) {
       if (wheelResetTimeoutRef.current) clearTimeout(wheelResetTimeoutRef.current);
       wheelResetTimeoutRef.current = setTimeout(() => {
         wheelAccumulatorRef.current = 0;
-      }, 380);
+      }, 350);
 
-      const activeSlide = slidesRef.current[current];
+      const activeSlide = getEffectiveScrollContainer();
+      const isScrollable = activeSlide ? activeSlide.scrollHeight > activeSlide.clientHeight + 16 : false;
+      const isAtBottom = activeSlide
+        ? activeSlide.scrollTop + activeSlide.clientHeight >= activeSlide.scrollHeight - 20
+        : true;
+      const isAtTop = activeSlide ? activeSlide.scrollTop <= 14 : true;
 
-      // Last Slide (Slide 2: Get In Touch) & Footer Drawer handling
+      // Terminal Slide (Slide 2: Get In Touch & Footer)
       if (current === totalSlides - 1) {
-        if (footerOpen) {
+        if (e.deltaY < 0) {
+          // Scrolling UP:
+          if (isScrollable && !isAtTop) {
+            wheelAccumulatorRef.current = 0;
+            isTopPrimedRef.current = false;
+            return;
+          }
+          wheelAccumulatorRef.current += e.deltaY;
+          const isFastUpScroll = Math.abs(e.deltaY) >= 75 || wheelAccumulatorRef.current <= -150;
+          if (isFastUpScroll) {
+            wheelAccumulatorRef.current = 0;
+            isTopPrimedRef.current = false;
+            e.preventDefault();
+            prevSlide();
+            return;
+          }
+
+          if (!isTopPrimedRef.current) {
+            isTopGestureActiveRef.current = true;
+            if (topGestureTimerRef.current) clearTimeout(topGestureTimerRef.current);
+            topGestureTimerRef.current = setTimeout(() => {
+              isTopGestureActiveRef.current = false;
+              isTopPrimedRef.current = true;
+              if (topExpireTimerRef.current) clearTimeout(topExpireTimerRef.current);
+              topExpireTimerRef.current = setTimeout(() => {
+                isTopPrimedRef.current = false;
+              }, 3000);
+            }, 280);
+            return;
+          }
+
+          if (isTopGestureActiveRef.current) return;
+
+          wheelAccumulatorRef.current = 0;
+          isTopPrimedRef.current = false;
+          if (topGestureTimerRef.current) clearTimeout(topGestureTimerRef.current);
+          if (topExpireTimerRef.current) clearTimeout(topExpireTimerRef.current);
+          e.preventDefault();
+          prevSlide();
           return;
         } else {
-          if (activeSlide) {
-            const isScrollable = activeSlide.scrollHeight > activeSlide.clientHeight + 16;
-            const isAtBottom = activeSlide.scrollTop + activeSlide.clientHeight >= activeSlide.scrollHeight - 16;
-            const isAtTop = activeSlide.scrollTop <= 12;
-
-            if (e.deltaY > 0) {
-              if (isScrollable && !isAtBottom) {
-                wheelAccumulatorRef.current = 0;
-                return;
-              }
-              wheelAccumulatorRef.current += e.deltaY;
-              if (wheelAccumulatorRef.current >= 220) {
-                wheelAccumulatorRef.current = 0;
-                e.preventDefault();
-                prevSlide();
-              }
-              return;
-            } else {
-              if (isScrollable && !isAtTop) {
-                wheelAccumulatorRef.current = 0;
-                return;
-              }
-              wheelAccumulatorRef.current += e.deltaY;
-              if (wheelAccumulatorRef.current <= -220) {
-                wheelAccumulatorRef.current = 0;
-                e.preventDefault();
-                prevSlide();
-              }
-              return;
-            }
+          // Scrolling DOWN on Footer:
+          if (isScrollable && !isAtBottom) {
+            wheelAccumulatorRef.current = 0;
+            return; // Let user scroll down through footer content
           }
+          // Once at the bottom of the footer: TERMINUS! Nothing below it!
+          e.preventDefault();
+          wheelAccumulatorRef.current = 0;
+          return;
         }
       }
 
-      // Slide 1 (Identify / Persona Selection):
-      // Allow user to comfortably scroll down, read content smoothly, and only transition on intentional strong scroll
-      if (activeSlide) {
-        const isScrollable = activeSlide.scrollHeight > activeSlide.clientHeight + 16;
-        const isAtBottom = activeSlide.scrollTop + activeSlide.clientHeight >= activeSlide.scrollHeight - 16;
-        const isAtTop = activeSlide.scrollTop <= 12;
-
+      // Slide 1: Experience Identity & Role Pages
+      if (current === 1) {
         if (e.deltaY > 0) {
-          // If there is scrollable content below, let user scroll naturally and smoothly!
+          // Scrolling DOWN:
+          if (identifyMode === 'cards') {
+            if (isScrollable && !isAtBottom) {
+              wheelAccumulatorRef.current = 0;
+              return;
+            }
+            if (!selectedPersona) {
+              wheelAccumulatorRef.current += e.deltaY;
+              if (wheelAccumulatorRef.current >= 150) {
+                identifyPromptRef.current?.();
+                wheelAccumulatorRef.current = 0;
+              }
+              return;
+            }
+            wheelAccumulatorRef.current += e.deltaY;
+            if (e.deltaY >= 150 || wheelAccumulatorRef.current >= 420) {
+              wheelAccumulatorRef.current = 0;
+              e.preventDefault();
+              nextSlide();
+            }
+            return;
+          }
+
+          // In Coming Soon role page (e.g. Student page):
+          // Step 1: Let user scroll all the way down through page and footer!
+          // "niche jo mere footer hai isako ek bar pura niche tak jane"
           if (isScrollable && !isAtBottom) {
             wheelAccumulatorRef.current = 0;
-            isFirstGestureActiveRef.current = false;
-            isPrimedForSecondScrollRef.current = false;
-            return;
+            isBottomPrimedRef.current = false;
+            isBottomGestureActiveRef.current = false;
+            if (bottomGestureTimerRef.current) clearTimeout(bottomGestureTimerRef.current);
+            if (bottomExpireTimerRef.current) clearTimeout(bottomExpireTimerRef.current);
+            return; // Allow natural vertical reading down to footer
           }
 
-          // Case 1: First scroll gesture
-          // Show "Please choose your identity" prompt and trap the entire 1st flick
-          if (!isPrimedForSecondScrollRef.current) {
-            isFirstGestureActiveRef.current = true;
-
-            if (!selectedPersona) {
-              identifyPromptRef.current?.();
-            }
-
-            // While the 1st flick is ongoing, keep extending gesture timer
-            if (firstGestureTimerRef.current) clearTimeout(firstGestureTimerRef.current);
-            firstGestureTimerRef.current = setTimeout(() => {
-              // 1st scroll motion has completely stopped! Now ready for 2nd scroll.
-              isFirstGestureActiveRef.current = false;
-              isPrimedForSecondScrollRef.current = true;
-              wheelAccumulatorRef.current = 0;
-
-              // Give user 3.8 seconds to perform their 2nd scroll
-              if (secondScrollExpireTimerRef.current) clearTimeout(secondScrollExpireTimerRef.current);
-              secondScrollExpireTimerRef.current = setTimeout(() => {
-                isPrimedForSecondScrollRef.current = false;
-              }, 3800);
-            }, 300);
-
-            // 1st scroll NEVER advances!
-            return;
-          }
-
-          // If the 1st scroll flick events are still trickling in, ignore
-          if (isFirstGestureActiveRef.current) {
-            return;
-          }
-
-          // Case 2: Genuine 2ND SCROLL GESTURE! ("phir agar dusre baar scroll karta hai to next page aayega")
+          // At the footer edge, require a deliberate fast scroll to advance.
+          // Gentle trackpad movement is swallowed here so it cannot accidentally
+          // carry the user onto the next slide.
           wheelAccumulatorRef.current += e.deltaY;
-
-          if (wheelAccumulatorRef.current >= 50 || Math.abs(e.deltaY) >= 40) {
+          e.preventDefault();
+          if (e.deltaY >= 150 || wheelAccumulatorRef.current >= 420) {
             wheelAccumulatorRef.current = 0;
-            isPrimedForSecondScrollRef.current = false;
-            isFirstGestureActiveRef.current = false;
-            if (firstGestureTimerRef.current) clearTimeout(firstGestureTimerRef.current);
-            if (secondScrollExpireTimerRef.current) clearTimeout(secondScrollExpireTimerRef.current);
-            e.preventDefault();
+            isBottomPrimedRef.current = false;
+            isBottomGestureActiveRef.current = false;
             nextSlide();
           }
           return;
         } else {
-          // If on Slide 1 in Coming Soon view, scroll UP returns directly to 6 Cards!
-          if (current === 1 && identifyMode === 'coming-soon' && identifyBackRef.current) {
-            wheelAccumulatorRef.current = 0;
-            topPrimedRef.current = false;
-            e.preventDefault();
-            identifyBackRef.current();
-            return;
-          }
-
-          // If there is scrollable content above, let user scroll naturally upwards!
-          if (isScrollable && !isAtTop) {
-            wheelAccumulatorRef.current = 0;
-            topPrimedRef.current = false;
-            return;
-          }
-
-          // User is at the top!
-          wheelAccumulatorRef.current += e.deltaY;
-          if (wheelAccumulatorRef.current <= -160) {
-            wheelAccumulatorRef.current = 0;
-
-            if (!topPrimedRef.current) {
-              // 1ST TIME AT TOP: Prime it, do not return yet!
-              topPrimedRef.current = true;
-              if (topPrimeTimerRef.current) clearTimeout(topPrimeTimerRef.current);
-              topPrimeTimerRef.current = setTimeout(() => {
-                topPrimedRef.current = false;
-              }, 2200);
+          // Scrolling UP:
+          if (identifyMode === 'cards') {
+            if (isScrollable && !isAtTop) {
+              wheelAccumulatorRef.current = 0;
               return;
             }
+            wheelAccumulatorRef.current += e.deltaY;
+            const isFastUpScroll = Math.abs(e.deltaY) >= 150 || wheelAccumulatorRef.current <= -420;
+            if (isFastUpScroll) {
+              wheelAccumulatorRef.current = 0;
+              isTopPrimedRef.current = false;
+              e.preventDefault();
+              prevSlide();
+            } else {
+              e.preventDefault();
+            }
+            return;
+          }
 
-            // 2ND TIME AT TOP:
-            topPrimedRef.current = false;
-            if (topPrimeTimerRef.current) clearTimeout(topPrimeTimerRef.current);
-            e.preventDefault();
+          // In Coming Soon role page (e.g. Student page):
+          // Step 1: Let user scroll naturally upwards from footer to cards!
+          if (isScrollable && !isAtTop) {
+            wheelAccumulatorRef.current = 0;
+            isTopPrimedRef.current = false;
+            isTopGestureActiveRef.current = false;
+            if (topGestureTimerRef.current) clearTimeout(topGestureTimerRef.current);
+            if (topExpireTimerRef.current) clearTimeout(topExpireTimerRef.current);
+            return; // Allow natural vertical reading upwards
+          }
+
+          // At the top edge, move back only on a deliberate fast upward scroll.
+          wheelAccumulatorRef.current += e.deltaY;
+          e.preventDefault();
+          if (e.deltaY <= -150 || wheelAccumulatorRef.current <= -420) {
+            wheelAccumulatorRef.current = 0;
+            isTopPrimedRef.current = false;
+            isTopGestureActiveRef.current = false;
             prevSlide();
           }
           return;
         }
-      } else {
-        wheelAccumulatorRef.current += e.deltaY;
-        if (wheelAccumulatorRef.current >= 240) {
-          wheelAccumulatorRef.current = 0;
-          e.preventDefault();
-          nextSlide();
-        } else if (wheelAccumulatorRef.current <= -240) {
-          wheelAccumulatorRef.current = 0;
-          e.preventDefault();
-          prevSlide();
-        }
+      }
+
+      // General fallback
+      wheelAccumulatorRef.current += e.deltaY;
+      if (wheelAccumulatorRef.current >= 200) {
+        wheelAccumulatorRef.current = 0;
+        e.preventDefault();
+        nextSlide();
+      } else if (wheelAccumulatorRef.current <= -200) {
+        wheelAccumulatorRef.current = 0;
+        e.preventDefault();
+        prevSlide();
       }
     };
 
@@ -347,83 +378,72 @@ export default function PageSlider({ initialPersona }: PageSliderProps) {
         }
       }
 
-      if (e.key === 'ArrowRight' || e.key === 'PageDown') {
-        if (current === 1) {
-          if (!isPrimedForSecondScrollRef.current) {
-            isPrimedForSecondScrollRef.current = true;
-            if (!selectedPersona) {
-              identifyPromptRef.current?.();
-            }
-            if (secondScrollExpireTimerRef.current) clearTimeout(secondScrollExpireTimerRef.current);
-            secondScrollExpireTimerRef.current = setTimeout(() => {
-              isPrimedForSecondScrollRef.current = false;
-            }, 3800);
-            return;
-          }
-          isPrimedForSecondScrollRef.current = false;
-          if (secondScrollExpireTimerRef.current) clearTimeout(secondScrollExpireTimerRef.current);
-          nextSlide();
-          return;
-        }
+      if (e.key === 'ArrowRight' || e.key === 'PageDown' || e.key === 'ArrowDown') {
+        const activeSlide = getEffectiveScrollContainer();
+        const isScrollable = activeSlide ? activeSlide.scrollHeight > activeSlide.clientHeight + 8 : false;
+        const isAtBottom = activeSlide
+          ? activeSlide.scrollTop + activeSlide.clientHeight >= activeSlide.scrollHeight - 14
+          : true;
+
         if (current === totalSlides - 1) {
-          setFooterOpen(true);
-        } else {
-          nextSlide();
-        }
-      } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
-        prevSlide();
-      } else if (e.key === 'ArrowDown') {
-        const activeSlide = slidesRef.current[current];
-        if (activeSlide && activeSlide.scrollHeight > activeSlide.clientHeight + 8) {
-          const isAtBottom = activeSlide.scrollTop + activeSlide.clientHeight >= activeSlide.scrollHeight - 12;
-          if (!isAtBottom) {
+          if (activeSlide && isScrollable && !isAtBottom) {
             activeSlide.scrollBy({ top: 120, behavior: 'smooth' });
-            return;
           }
-        }
-        if (current === 1) {
-          if (!isPrimedForSecondScrollRef.current) {
-            isPrimedForSecondScrollRef.current = true;
-            if (!selectedPersona) {
-              identifyPromptRef.current?.();
-            }
-            if (secondScrollExpireTimerRef.current) clearTimeout(secondScrollExpireTimerRef.current);
-            secondScrollExpireTimerRef.current = setTimeout(() => {
-              isPrimedForSecondScrollRef.current = false;
-            }, 3800);
-            return;
-          }
-          isPrimedForSecondScrollRef.current = false;
-          if (secondScrollExpireTimerRef.current) clearTimeout(secondScrollExpireTimerRef.current);
-          nextSlide();
           return;
         }
-        if (current === totalSlides - 1) {
-          setFooterOpen(true);
-        } else {
-          nextSlide();
-        }
-      } else if (e.key === 'ArrowUp') {
-        if (current === 1 && identifyMode === 'coming-soon' && identifyBackRef.current) {
-          identifyBackRef.current();
+
+        if (activeSlide && isScrollable && !isAtBottom) {
+          activeSlide.scrollBy({ top: 120, behavior: 'smooth' });
           return;
         }
-        const activeSlide = slidesRef.current[current];
-        if (activeSlide && activeSlide.scrollHeight > activeSlide.clientHeight + 8) {
-          const isAtTop = activeSlide.scrollTop <= 8;
-          if (!isAtTop) {
-            activeSlide.scrollBy({ top: -120, behavior: 'smooth' });
-            return;
-          }
+
+        if (current === 1 && identifyMode === 'cards' && !selectedPersona) {
+          identifyPromptRef.current?.();
+          return;
         }
+
+        if (!isBottomPrimedRef.current) {
+          isBottomPrimedRef.current = true;
+          if (bottomExpireTimerRef.current) clearTimeout(bottomExpireTimerRef.current);
+          bottomExpireTimerRef.current = setTimeout(() => {
+            isBottomPrimedRef.current = false;
+          }, 3000);
+          return;
+        }
+
+        isBottomPrimedRef.current = false;
+        if (bottomExpireTimerRef.current) clearTimeout(bottomExpireTimerRef.current);
+        nextSlide();
+        return;
+      } else if (e.key === 'ArrowLeft' || e.key === 'PageUp' || e.key === 'ArrowUp') {
+        const activeSlide = getEffectiveScrollContainer();
+        const isScrollable = activeSlide ? activeSlide.scrollHeight > activeSlide.clientHeight + 8 : false;
+        const isAtTop = activeSlide ? activeSlide.scrollTop <= 8 : true;
+
+        if (activeSlide && isScrollable && !isAtTop) {
+          activeSlide.scrollBy({ top: -120, behavior: 'smooth' });
+          return;
+        }
+
+        if (!isTopPrimedRef.current) {
+          isTopPrimedRef.current = true;
+          if (topExpireTimerRef.current) clearTimeout(topExpireTimerRef.current);
+          topExpireTimerRef.current = setTimeout(() => {
+            isTopPrimedRef.current = false;
+          }, 3000);
+          return;
+        }
+
+        isTopPrimedRef.current = false;
+        if (topExpireTimerRef.current) clearTimeout(topExpireTimerRef.current);
         prevSlide();
+        return;
       } else if (e.key === 'Escape') {
         if (current === 1 && identifyMode === 'coming-soon' && identifyBackRef.current) {
           identifyBackRef.current();
           return;
         }
-        if (footerOpen) setFooterOpen(false);
-        else setMenuOpen(false);
+        setMenuOpen(false);
       }
     };
 
@@ -451,68 +471,82 @@ export default function PageSlider({ initialPersona }: PageSliderProps) {
       const diffX = touchStartXRef.current - e.changedTouches[0].clientX;
       const diffY = touchStartYRef.current - e.changedTouches[0].clientY;
 
-      const activeSlide = slidesRef.current[current];
-      if (current === 1 && identifyMode === 'coming-soon' && identifyBackRef.current) {
-        if (diffY > 55) {
-          identifyBackRef.current();
-          return;
-        }
-      }
-      const isScrollable = activeSlide ? (activeSlide.scrollHeight > activeSlide.clientHeight + 8) : false;
-      const isAtBottom = activeSlide ? (activeSlide.scrollTop + activeSlide.clientHeight >= activeSlide.scrollHeight - 10) : true;
-      const isAtTop = activeSlide ? (activeSlide.scrollTop <= 8) : true;
+      const activeSlide = getEffectiveScrollContainer();
+      const isScrollable = activeSlide ? activeSlide.scrollHeight > activeSlide.clientHeight + 16 : false;
+      const isAtBottom = activeSlide
+        ? activeSlide.scrollTop + activeSlide.clientHeight >= activeSlide.scrollHeight - 20
+        : true;
+      const isAtTop = activeSlide ? activeSlide.scrollTop <= 16 : true;
 
-      if (current === totalSlides - 1 && diffY > 55 && (!isScrollable || isAtBottom)) {
-        prevSlide();
+      // Horizontal swipe
+      if (Math.abs(diffX) > Math.abs(diffY)) {
+        if (Math.abs(diffX) > 28) {
+          if (diffX > 0) {
+            if (current === 1 && identifyMode === 'cards' && !selectedPersona) {
+              identifyPromptRef.current?.();
+              return;
+            }
+            nextSlide();
+          } else {
+            prevSlide();
+          }
+        }
         return;
       }
 
-      if (Math.abs(diffX) > Math.abs(diffY)) {
-        if (Math.abs(diffX) > 28) {
-          if (diffX > 0) nextSlide();
-          else prevSlide();
+      // Vertical swipe: Swiping UP (diffY > 45, scrolling down)
+      if (diffY > 45) {
+        if (current === totalSlides - 1) {
+          return;
         }
-      } else {
-        if (diffY > 55 && (!isScrollable || isAtBottom)) {
-          if (current === 1) {
-            if (!isPrimedForSecondScrollRef.current) {
-              isPrimedForSecondScrollRef.current = true;
-              if (!selectedPersona) {
-                identifyPromptRef.current?.();
-              }
-              if (secondScrollExpireTimerRef.current) clearTimeout(secondScrollExpireTimerRef.current);
-              secondScrollExpireTimerRef.current = setTimeout(() => {
-                isPrimedForSecondScrollRef.current = false;
-              }, 3800);
-              return;
-            }
-            isPrimedForSecondScrollRef.current = false;
-            if (secondScrollExpireTimerRef.current) clearTimeout(secondScrollExpireTimerRef.current);
-            nextSlide();
-            return;
-          }
-          if (!bottomPrimedRef.current) {
-            bottomPrimedRef.current = true;
-            if (bottomPrimeTimerRef.current) clearTimeout(bottomPrimeTimerRef.current);
-            bottomPrimeTimerRef.current = setTimeout(() => {
-              bottomPrimedRef.current = false;
-            }, 2200);
-            return;
-          }
-          bottomPrimedRef.current = false;
+        if (isScrollable && !isAtBottom) {
+          return;
+        }
+        if (current === 1 && identifyMode === 'cards' && !selectedPersona) {
+          identifyPromptRef.current?.();
+          return;
+        }
+
+        if (current === 1 && identifyMode === 'coming-soon') {
+          if (diffY >= 180) nextSlide();
+          return;
+        }
+
+        if (diffY > 90 || isBottomPrimedRef.current) {
+          isBottomPrimedRef.current = false;
           nextSlide();
-        } else if (diffY < -55 && (!isScrollable || isAtTop)) {
-          if (!topPrimedRef.current) {
-            topPrimedRef.current = true;
-            if (topPrimeTimerRef.current) clearTimeout(topPrimeTimerRef.current);
-            topPrimeTimerRef.current = setTimeout(() => {
-              topPrimedRef.current = false;
-            }, 2200);
-            return;
-          }
-          topPrimedRef.current = false;
-          prevSlide();
+        } else {
+          isBottomPrimedRef.current = true;
+          if (bottomExpireTimerRef.current) clearTimeout(bottomExpireTimerRef.current);
+          bottomExpireTimerRef.current = setTimeout(() => {
+            isBottomPrimedRef.current = false;
+          }, 3000);
         }
+        return;
+      }
+
+      // Vertical swipe: Swiping DOWN (diffY < -45, scrolling up)
+      if (diffY < -45) {
+        if (isScrollable && !isAtTop) {
+          return;
+        }
+
+        if (current === 1 && identifyMode === 'coming-soon') {
+          if (diffY <= -180) prevSlide();
+          return;
+        }
+
+        if (diffY < -90 || isTopPrimedRef.current) {
+          isTopPrimedRef.current = false;
+          prevSlide();
+        } else {
+          isTopPrimedRef.current = true;
+          if (topExpireTimerRef.current) clearTimeout(topExpireTimerRef.current);
+          topExpireTimerRef.current = setTimeout(() => {
+            isTopPrimedRef.current = false;
+          }, 3000);
+        }
+        return;
       }
     };
 
@@ -529,10 +563,12 @@ export default function PageSlider({ initialPersona }: PageSliderProps) {
       window.removeEventListener('touchmove', handleTouchMove);
       window.removeEventListener('touchend', handleTouchEnd);
       if (nudgeTimeoutRef.current) clearTimeout(nudgeTimeoutRef.current);
-      if (bottomPrimeTimerRef.current) clearTimeout(bottomPrimeTimerRef.current);
-      if (topPrimeTimerRef.current) clearTimeout(topPrimeTimerRef.current);
+      if (bottomGestureTimerRef.current) clearTimeout(bottomGestureTimerRef.current);
+      if (bottomExpireTimerRef.current) clearTimeout(bottomExpireTimerRef.current);
+      if (topGestureTimerRef.current) clearTimeout(topGestureTimerRef.current);
+      if (topExpireTimerRef.current) clearTimeout(topExpireTimerRef.current);
     };
-  }, [current, identifyMode, selectedPersona, totalSlides, footerOpen, nextSlide, prevSlide, triggerButtonNudge]);
+  }, [current, identifyMode, selectedPersona, totalSlides, nextSlide, prevSlide, triggerButtonNudge]);
 
   return (
     <div className="relative w-screen h-screen overflow-hidden bg-[#090807] text-slate-100 select-text">
@@ -619,7 +655,9 @@ export default function PageSlider({ initialPersona }: PageSliderProps) {
         {/* SLIDE 1: EXPERIENCE IDENTITY (Royal Parchment Scroll) */}
         <div
           ref={(el) => { slidesRef.current[1] = el; }}
-          className={`slide-item bg-[#090807] text-slate-100 relative overflow-hidden select-text ${
+          className={`slide-item bg-[#090807] text-slate-100 relative ${
+            current === 1 && identifyMode === 'cards' ? 'overflow-y-auto overflow-x-hidden' : 'overflow-hidden'
+          } select-text ${
             current === 1 ? 'quill-active-slide' : ''
           }`}
         >
@@ -645,35 +683,33 @@ export default function PageSlider({ initialPersona }: PageSliderProps) {
           />
         </div>
 
-        {/* SLIDE 2: GET IN TOUCH (Direct Speaking Desk & Booking) */}
+        {/* SLIDE 2: GET IN TOUCH (Direct Speaking Desk & Booking with Golden Light Footer) */}
         <div
           ref={(el) => { slidesRef.current[2] = el; }}
-          className="slide-item bg-[#090807] text-slate-100 relative overflow-y-auto overflow-x-hidden select-text"
+          className="slide-item bg-[#090807] text-slate-100 relative overflow-y-auto overflow-x-hidden select-text flex flex-col justify-between"
         >
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(223,165,71,0.06),transparent_65%)] pointer-events-none" />
-          <GetInTouch
-            selectedPersona={selectedPersona}
-            onBackToPathway={() => goToSlide(1, 'backward')}
+          <div className="w-full relative z-10 flex-1">
+            <GetInTouch
+              selectedPersona={selectedPersona}
+              onBackToPathway={() => goToSlide(1, 'backward')}
+            />
+          </div>
+          {/* Full Width Luxury Golden Light Theme Footer */}
+          <Footer
+            onNavigateHome={() => goToSlide(0)}
+            onNavigateRoles={() => goToSlide(1)}
+            onNavigateContact={() => {}}
           />
         </div>
       </div>
-
-      {/* LUXURY MASTER FOOTER DRAWER */}
-      <Footer
-        isOpen={footerOpen}
-        onClose={() => setFooterOpen(false)}
-        onNavigateSlide={(idx) => {
-          setFooterOpen(false);
-          goToSlide(idx);
-        }}
-      />
 
       {/* FLOATING CORNER CONTROLS */}
       <div data-chrome="true" className="fixed bottom-6 right-6 z-40 flex items-center gap-2">
         <div className="flex flex-col gap-1.5">
           <button
             onClick={() => {
-              if (current > 0) prevSlide();
+              if (current > 0 || (current === 1 && identifyMode === 'coming-soon')) prevSlide();
             }}
             disabled={current === 0}
             className={`w-9 h-9 rounded-full bg-[#18130f]/90 border border-amber-500/40 flex items-center justify-center shadow-lg transition-all ${
@@ -689,31 +725,24 @@ export default function PageSlider({ initialPersona }: PageSliderProps) {
                 triggerButtonNudge();
                 return;
               }
-              if (current === 1) {
-                if (!isPrimedForSecondScrollRef.current) {
-                  isPrimedForSecondScrollRef.current = true;
-                  if (!selectedPersona) {
-                    identifyPromptRef.current?.();
-                  }
-                  if (secondScrollExpireTimerRef.current) clearTimeout(secondScrollExpireTimerRef.current);
-                  secondScrollExpireTimerRef.current = setTimeout(() => {
-                    isPrimedForSecondScrollRef.current = false;
-                  }, 3800);
-                  return;
-                }
-                isPrimedForSecondScrollRef.current = false;
-                if (secondScrollExpireTimerRef.current) clearTimeout(secondScrollExpireTimerRef.current);
-                nextSlide();
+              if (current === 1 && identifyMode === 'cards' && !selectedPersona) {
+                identifyPromptRef.current?.();
                 return;
               }
-              if (current === totalSlides - 1 && !footerOpen) {
-                setFooterOpen(true);
-              } else {
-                nextSlide();
+              if (current === totalSlides - 1) {
+                // At the footer: nothing below it!
+                return;
               }
+              nextSlide();
             }}
-            className="w-9 h-9 rounded-full bg-[#18130f]/90 border border-amber-500/40 flex items-center justify-center shadow-lg transition-all hover:bg-[#251e18] text-slate-200 hover:text-white cursor-pointer"
-            aria-label="Next Slide / Open Footer"
+            disabled={current === totalSlides - 1}
+            className={`w-9 h-9 rounded-full bg-[#18130f]/90 border border-amber-500/40 flex items-center justify-center shadow-lg transition-all ${
+              current === totalSlides - 1
+                ? 'opacity-35 cursor-not-allowed text-slate-500 border-amber-500/20'
+                : 'hover:bg-[#251e18] text-slate-200 hover:text-white cursor-pointer'
+            }`}
+            aria-label="Next Slide"
+            title={current === totalSlides - 1 ? 'End of page' : 'Next Slide'}
           >
             <ChevronDown className="w-4 h-4" />
           </button>
@@ -766,7 +795,7 @@ export default function PageSlider({ initialPersona }: PageSliderProps) {
               }}
               className="block w-full py-3 text-2xl sm:text-3xl font-serif-luxury font-bold text-slate-200 hover:text-[#dfa547] transition-colors cursor-pointer"
             >
-              03 &bull; Get In Touch
+              03 &bull; Get In Touch &amp; Secretariat
             </button>
             <Link
               href="/signup"
@@ -775,15 +804,6 @@ export default function PageSlider({ initialPersona }: PageSliderProps) {
             >
               04 &bull; Sign Up / Register
             </Link>
-            <button
-              onClick={() => {
-                setFooterOpen(true);
-                setMenuOpen(false);
-              }}
-              className="block w-full py-3 text-2xl sm:text-3xl font-serif-luxury font-bold text-slate-300 hover:text-white transition-colors cursor-pointer"
-            >
-              05 &bull; Master Sanctum &amp; Footer
-            </button>
           </div>
 
           <div className="text-center text-xs text-slate-400 pt-4 border-t border-amber-500/20">
