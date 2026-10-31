@@ -2,574 +2,719 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import {
-  ArrowLeft,
-  ArrowRight,
-  User,
-  Mail,
-  Phone,
-  Lock,
-  Eye,
-  EyeOff,
-  Check,
-  Sparkles,
-  ShieldCheck,
-  GraduationCap,
-  Building,
-  School,
-  Landmark,
-  Users,
-  Heart,
-} from 'lucide-react';
-
-type PersonaRole =
-  | 'student'
-  | 'individual'
-  | 'school'
-  | 'corporate'
-  | 'government'
-  | 'ngo'
-  | 'parent';
-
-interface RoleOption {
-  id: PersonaRole;
-  label: string;
-  shortLabel: string;
-  icon: React.ComponentType<{ className?: string }>;
-}
-
-const ROLES: RoleOption[] = [
-  { id: 'student', label: 'Student', shortLabel: 'Student', icon: GraduationCap },
-  { id: 'individual', label: 'Individual / Professional', shortLabel: 'Individual', icon: User },
-  { id: 'school', label: 'Educational Institution', shortLabel: 'Institution', icon: School },
-  { id: 'corporate', label: 'Corporate / Business', shortLabel: 'Corporate', icon: Building },
-  { id: 'government', label: 'Government', shortLabel: 'Government', icon: Landmark },
-  { id: 'ngo', label: 'NGO / Social Sector', shortLabel: 'NGO / Social', icon: Users },
-  { id: 'parent', label: 'Parent', shortLabel: 'Parent', icon: Heart },
-];
 
 export default function SignUpPage() {
   const [mode, setMode] = useState<'signup' | 'signin'>('signup');
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
-  const [phone, setPhone] = useState('');
-  const [countryCode, setCountryCode] = useState('+91');
-  const [selectedRole, setSelectedRole] = useState<PersonaRole>('student');
+  const [mobile, setMobile] = useState('');
+  const [dobDay, setDobDay] = useState('');
+  const [dobMonth, setDobMonth] = useState('');
+  const [dobYear, setDobYear] = useState('');
+  const [location, setLocation] = useState('');
+  const [classGrade, setClassGrade] = useState('');
+  const [accountType, setAccountType] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [agreeTerms, setAgreeTerms] = useState(true);
-  const [loading, setLoading] = useState(false);
-  const [submitted, setSubmitted] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [unlocked, setUnlocked] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMessage('');
-
     if (mode === 'signup') {
-      if (!fullName.trim()) {
-        setErrorMessage('Please enter your full name.');
-        return;
-      }
-      if (!phone.trim()) {
-        setErrorMessage('Please enter your contact phone / WhatsApp number.');
-        return;
-      }
-      if (password.length < 6) {
-        setErrorMessage('Password must be at least 6 characters long.');
-        return;
-      }
-      if (password !== confirmPassword) {
-        setErrorMessage('Passwords do not match. Please verify.');
-        return;
-      }
-      if (!agreeTerms) {
-        setErrorMessage('Please agree to the Sanctum Terms & Privacy Policy to proceed.');
-        return;
-      }
+      if (!fullName.trim()) { setErrorMessage('Please enter your Full Name'); return; }
+      if (!email.trim()) { setErrorMessage('Please enter your Email Address'); return; }
+      if (password.length < 6) { setErrorMessage('Password must be at least 6 characters'); return; }
+      if (password !== confirmPassword) { setErrorMessage('Passwords do not match'); return; }
     } else {
-      if (!email.trim() || !password) {
-        setErrorMessage('Please enter both your email address and password.');
-        return;
-      }
+      if (!email.trim() || !password) { setErrorMessage('Email and password required'); return; }
     }
+    setUnlocked(true);
+  };
 
-    setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      setSubmitted(true);
-    }, 1100);
+  const handleRelock = () => {
+    setUnlocked(false);
+    setFullName(''); setEmail(''); setMobile('');
+    setDobDay(''); setDobMonth(''); setDobYear('');
+    setLocation(''); setClassGrade(''); setAccountType('');
+    setPassword(''); setConfirmPassword(''); setErrorMessage('');
   };
 
   return (
-    <div className="relative h-screen w-full bg-[#090807] text-white flex flex-col justify-between overflow-y-auto lg:overflow-hidden selection:bg-[#dfa547] selection:text-black">
-      {/* 1. LUXURY BACKGROUND VIDEO & CELESTIAL AMBIENCE */}
-      <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
-        <video
-          autoPlay
-          loop
-          muted
-          playsInline
-          className="absolute inset-0 w-full h-full object-cover opacity-25 scale-105 filter blur-[0.5px]"
-        >
-          <source src="/ssecond-screen.mp4" type="video/mp4" />
-        </video>
-        {/* Ambient Dark Gradient Vignette */}
-        <div className="absolute inset-0 bg-gradient-to-b from-[#090807]/90 via-[#090807]/85 to-[#090807] pointer-events-none" />
-        {/* Radiant Celestial Golden Glows */}
-        <div className="absolute top-1/4 left-1/3 w-[550px] h-[550px] rounded-full bg-[#dfa547]/10 blur-[160px]" />
-        <div className="absolute bottom-10 right-1/4 w-[450px] h-[450px] rounded-full bg-[#b8731b]/10 blur-[150px]" />
-        <div className="absolute inset-0 bg-[radial-gradient(#dfa547_1px,transparent_1px)] [background-size:36px_36px] opacity-15" />
-      </div>
+    <>
+      <style>{`
+        @keyframes velvetWaveLeft {
+          0%, 100% { opacity: 0.55; transform: scale(1) translateY(0); }
+          50% { opacity: 0.9; transform: scale(1.06) translateY(-8px); }
+        }
+        @keyframes velvetWaveRight {
+          0%, 100% { opacity: 0.5; transform: scale(1) translateY(0); }
+          50% { opacity: 0.85; transform: scale(1.05) translateY(6px); }
+        }
+        @keyframes goldGleamTop {
+          0%, 100% { opacity: 0.4; transform: scaleX(1); }
+          50% { opacity: 0.8; transform: scaleX(1.12); }
+        }
+        @keyframes goldGleamBottom {
+          0%, 100% { opacity: 0.4; transform: scaleX(1); }
+          50% { opacity: 0.8; transform: scaleX(1.08); }
+        }
+        @keyframes keyGlow {
+          0%, 100% { opacity: 0.4; filter: blur(12px); transform: scale(1); }
+          50% { opacity: 0.85; filter: blur(18px); transform: scale(1.2); }
+        }
+        @keyframes btnHoverGlow {
+          0%, 100% {
+            box-shadow: 0 0 20px rgba(223, 165, 71, 0.4), inset 0 0 10px rgba(255, 230, 150, 0.3);
+          }
+          50% {
+            box-shadow: 0 0 35px rgba(251, 191, 36, 0.75), inset 0 0 20px rgba(255, 240, 180, 0.6);
+          }
+        }
+        .clean-input {
+          outline: none;
+          border: none;
+          background: transparent;
+          color: #ffffff;
+          font-family: Georgia, serif;
+          font-weight: 600;
+          font-size: clamp(0.7rem, 1.25vw, 1.05rem);
+          letter-spacing: 0.02em;
+          text-shadow: 0 1px 3px rgba(0,0,0,0.9), 0 0 8px rgba(255,220,130,0.5);
+          box-sizing: border-box;
+          padding: 0 2px;
+          caret-color: #ffd875;
+          z-index: 20;
+        }
+        .clean-input:focus {
+          background: rgba(255, 235, 170, 0.08);
+          border-radius: 2px;
+        }
+      `}</style>
 
-      {/* 2. ROYAL MASTER HEADER NAVBAR */}
-      <header className="relative z-30 w-full px-4 sm:px-10 py-2 sm:py-2.5 flex items-center justify-between border-b border-amber-500/15 backdrop-blur-md bg-black/40 flex-shrink-0">
-        <Link
-          href="/"
-          className="flex items-center gap-2 group cursor-pointer transition-transform hover:scale-105"
-        >
-          <img
-            src="/pranav_mahajan_transparent.png"
-            alt="Pranav Mahajan Logo"
-            className="h-9 sm:h-12 w-auto object-contain drop-shadow-[0_4px_20px_rgba(223,165,71,0.4)]"
-          />
-        </Link>
+      {/* ── FULL SCREEN CONTAINER ── */}
+      <div style={{
+        width: '100vw',
+        height: '100vh',
+        overflow: 'hidden',
+        position: 'relative',
+        backgroundColor: '#070503',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}>
 
-        <div className="flex items-center gap-3">
-          <Link
-            href="/"
-            className="inline-flex items-center gap-1.5 px-3 sm:px-4 py-1.5 rounded-full text-xs font-bold text-amber-200/90 hover:text-white bg-white/5 hover:bg-white/10 border border-amber-500/30 transition-all shadow-sm hover:scale-105"
-          >
-            <ArrowLeft className="w-3.5 h-3.5 text-[#dfa547]" />
-            <span>Back to Home</span>
-          </Link>
+        {/* ── 1. SEAMLESS MATCHING VELVET BACKGROUND (Edge to Edge, NO Black Bars) ── */}
+        <div style={{
+          position: 'absolute',
+          inset: 0,
+          backgroundImage: mode === 'signup' ? "url('/book-signup.jpg')" : "url('/uploaded.jpg')",
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          filter: 'brightness(0.75) contrast(1.1) saturate(1.15)',
+          zIndex: 0,
+        }} />
+
+        {/* Subtle velvet vignette so center stays crisp */}
+        <div style={{
+          position: 'absolute',
+          inset: 0,
+          background: 'radial-gradient(ellipse at center, rgba(10,6,2,0) 40%, rgba(5,3,1,0.55) 80%, rgba(2,1,0,0.85) 100%)',
+          zIndex: 1,
+          pointerEvents: 'none',
+        }} />
+
+        {/* ── 2. SEAMLESS LIVING AMBIENT ANIMATIONS ON THE 4 SIDES ── */}
+        <div style={{ position: 'absolute', inset: 0, zIndex: 2, pointerEvents: 'none', overflow: 'hidden' }}>
+          {/* Left velvet folds wave animation */}
+          <div style={{
+            position: 'absolute',
+            left: '-6%',
+            top: '5%',
+            bottom: '5%',
+            width: '24vw',
+            background: 'radial-gradient(ellipse at left center, rgba(223,165,71,0.3) 0%, rgba(184,115,27,0.15) 45%, transparent 75%)',
+            filter: 'blur(35px)',
+            animation: 'velvetWaveLeft 7s ease-in-out infinite',
+          }} />
+
+          {/* Right velvet folds & key glimmer */}
+          <div style={{
+            position: 'absolute',
+            right: '-6%',
+            top: '5%',
+            bottom: '5%',
+            width: '25vw',
+            background: 'radial-gradient(ellipse at right center, rgba(251,191,36,0.38) 0%, rgba(184,115,27,0.18) 45%, transparent 75%)',
+            filter: 'blur(40px)',
+            animation: 'velvetWaveRight 6s ease-in-out infinite',
+          }} />
+
+          {/* Top border golden gleam */}
+          <div style={{
+            position: 'absolute',
+            top: '-4%',
+            left: '12%',
+            right: '12%',
+            height: '18vh',
+            background: 'radial-gradient(ellipse at center top, rgba(251,215,130,0.3) 0%, rgba(184,115,27,0.12) 50%, transparent 75%)',
+            filter: 'blur(30px)',
+            animation: 'goldGleamTop 6.5s ease-in-out infinite',
+          }} />
+
+          {/* Bottom border golden gleam */}
+          <div style={{
+            position: 'absolute',
+            bottom: '-4%',
+            left: '12%',
+            right: '12%',
+            height: '18vh',
+            background: 'radial-gradient(ellipse at center bottom, rgba(223,165,71,0.3) 0%, rgba(184,115,27,0.12) 50%, transparent 75%)',
+            filter: 'blur(30px)',
+            animation: 'goldGleamBottom 7.5s ease-in-out infinite',
+          }} />
+
+          {/* Golden Key aura flare */}
+          <div style={{
+            position: 'absolute',
+            top: '48%',
+            right: '8%',
+            width: '8vw',
+            height: '8vw',
+            borderRadius: '50%',
+            background: 'radial-gradient(circle, rgba(255,225,140,0.45) 0%, rgba(223,165,71,0.15) 50%, transparent 70%)',
+            animation: 'keyGlow 4s ease-in-out infinite',
+          }} />
         </div>
-      </header>
 
-      {/* 3. MAIN SIGN UP / SIGN IN CARD (COMPACT SINGLE-SCREEN VIEWPORT) */}
-      <main className="relative z-20 w-full flex-1 flex items-center justify-center px-3 sm:px-6 py-2 sm:py-3">
-        <div
-          className={`w-full ${
-            mode === 'signup' ? 'max-w-4xl' : 'max-w-md'
-          } mx-auto rounded-2xl sm:rounded-3xl bg-gradient-to-b from-[#18130e]/95 via-[#120e0a]/95 to-[#0b0805]/98 border border-[#dfa547]/35 shadow-[0_15px_50px_rgba(0,0,0,0.85),0_0_35px_rgba(223,165,71,0.15)] p-4 sm:p-5 md:p-6 backdrop-blur-xl relative overflow-hidden transition-all duration-300`}
-        >
-          {/* Antique Corner Engraved Notches */}
-          <div className="absolute top-2.5 left-2.5 w-3.5 h-3.5 border-t-2 border-l-2 border-amber-500/50 pointer-events-none" />
-          <div className="absolute top-2.5 right-2.5 w-3.5 h-3.5 border-t-2 border-r-2 border-amber-500/50 pointer-events-none" />
-          <div className="absolute bottom-2.5 left-2.5 w-3.5 h-3.5 border-b-2 border-l-2 border-amber-500/50 pointer-events-none" />
-          <div className="absolute bottom-2.5 right-2.5 w-3.5 h-3.5 border-b-2 border-r-2 border-amber-500/50 pointer-events-none" />
+        {/* ── 3. MAIN CRISP BOOK CONTAINER (16:9 PROPORTIONAL & FULLY RESPONSIVE) ── */}
+        <div style={{
+          position: 'relative',
+          width: 'min(100vw, calc(100vh * 1.7778))',
+          height: 'min(100vh, calc(100vw / 1.7778))',
+          aspectRatio: '16 / 9',
+          zIndex: 5,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}>
 
-          {/* SUCCESS CONFIRMATION STATE */}
-          {submitted ? (
-            <div className="py-6 sm:py-8 text-center space-y-4 animate-in zoom-in-95 duration-500">
-              <div className="w-16 h-16 rounded-full bg-gradient-to-br from-amber-400 to-[#b8731b] mx-auto flex items-center justify-center text-black shadow-[0_0_35px_rgba(223,165,71,0.6)]">
-                <Check className="w-8 h-8 stroke-[3]" />
-              </div>
+          {/* Crisp Main Book Foreground Image */}
+          <img
+            src={mode === 'signup' ? '/book-signup.jpg' : '/uploaded.jpg'}
+            alt="Sanctum Book"
+            draggable={false}
+            style={{
+              position: 'absolute',
+              inset: 0,
+              width: '100%',
+              height: '100%',
+              objectFit: 'contain',
+              userSelect: 'none',
+              pointerEvents: 'none',
+              zIndex: 1,
+            }}
+          />
 
-              <div className="space-y-1.5">
-                <h2
-                  className="font-serif-luxury text-2xl sm:text-3xl font-extrabold tracking-tight"
-                  style={{
-                    background: 'linear-gradient(135deg, #ffffff 0%, #fbe6af 35%, #dfa547 70%, #b8731b 100%)',
-                    WebkitBackgroundClip: 'text',
-                    WebkitTextFillColor: 'transparent',
-                  }}
-                >
-                  {mode === 'signup' ? 'Welcome to the Sanctum!' : 'Welcome Back!'}
-                </h2>
-                <p className="text-amber-200/80 text-xs sm:text-sm max-w-sm mx-auto font-light">
-                  {mode === 'signup'
-                    ? `Your account has been created successfully as a ${selectedRole.toUpperCase()}. Check your email for confirmation.`
-                    : 'You have signed in successfully.'}
-                </p>
-              </div>
+          {/* ── 4. INTERACTIVE OVERLAY EXACTLY ALIGNED OVER THE BOOK LINES ── */}
+          <div style={{ position: 'relative', width: '100%', height: '100%', zIndex: 10 }}>
 
-              <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3">
-                <Link
-                  href="/"
-                  className="ochre-pill-button w-full sm:w-auto py-2.5 px-7 text-xs sm:text-sm font-bold shadow-xl hover:scale-105"
-                >
-                  <span>Enter Sanctum &bull; Home</span>
-                  <ArrowRight className="w-4 h-4" />
-                </Link>
-                <button
-                  onClick={() => {
-                    setSubmitted(false);
-                    setFullName('');
-                    setEmail('');
-                    setPassword('');
-                    setConfirmPassword('');
-                  }}
-                  className="outline-pill-button w-full sm:w-auto py-2.5 px-5 text-xs font-bold text-amber-200/80"
-                >
-                  Create Another Account
-                </button>
-              </div>
-            </div>
-          ) : (
-            <>
-              {/* COMPACT CARD HEADER */}
-              <div className="text-center space-y-1.5 mb-3.5">
-                <div className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-300 text-[10px] font-serif font-bold tracking-wider uppercase">
-                  <Sparkles className="w-3 h-3 text-[#dfa547]" />
-                  <span>Pranav Mahajan Master Sanctum</span>
-                </div>
-
-                <h1
-                  className="font-serif-luxury text-2xl sm:text-3xl font-extrabold tracking-tight"
-                  style={{
-                    background: 'linear-gradient(135deg, #ffffff 0%, #fbe6af 35%, #dfa547 70%, #b8731b 100%)',
-                    WebkitBackgroundClip: 'text',
-                    WebkitTextFillColor: 'transparent',
-                    filter: 'drop-shadow(0 2px 15px rgba(223, 165, 71, 0.3))',
-                  }}
-                >
-                  {mode === 'signup' ? 'Create Your Account' : 'Welcome Back'}
-                </h1>
-
-                <p className="font-serif italic text-amber-200/70 text-[11px] sm:text-xs max-w-md mx-auto">
-                  {mode === 'signup'
-                    ? 'Begin your personalized journey with keynote archives, mindfulness modules & masterclasses.'
-                    : 'Sign in to access your registered pathways and speaking portals.'}
-                </p>
-
-                {/* Pill Switcher */}
-                <div className="inline-flex p-0.5 rounded-full bg-black/50 border border-amber-500/30 mt-1">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setMode('signup');
-                      setErrorMessage('');
-                    }}
-                    className={`py-1 px-5 rounded-full text-xs font-bold transition-all cursor-pointer ${
-                      mode === 'signup'
-                        ? 'bg-gradient-to-r from-[#b8731b] to-[#dfa547] text-white shadow-md'
-                        : 'text-amber-200/70 hover:text-white'
-                    }`}
-                  >
-                    Sign Up
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setMode('signin');
-                      setErrorMessage('');
-                    }}
-                    className={`py-1 px-5 rounded-full text-xs font-bold transition-all cursor-pointer ${
-                      mode === 'signin'
-                        ? 'bg-gradient-to-r from-[#b8731b] to-[#dfa547] text-white shadow-md'
-                        : 'text-amber-200/70 hover:text-white'
-                    }`}
-                  >
-                    Sign In
+            {unlocked ? (
+              /* ═══ UNLOCKED STATE ═══ */
+              <div style={{
+                position: 'absolute',
+                top: '12%', left: '8%', right: '20%', bottom: '12%',
+                display: 'flex', flexDirection: 'column',
+                alignItems: 'center', justifyContent: 'center',
+                background: 'rgba(18, 12, 6, 0.82)',
+                backdropFilter: 'blur(8px)',
+                borderRadius: '12px',
+                border: '2px solid rgba(223, 165, 71, 0.6)',
+                boxShadow: '0 0 50px rgba(0,0,0,0.9), 0 0 40px rgba(184,115,27,0.5)',
+              }}>
+                <div className="animate-book-open" style={{ textAlign: 'center', padding: '1.5rem' }}>
+                  <p style={{
+                    color: '#fbe6af',
+                    fontSize: 'clamp(1.3rem, 3.5vw, 2.6rem)',
+                    fontWeight: 700,
+                    fontFamily: 'Georgia, serif',
+                    textShadow: '0 2px 25px rgba(0,0,0,0.95), 0 0 40px rgba(184,115,27,0.7)',
+                  }}>
+                    {mode === 'signup' ? `Welcome, ${fullName || 'Seeker'}` : `Welcome back, ${email}`}
+                  </p>
+                  <p style={{
+                    color: '#dfa547',
+                    fontSize: 'clamp(0.75rem, 1.4vw, 1.05rem)',
+                    marginTop: '0.6rem',
+                    textShadow: '0 1px 10px rgba(0,0,0,0.85)',
+                  }}>
+                    ✦ The Sanctum Book is Unlocked ✦
+                  </p>
+                  <button onClick={handleRelock} style={{
+                    marginTop: '2rem',
+                    color: '#fbe6af',
+                    background: 'linear-gradient(90deg, #8c5a18, #dfa547, #b8731b)',
+                    border: '1.5px solid rgba(251,230,175,0.7)',
+                    padding: '0.55rem 2.2rem',
+                    borderRadius: '6px',
+                    cursor: 'pointer',
+                    fontSize: 'clamp(0.75rem, 1.2vw, 0.95rem)',
+                    fontFamily: 'Georgia, serif',
+                    fontWeight: 700,
+                    boxShadow: '0 4px 20px rgba(184,115,27,0.6)',
+                  }}>
+                    🔒 Lock Again
                   </button>
                 </div>
               </div>
+            ) : mode === 'signup' ? (
+              /* ═══ SIGNUP: ACCURATE INTERACTIVE INPUTS DIRECTLY ON THE LINES ═══ */
+              <form onSubmit={handleSubmit} style={{ width: '100%', height: '100%', position: 'relative' }}>
 
-              {/* ERROR ALERT */}
-              {errorMessage && (
-                <div className="mb-2.5 p-2 rounded-lg bg-red-950/70 border border-red-500/40 text-red-200 text-xs text-center font-medium animate-in fade-in duration-200">
-                  {errorMessage}
-                </div>
-              )}
-
-              {/* FORM - SIGN UP (2-COLUMN GRID) */}
-              {mode === 'signup' ? (
-                <form onSubmit={handleSubmit} className="space-y-2.5 text-left">
-                  {/* ROW 1: Full Name & Email Address */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                    <div>
-                      <label className="block text-[11px] font-serif font-bold text-amber-200/80 mb-1">
-                        Full Name <span className="text-[#dfa547]">*</span>
-                      </label>
-                      <div className="relative">
-                        <User className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-amber-400/60" />
-                        <input
-                          type="text"
-                          required
-                          value={fullName}
-                          onChange={(e) => setFullName(e.target.value)}
-                          placeholder="e.g. Aryan Sharma"
-                          className="w-full bg-[#1e1711]/80 border border-amber-500/30 focus:border-[#dfa547] focus:ring-1 focus:ring-[#dfa547] text-slate-100 placeholder-amber-200/35 rounded-xl py-2 pl-9 pr-3 text-xs outline-none transition-all"
-                        />
-                      </div>
-                    </div>
-
-                    <div>
-                      <label className="block text-[11px] font-serif font-bold text-amber-200/80 mb-1">
-                        Email Address <span className="text-[#dfa547]">*</span>
-                      </label>
-                      <div className="relative">
-                        <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-amber-400/60" />
-                        <input
-                          type="email"
-                          required
-                          value={email}
-                          onChange={(e) => setEmail(e.target.value)}
-                          placeholder="name@example.com"
-                          className="w-full bg-[#1e1711]/80 border border-amber-500/30 focus:border-[#dfa547] focus:ring-1 focus:ring-[#dfa547] text-slate-100 placeholder-amber-200/35 rounded-xl py-2 pl-9 pr-3 text-xs outline-none transition-all"
-                        />
-                      </div>
-                    </div>
+                {/* Error Banner */}
+                {errorMessage && (
+                  <div style={{
+                    position: 'absolute',
+                    top: '7%',
+                    left: '18%',
+                    right: '25%',
+                    zIndex: 30,
+                    color: '#ffe0e0',
+                    background: 'rgba(120, 20, 20, 0.92)',
+                    border: '1.5px solid rgba(255, 100, 100, 0.7)',
+                    backdropFilter: 'blur(5px)',
+                    padding: '0.25rem 0.8rem',
+                    borderRadius: '4px',
+                    fontSize: 'clamp(0.55rem, 0.9vw, 0.75rem)',
+                    textAlign: 'center',
+                    fontWeight: 600,
+                    boxShadow: '0 4px 15px rgba(0,0,0,0.6)',
+                  }}>
+                    ⚠️ {errorMessage}
                   </div>
+                )}
 
-                  {/* ROW 2: Select Your Role (7 Compact Pills in 1 line on desktop) */}
-                  <div>
-                    <div className="flex items-center justify-between mb-1">
-                      <label className="block text-[11px] font-serif font-bold text-amber-200/80">
-                        Select Your Role <span className="text-[#dfa547]">*</span>
-                      </label>
-                      <span className="text-[10px] text-[#dfa547] font-medium capitalize">
-                        Active: {ROLES.find((r) => r.id === selectedRole)?.label}
-                      </span>
-                    </div>
+                {/* 1. Full Name (Row 1 Left) */}
+                <input
+                  type="text"
+                  value={fullName}
+                  onChange={e => setFullName(e.target.value)}
+                  className="clean-input"
+                  style={{
+                    position: 'absolute',
+                    left: '20.5%',
+                    top: '24.2%',
+                    width: '25.0%',
+                    height: '4.2%',
+                  }}
+                  required
+                />
 
-                    <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-7 gap-1.5">
-                      {ROLES.map((role) => {
-                        const IconComp = role.icon;
-                        const isSel = selectedRole === role.id;
-                        return (
-                          <button
-                            type="button"
-                            key={role.id}
-                            onClick={() => setSelectedRole(role.id)}
-                            title={role.label}
-                            className={`flex items-center justify-center gap-1 py-1.5 px-1.5 rounded-lg border text-[11px] font-medium transition-all cursor-pointer ${
-                              isSel
-                                ? 'bg-[#dfa547]/25 border-[#dfa547] text-amber-100 shadow-[0_0_12px_rgba(223,165,71,0.35)] ring-1 ring-[#dfa547]'
-                                : 'bg-[#1e1711]/60 border-amber-500/20 text-slate-300 hover:border-amber-500/50 hover:bg-[#1e1711]'
-                            }`}
-                          >
-                            <IconComp className={`w-3 h-3 flex-shrink-0 ${isSel ? 'text-amber-300' : 'text-amber-400/70'}`} />
-                            <span className="truncate">{role.shortLabel}</span>
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
+                {/* 2. Class / Grade (Row 1 Right) */}
+                <input
+                  type="text"
+                  value={classGrade}
+                  onChange={e => setClassGrade(e.target.value)}
+                  className="clean-input"
+                  style={{
+                    position: 'absolute',
+                    left: '54.8%',
+                    top: '24.2%',
+                    width: '21.0%',
+                    height: '4.2%',
+                  }}
+                />
 
-                  {/* ROW 3: Phone / WhatsApp & Password */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                    <div>
-                      <label className="block text-[11px] font-serif font-bold text-amber-200/80 mb-1">
-                        Phone / WhatsApp <span className="text-[#dfa547]">*</span>
-                      </label>
-                      <div className="flex gap-1.5">
-                        <select
-                          value={countryCode}
-                          onChange={(e) => setCountryCode(e.target.value)}
-                          className="bg-[#1e1711]/80 border border-amber-500/30 text-amber-200 text-xs rounded-xl px-2 py-2 outline-none cursor-pointer flex-shrink-0"
-                        >
-                          <option value="+91" className="bg-[#18130e]">🇮🇳 +91</option>
-                          <option value="+1" className="bg-[#18130e]">🇺🇸 +1</option>
-                          <option value="+44" className="bg-[#18130e]">🇬🇧 +44</option>
-                          <option value="+971" className="bg-[#18130e]">🇦🇪 +971</option>
-                          <option value="+65" className="bg-[#18130e]">🇸🇬 +65</option>
-                          <option value="+61" className="bg-[#18130e]">🇦🇺 +61</option>
-                          <option value="+49" className="bg-[#18130e]">🇩🇪 +49</option>
-                        </select>
-                        <div className="relative flex-1">
-                          <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-amber-400/60" />
-                          <input
-                            type="tel"
-                            required
-                            value={phone}
-                            onChange={(e) => setPhone(e.target.value)}
-                            placeholder="98765 43210"
-                            className="w-full bg-[#1e1711]/80 border border-amber-500/30 focus:border-[#dfa547] focus:ring-1 focus:ring-[#dfa547] text-slate-100 placeholder-amber-200/35 rounded-xl py-2 pl-9 pr-3 text-xs outline-none transition-all"
-                          />
-                        </div>
-                      </div>
-                    </div>
+                {/* 3. Email Address (Row 2 Left) */}
+                <input
+                  type="email"
+                  value={email}
+                  onChange={e => setEmail(e.target.value)}
+                  className="clean-input"
+                  style={{
+                    position: 'absolute',
+                    left: '20.5%',
+                    top: '37.5%',
+                    width: '25.0%',
+                    height: '4.2%',
+                  }}
+                  required
+                />
 
-                    <div>
-                      <label className="block text-[11px] font-serif font-bold text-amber-200/80 mb-1">
-                        Password <span className="text-[#dfa547]">*</span>
-                      </label>
-                      <div className="relative">
-                        <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-amber-400/60" />
-                        <input
-                          type={showPassword ? 'text' : 'password'}
-                          required
-                          value={password}
-                          onChange={(e) => setPassword(e.target.value)}
-                          placeholder="Min. 6 chars"
-                          className="w-full bg-[#1e1711]/80 border border-amber-500/30 focus:border-[#dfa547] focus:ring-1 focus:ring-[#dfa547] text-slate-100 placeholder-amber-200/35 rounded-xl py-2 pl-9 pr-8 text-xs outline-none transition-all"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => setShowPassword(!showPassword)}
-                          className="absolute right-2.5 top-1/2 -translate-y-1/2 text-amber-400/60 hover:text-amber-300 cursor-pointer"
-                        >
-                          {showPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
-                        </button>
-                      </div>
-                    </div>
-                  </div>
+                {/* 4. Account Type (Row 2 Right - Select) */}
+                <select
+                  value={accountType}
+                  onChange={e => setAccountType(e.target.value)}
+                  className="clean-input"
+                  style={{
+                    position: 'absolute',
+                    left: '54.8%',
+                    top: '37.5%',
+                    width: '21.0%',
+                    height: '4.2%',
+                    cursor: 'pointer',
+                    color: accountType ? '#ffffff' : 'transparent',
+                    appearance: 'none',
+                    WebkitAppearance: 'none',
+                  }}
+                >
+                  <option value="" disabled style={{ background: '#241407', color: '#888' }}>Select Type</option>
+                  <option value="Student" style={{ background: '#241407', color: '#fbe6af' }}>Student</option>
+                  <option value="Teacher" style={{ background: '#241407', color: '#fbe6af' }}>Teacher</option>
+                  <option value="Parent" style={{ background: '#241407', color: '#fbe6af' }}>Parent</option>
+                  <option value="Seeker" style={{ background: '#241407', color: '#fbe6af' }}>Seeker</option>
+                </select>
 
-                  {/* ROW 4: Confirm Password & Terms / Security */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 items-center">
-                    <div>
-                      <label className="block text-[11px] font-serif font-bold text-amber-200/80 mb-1">
-                        Confirm Password <span className="text-[#dfa547]">*</span>
-                      </label>
-                      <div className="relative">
-                        <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-amber-400/60" />
-                        <input
-                          type={showPassword ? 'text' : 'password'}
-                          required
-                          value={confirmPassword}
-                          onChange={(e) => setConfirmPassword(e.target.value)}
-                          placeholder="Re-enter password"
-                          className="w-full bg-[#1e1711]/80 border border-amber-500/30 focus:border-[#dfa547] focus:ring-1 focus:ring-[#dfa547] text-slate-100 placeholder-amber-200/35 rounded-xl py-2 pl-9 pr-3 text-xs outline-none transition-all"
-                        />
-                      </div>
-                    </div>
+                {/* 5. Mobile Number (Row 3 Left) */}
+                <input
+                  type="tel"
+                  value={mobile}
+                  onChange={e => setMobile(e.target.value)}
+                  className="clean-input"
+                  style={{
+                    position: 'absolute',
+                    left: '20.5%',
+                    top: '51.0%',
+                    width: '25.0%',
+                    height: '4.2%',
+                  }}
+                />
 
-                    <div className="pt-2 sm:pt-4">
-                      <div className="flex items-start gap-2">
-                        <input
-                          id="terms"
-                          type="checkbox"
-                          checked={agreeTerms}
-                          onChange={(e) => setAgreeTerms(e.target.checked)}
-                          className="mt-0.5 accent-[#dfa547] w-3.5 h-3.5 rounded cursor-pointer"
-                        />
-                        <label htmlFor="terms" className="text-[10.5px] text-amber-200/70 leading-tight cursor-pointer select-none">
-                          I agree to the{' '}
-                          <span className="text-[#dfa547] underline">Terms</span> and{' '}
-                          <span className="text-[#dfa547] underline">Privacy Policy</span> of Pranav Mahajan Mentorship.
-                        </label>
-                      </div>
-                      <div className="flex items-center gap-1.5 text-[9.5px] text-amber-200/50 mt-1">
-                        <ShieldCheck className="w-3 h-3 text-[#dfa547]" />
-                        <span>256-Bit SSL Encrypted &bull; Strictly Confidential</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* SUBMIT BUTTON */}
-                  <div className="pt-1.5">
-                    <button
-                      type="submit"
-                      disabled={loading}
-                      className="ochre-pill-button w-full py-2.5 sm:py-3 text-xs sm:text-sm font-bold shadow-xl hover:shadow-[0_0_25px_rgba(223,165,71,0.45)] flex items-center justify-center gap-2 cursor-pointer transition-transform hover:scale-[1.01] active:scale-[0.99] disabled:opacity-60"
-                    >
-                      {loading ? (
-                        <div className="flex items-center gap-2">
-                          <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                          <span>Registering Sanctum Account...</span>
-                        </div>
-                      ) : (
-                        <>
-                          <span>Create My Account</span>
-                          <ArrowRight className="w-4 h-4" />
-                        </>
-                      )}
-                    </button>
-                  </div>
-                </form>
-              ) : (
-                /* FORM - SIGN IN */
-                <form onSubmit={handleSubmit} className="space-y-3 text-left max-w-sm mx-auto">
-                  <div>
-                    <label className="block text-xs font-serif font-bold text-amber-200/80 mb-1">
-                      Email Address <span className="text-[#dfa547]">*</span>
-                    </label>
-                    <div className="relative">
-                      <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-amber-400/60" />
-                      <input
-                        type="email"
-                        required
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        placeholder="name@example.com"
-                        className="w-full bg-[#1e1711]/80 border border-amber-500/30 focus:border-[#dfa547] focus:ring-1 focus:ring-[#dfa547] text-slate-100 placeholder-amber-200/35 rounded-xl py-2.5 pl-10 pr-4 text-xs outline-none transition-all"
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <div className="flex items-center justify-between mb-1">
-                      <label className="block text-xs font-serif font-bold text-amber-200/80">
-                        Password <span className="text-[#dfa547]">*</span>
-                      </label>
-                      <button
-                        type="button"
-                        onClick={() => alert('Password reset link sent to your registered email.')}
-                        className="text-[11px] text-[#dfa547] hover:underline cursor-pointer"
-                      >
-                        Forgot password?
-                      </button>
-                    </div>
-                    <div className="relative">
-                      <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-amber-400/60" />
-                      <input
-                        type={showPassword ? 'text' : 'password'}
-                        required
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        placeholder="Enter password"
-                        className="w-full bg-[#1e1711]/80 border border-amber-500/30 focus:border-[#dfa547] focus:ring-1 focus:ring-[#dfa547] text-slate-100 placeholder-amber-200/35 rounded-xl py-2.5 pl-10 pr-9 text-xs outline-none transition-all"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-amber-400/60 hover:text-amber-300 cursor-pointer"
-                      >
-                        {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                      </button>
-                    </div>
-                  </div>
-
-                  <div className="pt-2">
-                    <button
-                      type="submit"
-                      disabled={loading}
-                      className="ochre-pill-button w-full py-2.5 text-xs sm:text-sm font-bold shadow-xl flex items-center justify-center gap-2 cursor-pointer transition-transform hover:scale-[1.01] active:scale-[0.99] disabled:opacity-60"
-                    >
-                      {loading ? (
-                        <div className="flex items-center gap-2">
-                          <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                          <span>Signing In...</span>
-                        </div>
-                      ) : (
-                        <>
-                          <span>Sign In to Sanctum</span>
-                          <ArrowRight className="w-4 h-4" />
-                        </>
-                      )}
-                    </button>
-                  </div>
-                </form>
-              )}
-
-              {/* FOOTER SWITCHER */}
-              <div className="mt-3 pt-2.5 border-t border-amber-500/15 text-center text-xs text-amber-200/70 flex items-center justify-center gap-1.5">
-                <span>{mode === 'signup' ? 'Already have an account?' : "Don't have an account yet?"}</span>
+                {/* 6. Create Password (Row 3 Right) */}
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  value={password}
+                  onChange={e => setPassword(e.target.value)}
+                  className="clean-input"
+                  style={{
+                    position: 'absolute',
+                    left: '54.8%',
+                    top: '51.0%',
+                    width: '18.5%',
+                    height: '4.2%',
+                  }}
+                  required
+                />
+                {/* Click target over the drawn eye icon */}
                 <button
                   type="button"
-                  onClick={() => {
-                    setMode(mode === 'signup' ? 'signin' : 'signup');
-                    setErrorMessage('');
+                  onClick={() => setShowPassword(!showPassword)}
+                  style={{
+                    position: 'absolute',
+                    left: '74.2%',
+                    top: '50.2%',
+                    width: '3.0%',
+                    height: '5.2%',
+                    background: 'transparent',
+                    border: 'none',
+                    cursor: 'pointer',
+                    zIndex: 25,
+                    borderRadius: '50%',
                   }}
-                  className="font-bold text-[#dfa547] hover:underline cursor-pointer"
-                >
-                  {mode === 'signup' ? 'Sign In' : 'Create an Account'}
-                </button>
-              </div>
-            </>
-          )}
-        </div>
-      </main>
+                  title={showPassword ? 'Hide password' : 'Show password'}
+                />
 
-      {/* 4. CLEAN ULTRA-COMPACT FOOTER */}
-      <footer className="relative z-30 w-full py-1.5 px-4 text-center text-[10px] text-amber-200/50 border-t border-amber-500/10 backdrop-blur-sm bg-black/30 flex-shrink-0">
-        <p>
-          &copy; 2026 Pranav Mahajan Official &bull; Empowering 150,000+ Lives Across 18 Countries.
-        </p>
-      </footer>
-    </div>
+                {/* 7. Date of Birth (Row 4 Left: DD / MM / YYYY) */}
+                <input
+                  type="text"
+                  value={dobDay}
+                  onChange={e => setDobDay(e.target.value)}
+                  maxLength={2}
+                  className="clean-input"
+                  style={{
+                    position: 'absolute',
+                    left: '20.2%',
+                    top: '64.5%',
+                    width: '3.2%',
+                    height: '4.2%',
+                    textAlign: 'center',
+                  }}
+                />
+                <input
+                  type="text"
+                  value={dobMonth}
+                  onChange={e => setDobMonth(e.target.value)}
+                  maxLength={2}
+                  className="clean-input"
+                  style={{
+                    position: 'absolute',
+                    left: '24.5%',
+                    top: '64.5%',
+                    width: '3.2%',
+                    height: '4.2%',
+                    textAlign: 'center',
+                  }}
+                />
+                <input
+                  type="text"
+                  value={dobYear}
+                  onChange={e => setDobYear(e.target.value)}
+                  maxLength={4}
+                  className="clean-input"
+                  style={{
+                    position: 'absolute',
+                    left: '29.2%',
+                    top: '64.5%',
+                    width: '6.2%',
+                    height: '4.2%',
+                    textAlign: 'center',
+                  }}
+                />
+
+                {/* 8. Confirm Password (Row 4 Right) */}
+                <input
+                  type={showConfirmPassword ? 'text' : 'password'}
+                  value={confirmPassword}
+                  onChange={e => setConfirmPassword(e.target.value)}
+                  className="clean-input"
+                  style={{
+                    position: 'absolute',
+                    left: '54.8%',
+                    top: '64.5%',
+                    width: '18.5%',
+                    height: '4.2%',
+                  }}
+                  required
+                />
+                {/* Click target over the drawn eye icon */}
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  style={{
+                    position: 'absolute',
+                    left: '74.2%',
+                    top: '63.8%',
+                    width: '3.0%',
+                    height: '5.2%',
+                    background: 'transparent',
+                    border: 'none',
+                    cursor: 'pointer',
+                    zIndex: 25,
+                    borderRadius: '50%',
+                  }}
+                  title={showConfirmPassword ? 'Hide password' : 'Show password'}
+                />
+
+                {/* 9. Location (Row 5 Left) */}
+                <input
+                  type="text"
+                  value={location}
+                  onChange={e => setLocation(e.target.value)}
+                  className="clean-input"
+                  style={{
+                    position: 'absolute',
+                    left: '20.5%',
+                    top: '78.2%',
+                    width: '25.0%',
+                    height: '4.2%',
+                  }}
+                />
+
+                {/* 10. CREATE ACCOUNT BUTTON (Over the golden badge) */}
+                <button
+                  type="submit"
+                  style={{
+                    position: 'absolute',
+                    left: '51.5%',
+                    top: '72.0%',
+                    width: '27.5%',
+                    height: '9.8%',
+                    background: 'transparent',
+                    border: 'none',
+                    borderRadius: '8px',
+                    cursor: 'pointer',
+                    zIndex: 25,
+                    animation: 'btnHoverGlow 3s ease-in-out infinite',
+                    transition: 'transform 0.15s',
+                  }}
+                  onMouseEnter={e => (e.currentTarget.style.transform = 'scale(1.02)')}
+                  onMouseLeave={e => (e.currentTarget.style.transform = 'scale(1)')}
+                  title="Click to Create Account"
+                />
+
+                {/* Toggle Link below book */}
+                <div style={{
+                  position: 'absolute',
+                  bottom: '2.5%',
+                  left: '14%',
+                  right: '25%',
+                  textAlign: 'center',
+                  fontSize: 'clamp(0.55rem, 0.95vw, 0.75rem)',
+                  zIndex: 25,
+                }}>
+                  <span style={{ color: 'rgba(251, 230, 175, 0.8)', textShadow: '0 1px 4px rgba(0,0,0,0.95)' }}>
+                    Already have an account?{' '}
+                    <button
+                      type="button"
+                      onClick={() => setMode('signin')}
+                      style={{
+                        color: '#ffe699',
+                        background: 'none',
+                        border: 'none',
+                        cursor: 'pointer',
+                        textDecoration: 'underline',
+                        fontWeight: 700,
+                        fontFamily: 'Georgia, serif',
+                        fontSize: 'inherit',
+                      }}
+                    >
+                      Sign In
+                    </button>
+                  </span>
+                  <span style={{ color: 'rgba(223,165,71,0.4)', margin: '0 0.5rem' }}>|</span>
+                  <Link href="/" style={{ color: 'rgba(251, 230, 175, 0.7)', textDecoration: 'underline', fontSize: 'inherit' }}>
+                    Home
+                  </Link>
+                </div>
+              </form>
+            ) : (
+              /* ═══ SIGNIN MODE (Centered Golden Plaque Modal on uploaded.jpg) ═══ */
+              <div style={{
+                position: 'absolute',
+                top: '12%', left: '15%', right: '22%', bottom: '10%',
+                display: 'flex', flexDirection: 'column',
+                alignItems: 'center', justifyContent: 'center',
+              }}>
+                <div style={{
+                  width: '100%',
+                  maxWidth: '380px',
+                  background: 'linear-gradient(145deg, rgba(50, 32, 14, 0.9) 0%, rgba(25, 15, 6, 0.95) 100%)',
+                  border: '2px solid rgba(223, 165, 71, 0.75)',
+                  borderRadius: '10px',
+                  padding: 'clamp(1rem, 2.5vw, 1.8rem)',
+                  boxShadow: '0 0 50px rgba(0,0,0,0.9), inset 0 1px 2px rgba(255,230,150,0.4)',
+                  backdropFilter: 'blur(8px)',
+                }}>
+                  <h2 style={{
+                    color: '#fbe6af',
+                    fontFamily: 'Georgia, serif',
+                    fontSize: 'clamp(1.1rem, 2vw, 1.5rem)',
+                    fontWeight: 700,
+                    textAlign: 'center',
+                    marginBottom: '1rem',
+                    textShadow: '0 2px 10px rgba(0,0,0,0.8)',
+                  }}>
+                    ✦ Sanctum Sign In ✦
+                  </h2>
+
+                  {errorMessage && (
+                    <div style={{
+                      color: '#ffe0e0',
+                      background: 'rgba(120, 20, 20, 0.85)',
+                      border: '1px solid rgba(255, 100, 100, 0.5)',
+                      padding: '0.3rem 0.8rem',
+                      borderRadius: '4px',
+                      fontSize: '0.75rem',
+                      marginBottom: '0.8rem',
+                      textAlign: 'center',
+                    }}>
+                      {errorMessage}
+                    </div>
+                  )}
+
+                  <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '0.9rem' }}>
+                    <div>
+                      <label style={{ display: 'block', color: '#dfa547', fontSize: '0.75rem', fontWeight: 700, fontFamily: 'Georgia, serif', marginBottom: '0.25rem' }}>
+                        ✉ Email Address
+                      </label>
+                      <input
+                        type="email"
+                        value={email}
+                        onChange={e => setEmail(e.target.value)}
+                        placeholder="name@example.com"
+                        style={{
+                          width: '100%',
+                          padding: '0.5rem 0.7rem',
+                          background: 'rgba(15, 9, 3, 0.75)',
+                          border: '1px solid rgba(184,115,27,0.5)',
+                          borderRadius: '4px',
+                          color: '#fff',
+                          fontSize: '0.85rem',
+                          fontFamily: 'Georgia, serif',
+                          outline: 'none',
+                          boxSizing: 'border-box',
+                        }}
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label style={{ display: 'block', color: '#dfa547', fontSize: '0.75rem', fontWeight: 700, fontFamily: 'Georgia, serif', marginBottom: '0.25rem' }}>
+                        🔒 Password
+                      </label>
+                      <input
+                        type="password"
+                        value={password}
+                        onChange={e => setPassword(e.target.value)}
+                        placeholder="Enter your password"
+                        style={{
+                          width: '100%',
+                          padding: '0.5rem 0.7rem',
+                          background: 'rgba(15, 9, 3, 0.75)',
+                          border: '1px solid rgba(184,115,27,0.5)',
+                          borderRadius: '4px',
+                          color: '#fff',
+                          fontSize: '0.85rem',
+                          fontFamily: 'Georgia, serif',
+                          outline: 'none',
+                          boxSizing: 'border-box',
+                        }}
+                        required
+                      />
+                    </div>
+                    <button
+                      type="submit"
+                      style={{
+                        marginTop: '0.5rem',
+                        padding: '0.65rem',
+                        background: 'linear-gradient(90deg, #8c5a18, #dfa547, #b8731b)',
+                        color: '#fff',
+                        fontFamily: 'Georgia, serif',
+                        fontWeight: 700,
+                        fontSize: '0.95rem',
+                        border: '1.5px solid rgba(255,230,150,0.5)',
+                        borderRadius: '6px',
+                        cursor: 'pointer',
+                        boxShadow: '0 4px 15px rgba(184,115,27,0.5)',
+                        textShadow: '0 1px 3px rgba(0,0,0,0.6)',
+                      }}
+                    >
+                      ✦ Sign In to Sanctum ✦
+                    </button>
+                  </form>
+
+                  <div style={{ textAlign: 'center', marginTop: '1rem', fontSize: '0.78rem' }}>
+                    <span style={{ color: 'rgba(251, 230, 175, 0.7)' }}>
+                      Need an account?{' '}
+                      <button
+                        type="button"
+                        onClick={() => setMode('signup')}
+                        style={{
+                          color: '#ffe699',
+                          background: 'none',
+                          border: 'none',
+                          cursor: 'pointer',
+                          textDecoration: 'underline',
+                          fontWeight: 700,
+                          fontFamily: 'Georgia, serif',
+                        }}
+                      >
+                        Sign Up
+                      </button>
+                    </span>
+                    <span style={{ color: 'rgba(223,165,71,0.4)', margin: '0 0.5rem' }}>|</span>
+                    <Link href="/" style={{ color: 'rgba(251, 230, 175, 0.6)', textDecoration: 'underline' }}>
+                      Home
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </>
   );
 }

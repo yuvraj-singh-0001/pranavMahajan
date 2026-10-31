@@ -234,6 +234,36 @@ body {
 }
 
 /* ==========================================================================
+   ROLE VIDEO TO PAGE LATERAL SLIDE TRANSITIONS
+   ========================================================================== */
+
+/* Role Page sliding in smoothly from the right side */
+.role-page-slide-in {
+  animation: rolePageSlideIn 0.85s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes rolePageSlideIn {
+  0% {
+    transform: translate3d(50vw, 0, 0);
+    opacity: 0;
+  }
+  30% {
+    opacity: 0.6;
+  }
+  100% {
+    transform: translate3d(0, 0, 0);
+    opacity: 1;
+  }
+}
+
+/* Role Video sliding out to the left side */
+.role-video-slide-out {
+  transform: translate3d(-100vw, 0, 0) !important;
+  opacity: 0 !important;
+  transition: transform 0.85s cubic-bezier(0.65, 0, 0.35, 1), opacity 0.85s cubic-bezier(0.65, 0, 0.35, 1) !important;
+}
+
+/* ==========================================================================
    CELESTIAL ROCKET & HEAVENLY CLOUD (SWARG YATRA) ANIMATION SYSTEM
    ========================================================================== */
 
@@ -859,3 +889,66 @@ html.quill-mode [data-chrome="true"] a * {
 }
 
 
+
+
+/* ══════════════════════════════════════════════════
+   LOCKED SANCTUM GRIMOIRE UNLOCK ANIMATIONS
+   ══════════════════════════════════════════════════ */
+@keyframes keyUnlockTurn {
+  0% {
+    transform: translateX(0) rotate(0deg) scale(1);
+    filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.9));
+  }
+  35% {
+    transform: translateX(-40px) rotate(-15deg) scale(1.15);
+    filter: drop-shadow(0 0 25px rgba(255, 215, 110, 0.9));
+  }
+  70% {
+    transform: translateX(-65px) rotate(90deg) scale(1.2);
+    filter: drop-shadow(0 0 35px rgba(255, 235, 140, 1));
+  }
+  100% {
+    transform: translateX(-65px) rotate(90deg) scale(1.15);
+    filter: drop-shadow(0 0 40px rgba(255, 245, 180, 1));
+  }
+}
+
+.animate-key-unlock-turn {
+  animation: keyUnlockTurn 1.25s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+
+@keyframes lockWiggle {
+  0%, 100% {
+    transform: translateX(0) rotate(0deg);
+  }
+  20% {
+    transform: translateX(-4px) rotate(-1deg);
+  }
+  40% {
+    transform: translateX(4px) rotate(1deg);
+  }
+  60% {
+    transform: translateX(-3px) rotate(-0.5deg);
+  }
+  80% {
+    transform: translateX(3px) rotate(0.5deg);
+  }
+}
+
+.animate-wiggle {
+  animation: lockWiggle 0.45s ease-in-out;
+}
+
+/* ══════════════════════════════════════════════════
+   SIMPLE BOOK OPEN ANIMATION FOR UNLOCKED STATE
+   ══════════════════════════════════════════════════ */
+@keyframes bookOpen {
+  0% { opacity: 0; transform: scale(0.8) rotateY(60deg); }
+  40% { opacity: 0.6; transform: scale(1.05) rotateY(-15deg); }
+  80% { opacity: 1; transform: scale(1) rotateY(0deg); }
+  100% { opacity: 1; transform: scale(1) rotateY(0deg); }
+}
+
+.animate-book-open {
+  animation: bookOpen 1.2s ease-out forwards;
+}

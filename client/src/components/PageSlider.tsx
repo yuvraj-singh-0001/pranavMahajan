@@ -290,10 +290,6 @@ export default function PageSlider({ initialPersona }: PageSliderProps) {
             wheelAccumulatorRef.current = 0;
             topPrimedRef.current = false;
             e.preventDefault();
-            if (selectedPersona === 'individual' || selectedPersona === 'government') {
-              nextSlide();
-              return;
-            }
             identifyBackRef.current();
             return;
           }
@@ -386,10 +382,6 @@ export default function PageSlider({ initialPersona }: PageSliderProps) {
           }
         }
         if (current === 1) {
-          if (identifyMode === 'coming-soon' && (selectedPersona === 'individual' || selectedPersona === 'government')) {
-            identifyBackRef.current?.();
-            return;
-          }
           if (!isPrimedForSecondScrollRef.current) {
             isPrimedForSecondScrollRef.current = true;
             if (!selectedPersona) {
@@ -412,8 +404,8 @@ export default function PageSlider({ initialPersona }: PageSliderProps) {
           nextSlide();
         }
       } else if (e.key === 'ArrowUp') {
-        if (current === 1 && identifyMode === 'coming-soon' && (selectedPersona === 'individual' || selectedPersona === 'government')) {
-          nextSlide();
+        if (current === 1 && identifyMode === 'coming-soon' && identifyBackRef.current) {
+          identifyBackRef.current();
           return;
         }
         const activeSlide = slidesRef.current[current];
@@ -460,13 +452,9 @@ export default function PageSlider({ initialPersona }: PageSliderProps) {
       const diffY = touchStartYRef.current - e.changedTouches[0].clientY;
 
       const activeSlide = slidesRef.current[current];
-      if (current === 1 && identifyMode === 'coming-soon' && (selectedPersona === 'individual' || selectedPersona === 'government')) {
+      if (current === 1 && identifyMode === 'coming-soon' && identifyBackRef.current) {
         if (diffY > 55) {
-          identifyBackRef.current?.();
-          return;
-        }
-        if (diffY < -55) {
-          nextSlide();
+          identifyBackRef.current();
           return;
         }
       }
