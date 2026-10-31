@@ -343,15 +343,10 @@ export default function PageSlider({ initialPersona }: PageSliderProps) {
             return; // Allow natural vertical reading upwards
           }
 
-          // At the top edge, move back only on a deliberate fast upward scroll.
-          wheelAccumulatorRef.current += e.deltaY;
+          // Keep upward wheel gestures at the top from changing pages. Use the
+          // explicit Previous control when the user wants to leave this role.
+          wheelAccumulatorRef.current = 0;
           e.preventDefault();
-          if (e.deltaY <= -150 || wheelAccumulatorRef.current <= -420) {
-            wheelAccumulatorRef.current = 0;
-            isTopPrimedRef.current = false;
-            isTopGestureActiveRef.current = false;
-            prevSlide();
-          }
           return;
         }
       }
@@ -422,6 +417,11 @@ export default function PageSlider({ initialPersona }: PageSliderProps) {
 
         if (activeSlide && isScrollable && !isAtTop) {
           activeSlide.scrollBy({ top: -120, behavior: 'smooth' });
+          return;
+        }
+
+        if (current === 1 && identifyMode === 'coming-soon') {
+          e.preventDefault();
           return;
         }
 
@@ -532,7 +532,8 @@ export default function PageSlider({ initialPersona }: PageSliderProps) {
         }
 
         if (current === 1 && identifyMode === 'coming-soon') {
-          if (diffY <= -180) prevSlide();
+          // A swipe past the top is still just a scroll. Use the visible
+          // Previous control when the user wants to return to role choices.
           return;
         }
 
@@ -612,13 +613,6 @@ export default function PageSlider({ initialPersona }: PageSliderProps) {
           >
             Sign Up
           </Link>
-
-          <button
-            onClick={() => goToSlide(2)}
-            className="hidden sm:inline-flex ochre-pill-button py-2 px-5 text-xs font-bold shadow-md hover:shadow-lg"
-          >
-            Get In Touch
-          </button>
 
           <button
             onClick={() => setMenuOpen(!menuOpen)}

@@ -952,3 +952,133 @@ html.quill-mode [data-chrome="true"] a * {
 .animate-book-open {
   animation: bookOpen 1.2s ease-out forwards;
 }
+
+.role-story-reveal {
+  opacity: 0;
+  filter: blur(7px);
+  transition: opacity 700ms ease, transform 800ms cubic-bezier(0.2, 0.75, 0.25, 1), filter 800ms ease;
+  will-change: opacity, transform, filter;
+}
+
+.role-story-from-left {
+  transform: translate3d(-54px, 0, 0);
+}
+
+.role-story-from-right {
+  transform: translate3d(54px, 0, 0);
+}
+
+.role-story-from-bottom {
+  transform: translate3d(0, 42px, 0) scale(0.985);
+}
+
+.role-story-reveal.is-visible {
+  opacity: 1;
+  filter: blur(0);
+  transform: translate3d(0, 0, 0) scale(1);
+}
+
+.role-card-3d {
+  transform-style: preserve-3d;
+  backface-visibility: hidden;
+}
+
+.role-card-student:hover,
+.role-card-student:focus-visible {
+  transform: perspective(1100px) rotateX(3deg) rotateY(-3deg) translateY(-7px);
+}
+
+.role-card-school:hover,
+.role-card-school:focus-visible {
+  transform: perspective(1100px) rotateX(5deg) rotateY(-4deg) translateY(-5px);
+}
+
+.role-card-editorial:hover,
+.role-card-editorial:focus-visible {
+  transform: perspective(1100px) rotateY(3deg) translateY(-4px);
+}
+
+.role-card-executive:hover,
+.role-card-executive:focus-visible {
+  transform: perspective(1100px) rotateX(-3deg) rotateY(2deg) translateY(-4px);
+}
+
+.role-card-government:hover,
+.role-card-government:focus-visible {
+  transform: perspective(1100px) rotateX(3deg) rotateY(-3deg) translateY(-5px);
+}
+
+.role-card-ngo:hover,
+.role-card-ngo:focus-visible {
+  transform: perspective(1100px) rotateX(4deg) rotateY(3deg) translateY(-5px);
+}
+
+.role-card-parent:hover,
+.role-card-parent:focus-visible {
+  transform: perspective(1100px) rotateY(-3deg) rotateX(2deg) translateY(-4px);
+}
+
+.role-cycle-path {
+  display: none;
+}
+
+.role-cycle-ring {
+  animation: roleCycleSpin 12s linear infinite;
+}
+
+@keyframes roleCycleSpin {
+  to { transform: rotate(360deg); }
+}
+
+@media (min-width: 768px) {
+  .role-cycle-path {
+    display: block;
+    position: absolute;
+    top: 4.15rem;
+    left: 14%;
+    right: 14%;
+    border-top: 1px dashed currentColor;
+    opacity: 0.45;
+  }
+
+  .role-cycle-path::after {
+    content: '';
+    position: absolute;
+    top: -3px;
+    left: 0;
+    width: 6px;
+    height: 6px;
+    border-radius: 9999px;
+    background: currentColor;
+    animation: roleCycleTravel 7s ease-in-out infinite;
+  }
+}
+
+@keyframes roleCycleTravel {
+  0% { left: 0; opacity: 0; }
+  12% { opacity: 1; }
+  88% { opacity: 1; }
+  100% { left: calc(100% - 6px); opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .role-story-reveal,
+  .role-story-from-left,
+  .role-story-from-right,
+  .role-story-from-bottom {
+    opacity: 1;
+    filter: none;
+    transform: none;
+    transition: none;
+  }
+
+  .role-cycle-ring,
+  .role-cycle-path::after {
+    animation: none;
+  }
+
+  .role-card-3d:hover,
+  .role-card-3d:focus-visible {
+    transform: none;
+  }
+}

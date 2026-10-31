@@ -9,7 +9,6 @@ import {
   Landmark,
   Users,
   ArrowRight,
-  Check,
   Sparkles,
   Clock,
   Volume2,
@@ -90,9 +89,7 @@ const PERSONAS: PersonaOption[] = [
 export interface RoleExperienceConfig {
   id: PersonaType;
   title: string;
-  icon: React.ComponentType<{ className?: string; style?: React.CSSProperties }>;
   videoSrc: string;
-  badgeLabel: string;
   headingLines: string[];
   subtitle: string;
   storageKey: string;
@@ -104,9 +101,7 @@ export const ROLE_EXPERIENCES: Record<PersonaType, RoleExperienceConfig> = {
   student: {
     id: 'student',
     title: 'Student',
-    icon: GraduationCap,
     videoSrc: '/studentpanel.mp4',
-    badgeLabel: 'Student Gateway',
     headingLines: ['This is the', 'student pages'],
     subtitle: "Pushing open the doors to excellence, leadership, and boundless possibilities with Pranav Mahajan's youth masterclasses.",
     storageKey: 'pravan_student_video_watched',
@@ -116,9 +111,7 @@ export const ROLE_EXPERIENCES: Record<PersonaType, RoleExperienceConfig> = {
   school: {
     id: 'school',
     title: 'Educational Institution',
-    icon: School,
     videoSrc: '/school-role.mp4',
-    badgeLabel: 'Educational Institution',
     headingLines: ['This is my', 'edu page'],
     subtitle: 'Empowering academic excellence, youth leadership culture, and transformative teacher-student synergy.',
     storageKey: 'pravan_school_video_watched',
@@ -128,9 +121,7 @@ export const ROLE_EXPERIENCES: Record<PersonaType, RoleExperienceConfig> = {
   individual: {
     id: 'individual',
     title: 'Individual',
-    icon: User,
     videoSrc: '/Individual.mp4',
-    badgeLabel: 'Individual Gateway',
     headingLines: ['This is my', 'Individual page'],
     subtitle: 'Personal transformation, peak subconscious focus, and life-changing self-mastery frameworks.',
     storageKey: 'pravan_individual_video_watched',
@@ -140,9 +131,7 @@ export const ROLE_EXPERIENCES: Record<PersonaType, RoleExperienceConfig> = {
   corporate: {
     id: 'corporate',
     title: 'Corporate / Business',
-    icon: Building,
     videoSrc: '/Video_prompt_for_collage_animation_40b3e6b1_1080p%20(online-video-cutter.com).mp4',
-    badgeLabel: 'Corporate & Business',
     headingLines: ['This is my', 'Corporate', 'Business page'],
     subtitle: 'Executive peak performance, high-impact leadership culture, and organizational breakthrough mastery.',
     storageKey: 'pravan_corporate_video_watched',
@@ -152,9 +141,7 @@ export const ROLE_EXPERIENCES: Record<PersonaType, RoleExperienceConfig> = {
   government: {
     id: 'government',
     title: 'Government Department',
-    icon: Landmark,
     videoSrc: '/gvtanimetion.mp4',
-    badgeLabel: 'Government Department',
     headingLines: ['This is my', 'Government Page'],
     subtitle: 'Strategic institutional vision, nation-building synergy, and transformative public governance keynote programs.',
     storageKey: 'pravan_government_video_watched',
@@ -164,9 +151,7 @@ export const ROLE_EXPERIENCES: Record<PersonaType, RoleExperienceConfig> = {
   ngo: {
     id: 'ngo',
     title: 'NGO / Social Sector',
-    icon: Users,
     videoSrc: '/animetion%20video%20(2)%20(online-video-cutter.com).mp4',
-    badgeLabel: 'NGO & Social Sector',
     headingLines: ['This is my', 'NGO Page'],
     subtitle: 'Grassroots empowerment, sustainable social impact, and uplifting community transformation.',
     storageKey: 'pravan_ngo_video_watched',
@@ -176,15 +161,69 @@ export const ROLE_EXPERIENCES: Record<PersonaType, RoleExperienceConfig> = {
   parent: {
     id: 'parent',
     title: 'Conscious Parenting',
-    icon: Users,
     videoSrc: '/animetion%20video%20(2)%20(online-video-cutter.com).mp4',
-    badgeLabel: 'Conscious Parenting',
     headingLines: ['This is my', 'Parenting Page'],
     subtitle: 'Nurturing conscious families, mindful communication, and emotional resilience for modern parents.',
     storageKey: 'pravan_parent_video_watched',
     themeColor: '#f472b6',
     themeGlow: 'rgba(244, 114, 182, 0.4)',
   },
+};
+
+const ROLE_PAGE_SECTIONS: Record<PersonaType, Array<{
+  eyebrow: string;
+  title: string;
+  description: string;
+  buttonLabel?: string;
+}>> = {
+  student: [
+    { eyebrow: 'FOCUS & STUDY', title: 'Focus that lasts', description: 'Build concentration habits that help you study with more clarity and less distraction.', buttonLabel: 'Explore focus' },
+    { eyebrow: 'EXAM WELLBEING', title: 'Exam calm & confidence', description: 'Approach exams with a steadier mind, stronger preparation, and confidence in your ability.', buttonLabel: 'Build exam confidence' },
+    { eyebrow: 'ACADEMIC GROWTH', title: 'Learn at your best', description: 'Develop the mindset and routines to turn your effort into consistent academic progress.', buttonLabel: 'Start learning' },
+  ],
+  individual: [
+    { eyebrow: 'SELF-AWARENESS', title: 'Personal clarity', description: 'Understand what matters most and make decisions with greater confidence.' },
+    { eyebrow: 'RESILIENCE', title: 'Mindset & resilience', description: 'Build practical tools for calm, focus, and a more resilient response to challenges.' },
+    { eyebrow: 'PERSONAL MASTERY', title: 'Design your next chapter', description: 'Create meaningful goals and daily practices that support lasting personal growth.' },
+  ],
+  school: [
+    { eyebrow: 'STUDENT POTENTIAL', title: 'Confidence to grow', description: 'Inspire students to develop confidence, focus, and a stronger sense of possibility.' },
+    { eyebrow: 'YOUTH LEADERSHIP', title: 'Lead with purpose', description: 'Help young people practise responsibility, communication, and purposeful leadership.' },
+    { eyebrow: 'SCHOOL CULTURE', title: 'A stronger community', description: 'Bring students and educators together around wellbeing, aspiration, and shared growth.' },
+  ],
+  corporate: [
+    { eyebrow: 'EXECUTIVE FOCUS', title: 'Focused leadership', description: 'Equip leaders to make clear decisions and stay composed through demanding moments.' },
+    { eyebrow: 'TEAM CULTURE', title: 'Teams that thrive', description: 'Strengthen trust, communication, and a culture where people can do their best work.' },
+    { eyebrow: 'SUSTAINABLE RESULTS', title: 'Performance that lasts', description: 'Support ambitious goals with habits that protect energy, attention, and long-term wellbeing.' },
+  ],
+  government: [
+    { eyebrow: 'PUBLIC LEADERSHIP', title: 'Lead with purpose', description: 'Encourage thoughtful leadership, sound decisions, and service with a clear purpose.' },
+    { eyebrow: 'INSTITUTIONAL STRENGTH', title: 'Resilient institutions', description: 'Support teams navigating change with focus, collaboration, and steadiness.' },
+    { eyebrow: 'PUBLIC IMPACT', title: 'People-centered progress', description: 'Bring a shared vision and practical mindset tools to public-sector gatherings.' },
+  ],
+  ngo: [
+    { eyebrow: 'COMMUNITY POWER', title: 'Empowered communities', description: 'Create space for people to recognise their strengths and shape local solutions.' },
+    { eyebrow: 'YOUTH DEVELOPMENT', title: 'Confident young people', description: 'Build confidence, communication, and leadership skills among youth and volunteers.' },
+    { eyebrow: 'LASTING IMPACT', title: 'Impact that continues', description: 'Connect purpose with practical habits that help teams sustain their social impact.' },
+  ],
+  parent: [
+    { eyebrow: 'FAMILY COMMUNICATION', title: 'Mindful communication', description: 'Bring more patience, listening, and understanding into everyday family conversations.' },
+    { eyebrow: 'EMOTIONAL WELLBEING', title: 'Emotional resilience', description: 'Help children and parents meet difficult moments with confidence and care.' },
+    { eyebrow: 'FAMILY CONNECTION', title: 'A connected family', description: 'Build small, meaningful practices that support trust, harmony, and shared growth.' },
+  ],
+};
+
+type RolePageLayout = 'student-cards' | 'editorial' | 'program' | 'executive' | 'cycle' | 'impact' | 'conversation';
+type RoleActionStyle = 'pill' | 'text' | 'outline' | 'none';
+
+const ROLE_PAGE_PRESENTATION: Record<PersonaType, { layout: RolePageLayout; actionStyle: RoleActionStyle; actionLabel: string }> = {
+  student: { layout: 'student-cards', actionStyle: 'none', actionLabel: '' },
+  individual: { layout: 'editorial', actionStyle: 'text', actionLabel: 'Explore personal mentoring' },
+  school: { layout: 'program', actionStyle: 'outline', actionLabel: 'Plan a school session' },
+  corporate: { layout: 'executive', actionStyle: 'pill', actionLabel: 'Discuss a keynote' },
+  government: { layout: 'cycle', actionStyle: 'none', actionLabel: '' },
+  ngo: { layout: 'impact', actionStyle: 'text', actionLabel: 'Plan a community event' },
+  parent: { layout: 'conversation', actionStyle: 'outline', actionLabel: 'Explore family guidance' },
 };
 
 export default function Identify({
@@ -219,7 +258,6 @@ export default function Identify({
   const [hasWatchedVideo, setHasWatchedVideo] = useState<Record<string, boolean>>({});
   const [roleVideoPlaying, setRoleVideoPlaying] = useState(false);
   const [roleVideoEnded, setRoleVideoEnded] = useState(false);
-  const [activeCard, setActiveCard] = useState<number>(1);
 
   useEffect(() => {
     try {
@@ -345,12 +383,14 @@ export default function Identify({
     }, 2800);
   };
 
-  const handleContinue = () => {
-    if (!selected) {
+  const handleContinue = (persona?: PersonaType) => {
+    const personaToOpen = persona || selected;
+    if (!personaToOpen) {
       triggerPrompt();
       return;
     }
     if (flipState !== 'idle') return;
+    setSelected(personaToOpen);
     setRoleVideoEnded(false);
     setFlipState('flipping-forward');
     playPaperTurnSound();
@@ -542,11 +582,8 @@ export default function Identify({
   };
 
   const handleSelect = (id: PersonaType) => {
+    if (flipState !== 'idle') return;
     explicitlySelectedRoleRef.current = id;
-    if (selected === id) {
-      handleContinue();
-      return;
-    }
     setRoleVideoEnded(false);
     setSelected(id);
     setShowPrompt(false);
@@ -555,6 +592,7 @@ export default function Identify({
     if (onSelectPersona) {
       onSelectPersona(id);
     }
+    handleContinue(id);
   };
 
   const currentOption = selected ? PERSONAS.find((p) => p.id === selected) : null;
@@ -611,6 +649,24 @@ export default function Identify({
       setRoleVideoEnded(false);
     }
   }, [viewMode, selected, flipState, activeRole?.id]);
+
+  useEffect(() => {
+    if (!isActive || viewMode !== 'coming-soon' || !roleVideoEnded) return;
+    const panel = document.querySelector<HTMLElement>('[data-role-panel="true"]');
+    if (!panel) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          entry.target.classList.toggle('is-visible', entry.isIntersecting);
+        });
+      },
+      { root: panel, threshold: 0.18, rootMargin: '0px 0px -6% 0px' },
+    );
+
+    panel.querySelectorAll<HTMLElement>('[data-role-reveal]').forEach((section) => observer.observe(section));
+    return () => observer.disconnect();
+  }, [isActive, viewMode, roleVideoEnded, activeRole.id]);
 
   const handleRoleTimeUpdate = () => {
     const v = roleVideoRef.current;
@@ -821,23 +877,6 @@ export default function Identify({
                 {/* Header Row */}
                 <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-amber-200/15 pb-6">
                   <div className="max-w-2xl">
-                    {/* Category Subtitle Pill */}
-                    <div
-                      className="mb-3 inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#18120b]/90 border text-xs font-serif font-bold tracking-wider uppercase shadow-lg transition-all"
-                      style={{
-                        borderColor: `${activeRole.themeColor}88`,
-                        color: activeRole.themeColor,
-                        boxShadow: `0 0 20px ${activeRole.themeGlow}`,
-                      }}
-                    >
-                      {React.createElement(activeRole.icon, {
-                        className: 'w-3.5 h-3.5',
-                        style: { color: activeRole.themeColor },
-                      })}
-                      <span>{activeRole.badgeLabel}</span>
-                      <span className="w-1.5 h-1.5 rounded-full animate-ping" style={{ backgroundColor: activeRole.themeColor }} />
-                    </div>
-
                     {/* Handwritten Caveat Headline */}
                     <h1
                       className="individual-ink-glow font-bold leading-[0.9] text-[#f5c66d] drop-shadow-[0_2px_14px_rgba(0,0,0,0.85)] text-4xl sm:text-6xl md:text-7xl py-1 select-text"
@@ -868,149 +907,108 @@ export default function Identify({
 
                 </div>
 
-                {/* MODERN CARDS SECTION (Card 1, Card 2, Card 3) */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-5 sm:gap-6">
-                  {/* CARD 1 */}
-                  <div
-                    onClick={() => setActiveCard(1)}
-                    className={`group relative rounded-3xl p-6 sm:p-8 transition-all duration-300 flex flex-col justify-between overflow-hidden bg-gradient-to-b from-[#18120c]/90 via-[#120e0a]/90 to-[#0c0906]/95 border hover:border-amber-400 hover:scale-[1.02] hover:-translate-y-1.5 shadow-[0_10px_30px_rgba(0,0,0,0.6)] hover:shadow-[0_15px_40px_rgba(223,165,71,0.25)] cursor-pointer ${
-                      activeCard === 1
-                        ? 'border-amber-400 ring-2 ring-amber-400/30 shadow-[0_0_30px_rgba(223,165,71,0.35)] scale-[1.01]'
-                        : 'border-amber-500/30'
-                    }`}
-                  >
-                    <div className="absolute top-0 right-0 w-32 h-32 rounded-full blur-2xl pointer-events-none bg-amber-400/10 group-hover:bg-amber-400/20 transition-all" />
+                {/* Each audience gets its own open, animated content layout */}
+                {(() => {
+                  const presentation = ROLE_PAGE_PRESENTATION[activeRole.id];
+                  const sections = ROLE_PAGE_SECTIONS[activeRole.id];
+                  const layoutClass: Record<RolePageLayout, string> = {
+                    'student-cards': 'grid max-w-5xl grid-cols-1 gap-5 md:grid-cols-3 md:gap-6',
+                    editorial: 'max-w-4xl border-y border-white/10',
+                    program: 'grid max-w-5xl grid-cols-1 gap-x-8 md:grid-cols-3 md:divide-x md:divide-white/10',
+                    executive: 'max-w-5xl divide-y divide-white/10 border-y border-white/20',
+                    cycle: 'role-cycle-layout grid max-w-5xl grid-cols-1 gap-5 md:grid-cols-3 md:gap-6',
+                    impact: 'max-w-3xl',
+                    conversation: 'max-w-4xl',
+                  };
 
-                    <div>
-                      {/* Step Tag */}
-                      <div className="flex items-center justify-between mb-4">
-                        <span className="text-xs font-mono font-bold tracking-widest px-3 py-1 rounded-full border border-amber-500/40 bg-amber-400/10 text-amber-300">
-                          01
-                        </span>
-                        <span className="text-[10px] font-mono uppercase tracking-wider text-amber-200/60">
-                          {activeRole.badgeLabel}
-                        </span>
+                  return (
+                    <div className={`relative mx-auto w-full py-5 sm:py-8 ${layoutClass[presentation.layout]}`}>
+                      {presentation.layout === 'cycle' ? (
+                        <div aria-hidden="true" className="role-cycle-path" style={{ borderColor: `${activeRole.themeColor}66`, color: activeRole.themeColor }} />
+                      ) : null}
+
+                      <div className={presentation.layout === 'executive' ? 'flex flex-col' : presentation.layout === 'program' || presentation.layout === 'student-cards' || presentation.layout === 'cycle' ? 'contents' : ''}>
+                        {sections.map((section, index) => {
+                          const SectionIcon = [Sparkles, Target, Brain][index];
+                          const direction = index === 0 ? 'role-story-from-left' : index === 1 ? 'role-story-from-right' : 'role-story-from-bottom';
+                          const content = (
+                            <div>
+                              <p className="mb-2 font-mono text-[10px] font-bold uppercase tracking-[0.24em]" style={{ color: activeRole.themeColor }}>{section.eyebrow}</p>
+                              <h2 className="font-serif text-2xl font-bold leading-tight text-white sm:text-3xl">{section.title}</h2>
+                              <p className="mt-3 max-w-2xl text-sm leading-relaxed text-slate-300/85 sm:text-base">{section.description}</p>
+                            </div>
+                          );
+                          const marker = (
+                            <div className="flex shrink-0 items-center gap-3">
+                              <span className="font-serif text-4xl font-bold leading-none opacity-35 sm:text-5xl" style={{ color: activeRole.themeColor }}>0{index + 1}</span>
+                              <span className="flex h-11 w-11 items-center justify-center rounded-full border border-white/10 bg-black/20" style={{ color: activeRole.themeColor, borderColor: `${activeRole.themeColor}66` }}>
+                                <SectionIcon className="h-5 w-5" />
+                              </span>
+                            </div>
+                          );
+
+                          let sectionClass = 'role-story-reveal';
+                          const cardMotionClass: Record<RolePageLayout, string> = {
+                            'student-cards': 'role-card-3d role-card-student',
+                            editorial: 'role-card-3d role-card-editorial',
+                            program: 'role-card-3d role-card-school',
+                            executive: 'role-card-3d role-card-executive',
+                            cycle: 'role-card-3d role-card-government',
+                            impact: 'role-card-3d role-card-ngo',
+                            conversation: 'role-card-3d role-card-parent',
+                          };
+                          sectionClass += ` ${cardMotionClass[presentation.layout]}`;
+                          if (presentation.layout === 'student-cards') {
+                            const cardVariant = index === 0
+                              ? 'border-amber-300/50 bg-gradient-to-br from-amber-300/15 via-[#17110a]/90 to-[#0b0907] shadow-[0_18px_45px_rgba(0,0,0,0.35)]'
+                              : index === 1
+                                ? 'border-white/15 bg-white/[0.055] backdrop-blur-xl shadow-[0_18px_45px_rgba(0,0,0,0.25)] md:translate-y-7'
+                                : 'border-dashed border-amber-200/35 bg-[#0c1315]/80 shadow-[0_18px_45px_rgba(0,0,0,0.35)]';
+                            sectionClass += ` ${direction} group relative flex min-h-[300px] flex-col justify-between overflow-hidden rounded-[1.7rem] border p-6 transition duration-500 hover:-translate-y-2 hover:shadow-[0_24px_55px_rgba(0,0,0,0.5)] sm:p-7 ${cardVariant}`;
+                          }
+                          if (presentation.layout === 'editorial') sectionClass += ` ${direction} mb-5 rounded-[2rem] border bg-white/[0.035] p-7 text-center shadow-[0_22px_55px_rgba(0,0,0,0.25)] sm:mb-7 sm:p-10 sm:py-12`;
+                          if (presentation.layout === 'program') sectionClass += ` ${direction} min-h-[300px] rounded-3xl border bg-gradient-to-br from-[#10221d]/90 via-[#101713]/85 to-[#0b0d0c] p-6 shadow-[0_20px_45px_rgba(0,0,0,0.32)] md:mb-5 md:border-b md:px-6 md:py-8`;
+                          if (presentation.layout === 'executive') sectionClass += ` ${direction} mb-4 grid grid-cols-1 gap-4 rounded-2xl border bg-gradient-to-r from-[#111619]/95 via-[#101212]/90 to-[#17130e]/90 p-6 shadow-[0_18px_40px_rgba(0,0,0,0.35)] sm:grid-cols-[5rem_1fr] sm:gap-8 sm:p-8`;
+                          if (presentation.layout === 'cycle') sectionClass += ` ${direction} relative z-10 flex flex-col items-center rounded-[2rem] border bg-[#0a0c0c]/75 px-5 py-7 text-center shadow-[0_18px_42px_rgba(0,0,0,0.32)] sm:px-7 sm:py-9`;
+                          if (presentation.layout === 'impact') sectionClass += ` ${direction} mb-5 flex flex-col items-center rounded-[2rem] border border-dashed bg-gradient-to-b from-[#1c1118]/85 to-[#0d0a0c]/90 p-7 text-center shadow-[0_18px_45px_rgba(0,0,0,0.3)] sm:mb-7 sm:p-10`;
+                          if (presentation.layout === 'conversation') sectionClass += ` ${direction} mb-5 flex flex-col gap-5 rounded-[1.8rem] border bg-gradient-to-br from-[#21141b]/80 to-[#100d10]/95 p-6 shadow-[0_18px_42px_rgba(0,0,0,0.32)] sm:mb-7 sm:flex-row sm:items-center sm:p-8 ${index % 2 ? 'sm:flex-row-reverse sm:text-right' : ''}`;
+
+                          return (
+                            <article key={`${activeRole.id}-section-${index}`} data-role-reveal className={sectionClass} style={{ transitionDelay: `${index * 70}ms`, borderColor: `${activeRole.themeColor}55` }}>
+                              {presentation.layout === 'student-cards' ? <><div className="pointer-events-none absolute -right-10 -top-10 h-36 w-36 rounded-full opacity-20 blur-3xl" style={{ backgroundColor: activeRole.themeColor }} /><div className="relative"><div className="mb-6 flex items-center justify-between"><span className="font-mono text-xs tracking-[0.25em]" style={{ color: activeRole.themeColor }}>0{index + 1} / 03</span><SectionIcon className="h-5 w-5" style={{ color: activeRole.themeColor }} /></div>{content}</div><button type="button" onClick={() => handleGoToPersonaPage(activeRole.id)} className={`relative mt-7 inline-flex min-h-11 items-center justify-between gap-3 px-4 py-3 text-left text-xs font-bold transition sm:text-sm ${index === 0 ? 'rounded-full bg-amber-300 text-[#1a1006] hover:bg-amber-200' : index === 1 ? 'rounded-xl border border-white/15 bg-white/[0.06] text-white hover:bg-white/[0.12]' : 'rounded-lg border border-dashed border-amber-200/35 text-amber-100 hover:bg-amber-200/10'}`}><span>{section.buttonLabel}</span><ChevronRight className="h-4 w-4 shrink-0 transition-transform group-hover:translate-x-1" /></button></> : null}
+                              {presentation.layout === 'editorial' ? <div className="mx-auto max-w-3xl"><p className="mb-4 font-mono text-[10px] font-bold uppercase tracking-[0.3em]" style={{ color: activeRole.themeColor }}>0{index + 1} <span className="px-2 opacity-50">/</span> {section.eyebrow}</p><h2 className="font-serif text-3xl font-semibold italic leading-tight text-white sm:text-5xl">{section.title}</h2><p className="mx-auto mt-5 max-w-2xl text-sm leading-7 text-slate-300/85 sm:text-base">{section.description}</p></div> : null}
+                              {presentation.layout === 'program' ? <><div className="mb-5 flex items-center justify-between"><span className="text-xs font-mono tracking-[0.24em]" style={{ color: activeRole.themeColor }}>0{index + 1}</span><SectionIcon className="h-5 w-5" style={{ color: activeRole.themeColor }} /></div>{content}<div className="mt-5 h-px w-12" style={{ backgroundColor: activeRole.themeColor }} /></> : null}
+                              {presentation.layout === 'executive' ? <><span className="font-mono text-4xl font-light tracking-tight" style={{ color: activeRole.themeColor }}>0{index + 1}</span>{content}</> : null}
+                              {presentation.layout === 'cycle' ? <><div className="role-cycle-node relative mb-5 flex h-[4.5rem] w-[4.5rem] items-center justify-center rounded-full border bg-[#090807] font-mono text-lg font-bold" style={{ borderColor: `${activeRole.themeColor}aa`, color: activeRole.themeColor }}><span className="role-cycle-ring absolute inset-1 rounded-full border border-dashed" style={{ borderColor: `${activeRole.themeColor}88` }} />0{index + 1}</div><div className="max-w-xs">{content}</div></> : null}
+                              {presentation.layout === 'impact' ? <><span className="mb-4 flex h-14 w-14 items-center justify-center rounded-full border" style={{ color: activeRole.themeColor, borderColor: `${activeRole.themeColor}70` }}><SectionIcon className="h-6 w-6" /></span><span className="mb-2 font-mono text-xs tracking-[0.3em]" style={{ color: activeRole.themeColor }}>IMPACT 0{index + 1}</span><div className="max-w-2xl">{content}</div></> : null}
+                              {presentation.layout === 'conversation' ? <><span className="font-serif text-6xl leading-none opacity-50" style={{ color: activeRole.themeColor }}>“</span><div className="flex-1">{content}</div></> : null}
+                            </article>
+                          );
+                        })}
                       </div>
 
-                      {/* Icon & Title */}
-                      <div className="flex items-center gap-3.5 mb-4">
-                        <div className="w-12 h-12 rounded-2xl bg-[#24170e] border border-amber-500/40 text-amber-300 flex items-center justify-center shadow-inner group-hover:scale-110 transition-transform">
-                          <Sparkles className="w-6 h-6 stroke-[1.8]" />
+                      {presentation.layout === 'cycle' ? (
+                        <p className="relative z-10 mt-4 text-center font-mono text-[10px] font-bold tracking-[0.28em] sm:col-span-3" style={{ color: activeRole.themeColor }}>
+                          VISION <span className="px-2 opacity-50">→</span> SERVICE <span className="px-2 opacity-50">→</span> IMPACT <span className="px-2 opacity-50">↻</span>
+                        </p>
+                      ) : null}
+
+                      {presentation.actionStyle !== 'none' ? (
+                        <div className={`mt-8 ${presentation.actionStyle === 'text' ? 'text-center sm:text-left' : 'flex justify-center sm:justify-start'}`}>
+                          <button
+                            type="button"
+                            onClick={() => handleGoToPersonaPage(activeRole.id)}
+                            className={`group inline-flex min-h-11 items-center gap-2 font-semibold transition hover:-translate-y-0.5 ${presentation.actionStyle === 'pill' ? 'rounded-full px-6 py-3 text-sm text-[#120c06] shadow-lg hover:shadow-xl' : presentation.actionStyle === 'outline' ? 'rounded-lg border px-5 py-3 text-sm hover:bg-white/5' : 'border-b pb-1 text-sm hover:gap-3'}`}
+                            style={presentation.actionStyle === 'pill' ? { backgroundColor: activeRole.themeColor } : { color: activeRole.themeColor, borderColor: `${activeRole.themeColor}88` }}
+                          >
+                            {presentation.actionLabel}
+                            <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                          </button>
                         </div>
-                        <h2 className="font-serif font-bold text-2xl sm:text-3xl text-white tracking-wide">
-                          Card 1
-                        </h2>
-                      </div>
-
-                      <p className="text-xs sm:text-sm text-slate-400 font-sans leading-relaxed">
-                        Card 1 content description goes here.
-                      </p>
+                      ) : null}
                     </div>
-
-                    <button
-                      type="button"
-                      onClick={() => handleGoToPersonaPage(activeRole.id)}
-                      className="mt-6 w-full py-3 px-4 rounded-xl text-xs sm:text-sm font-serif font-bold uppercase tracking-wider flex items-center justify-center gap-2 bg-[#1f150e] hover:bg-[#2c1d12] border border-amber-500/40 text-amber-200 hover:text-white transition-all shadow-md group-hover:border-amber-400 cursor-pointer"
-                    >
-                      <span>Explore</span>
-                      <ChevronRight className="w-4 h-4 text-amber-300" />
-                    </button>
-                  </div>
-
-                  {/* CARD 2 */}
-                  <div
-                    onClick={() => setActiveCard(2)}
-                    className={`group relative rounded-3xl p-6 sm:p-8 transition-all duration-300 flex flex-col justify-between overflow-hidden bg-gradient-to-b from-[#18120c]/90 via-[#120e0a]/90 to-[#0c0906]/95 border hover:border-amber-400 hover:scale-[1.02] hover:-translate-y-1.5 shadow-[0_10px_30px_rgba(0,0,0,0.6)] hover:shadow-[0_15px_40px_rgba(223,165,71,0.25)] cursor-pointer ${
-                      activeCard === 2
-                        ? 'border-amber-400 ring-2 ring-amber-400/30 shadow-[0_0_30px_rgba(223,165,71,0.35)] scale-[1.01]'
-                        : 'border-amber-500/30'
-                    }`}
-                  >
-                    <div className="absolute top-0 right-0 w-32 h-32 rounded-full blur-2xl pointer-events-none bg-amber-400/10 group-hover:bg-amber-400/20 transition-all" />
-
-                    <div>
-                      {/* Step Tag */}
-                      <div className="flex items-center justify-between mb-4">
-                        <span className="text-xs font-mono font-bold tracking-widest px-3 py-1 rounded-full border border-amber-500/40 bg-amber-400/10 text-amber-300">
-                          02
-                        </span>
-                        <span className="text-[10px] font-mono uppercase tracking-wider text-amber-200/60">
-                          {activeRole.badgeLabel}
-                        </span>
-                      </div>
-
-                      {/* Icon & Title */}
-                      <div className="flex items-center gap-3.5 mb-4">
-                        <div className="w-12 h-12 rounded-2xl bg-[#24170e] border border-amber-500/40 text-amber-300 flex items-center justify-center shadow-inner group-hover:scale-110 transition-transform">
-                          <Target className="w-6 h-6 stroke-[1.8]" />
-                        </div>
-                        <h2 className="font-serif font-bold text-2xl sm:text-3xl text-white tracking-wide">
-                          Card 2
-                        </h2>
-                      </div>
-
-                      <p className="text-xs sm:text-sm text-slate-400 font-sans leading-relaxed">
-                        Card 2 content description goes here.
-                      </p>
-                    </div>
-
-                    <button
-                      type="button"
-                      onClick={() => handleGoToPersonaPage(activeRole.id)}
-                      className="mt-6 w-full py-3 px-4 rounded-xl text-xs sm:text-sm font-serif font-bold uppercase tracking-wider flex items-center justify-center gap-2 bg-[#1f150e] hover:bg-[#2c1d12] border border-amber-500/40 text-amber-200 hover:text-white transition-all shadow-md group-hover:border-amber-400 cursor-pointer"
-                    >
-                      <span>Explore</span>
-                      <ChevronRight className="w-4 h-4 text-amber-300" />
-                    </button>
-                  </div>
-
-                  {/* CARD 3 */}
-                  <div
-                    onClick={() => setActiveCard(3)}
-                    className={`group relative rounded-3xl p-6 sm:p-8 transition-all duration-300 flex flex-col justify-between overflow-hidden bg-gradient-to-b from-[#18120c]/90 via-[#120e0a]/90 to-[#0c0906]/95 border hover:border-amber-400 hover:scale-[1.02] hover:-translate-y-1.5 shadow-[0_10px_30px_rgba(0,0,0,0.6)] hover:shadow-[0_15px_40px_rgba(223,165,71,0.25)] cursor-pointer ${
-                      activeCard === 3
-                        ? 'border-amber-400 ring-2 ring-amber-400/30 shadow-[0_0_30px_rgba(223,165,71,0.35)] scale-[1.01]'
-                        : 'border-amber-500/30'
-                    }`}
-                  >
-                    <div className="absolute top-0 right-0 w-32 h-32 rounded-full blur-2xl pointer-events-none bg-amber-400/10 group-hover:bg-amber-400/20 transition-all" />
-
-                    <div>
-                      {/* Step Tag */}
-                      <div className="flex items-center justify-between mb-4">
-                        <span className="text-xs font-mono font-bold tracking-widest px-3 py-1 rounded-full border border-amber-500/40 bg-amber-400/10 text-amber-300">
-                          03
-                        </span>
-                        <span className="text-[10px] font-mono uppercase tracking-wider text-amber-200/60">
-                          {activeRole.badgeLabel}
-                        </span>
-                      </div>
-
-                      {/* Icon & Title */}
-                      <div className="flex items-center gap-3.5 mb-4">
-                        <div className="w-12 h-12 rounded-2xl bg-[#24170e] border border-amber-500/40 text-amber-300 flex items-center justify-center shadow-inner group-hover:scale-110 transition-transform">
-                          <Brain className="w-6 h-6 stroke-[1.8]" />
-                        </div>
-                        <h2 className="font-serif font-bold text-2xl sm:text-3xl text-white tracking-wide">
-                          Card 3
-                        </h2>
-                      </div>
-
-                      <p className="text-xs sm:text-sm text-slate-400 font-sans leading-relaxed">
-                        Card 3 content description goes here.
-                      </p>
-                    </div>
-
-                    <button
-                      type="button"
-                      onClick={() => handleGoToPersonaPage(activeRole.id)}
-                      className="mt-6 w-full py-3 px-4 rounded-xl text-xs sm:text-sm font-serif font-bold uppercase tracking-wider flex items-center justify-center gap-2 bg-[#1f150e] hover:bg-[#2c1d12] border border-amber-500/40 text-amber-200 hover:text-white transition-all shadow-md group-hover:border-amber-400 cursor-pointer"
-                    >
-                      <span>Explore</span>
-                      <ChevronRight className="w-4 h-4 text-amber-300" />
-                    </button>
-                  </div>
-                </div>
+                  );
+                })()}
 
               </div>
 
@@ -1121,12 +1119,6 @@ export default function Identify({
                       <div className="absolute bottom-1 right-1 w-1.5 h-1.5 border-b-2 border-r-2 border-[#fde68a]/85 pointer-events-none" />
 
                       <div className="relative z-10 flex flex-col items-center text-center space-y-1 py-0.5">
-                        {isSelected && (
-                          <div className="absolute -top-2 -right-2 w-5 h-5 rounded-full bg-[#dfa547] border border-amber-200 text-black flex items-center justify-center shadow-md animate-in zoom-in-75 duration-200">
-                            <Check className="w-3 h-3 stroke-[3]" />
-                          </div>
-                        )}
-
                         <div className="w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center text-amber-100 group-hover:text-white group-hover:scale-110 transition-all drop-shadow-xs">
                           <IconComponent className="w-6 h-6 sm:w-7 sm:h-7 stroke-[1.75]" />
                         </div>
@@ -1147,33 +1139,6 @@ export default function Identify({
               </div>
             </div>
 
-            {/* Bottom Button */}
-            <div
-              className={`relative z-10 w-full max-w-4xl mx-auto flex items-center justify-end mt-3 sm:mt-4 transition-all duration-700 ease-out ${buttonsVisible
-                  ? 'opacity-100 translate-y-0'
-                  : 'opacity-0 translate-y-4 pointer-events-none'
-                }`}
-            >
-              <button
-                onClick={handleContinue}
-                className={`py-2.5 sm:py-3 px-6 sm:px-8 text-xs sm:text-sm font-bold shadow-xl flex items-center justify-center gap-2 cursor-pointer transition-all duration-300 hover:scale-105 active:scale-95 rounded-full ${selected
-                    ? 'ochre-pill-button hover:shadow-[0_0_25px_rgba(223,165,71,0.5)]'
-                    : 'bg-gradient-to-r from-[#2a1c0d]/90 via-[#3a2712]/90 to-[#2a1c0d]/90 border border-[#dfa547]/60 text-amber-200/90 hover:text-white hover:border-[#dfa547] shadow-[0_4px_20px_rgba(0,0,0,0.5)]'
-                  } ${shakePrompt && !selected ? 'animate-button-attention' : ''}`}
-              >
-                {selected && currentOption ? (
-                  <>
-                    <span>Continue as {currentOption.title}</span>
-                    <ArrowRight className="w-4 h-4" />
-                  </>
-                ) : (
-                  <>
-                    <Sparkles className="w-4 h-4 text-amber-400" />
-                    <span>First choose your identity</span>
-                  </>
-                )}
-              </button>
-            </div>
           </div>
         )}
 
