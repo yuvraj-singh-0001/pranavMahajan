@@ -102,17 +102,17 @@ export const ROLE_EXPERIENCES: Record<PersonaType, RoleExperienceConfig> = {
     id: 'student',
     title: 'Student',
     videoSrc: '/studentpanel.mp4',
-    headingLines: ['This is the', 'student pages'],
+    headingLines: ['Find your', 'next level'],
     subtitle: "Pushing open the doors to excellence, leadership, and boundless possibilities with Pranav Mahajan's youth masterclasses.",
     storageKey: 'pravan_student_video_watched',
-    themeColor: '#dfa547',
-    themeGlow: 'rgba(223, 165, 71, 0.4)',
+    themeColor: '#B8F7D0',
+    themeGlow: 'rgba(137, 237, 176, 0.34)',
   },
   school: {
     id: 'school',
     title: 'Educational Institution',
     videoSrc: '/school-role.mp4',
-    headingLines: ['This is my', 'edu page'],
+    headingLines: ['Shape the', 'school of tomorrow'],
     subtitle: 'Empowering academic excellence, youth leadership culture, and transformative teacher-student synergy.',
     storageKey: 'pravan_school_video_watched',
     themeColor: '#10b981',
@@ -122,7 +122,7 @@ export const ROLE_EXPERIENCES: Record<PersonaType, RoleExperienceConfig> = {
     id: 'individual',
     title: 'Individual',
     videoSrc: '/Individual.mp4',
-    headingLines: ['This is my', 'Individual page'],
+    headingLines: ['Become more', 'fully yourself'],
     subtitle: 'Personal transformation, peak subconscious focus, and life-changing self-mastery frameworks.',
     storageKey: 'pravan_individual_video_watched',
     themeColor: '#c084fc',
@@ -132,7 +132,7 @@ export const ROLE_EXPERIENCES: Record<PersonaType, RoleExperienceConfig> = {
     id: 'corporate',
     title: 'Corporate / Business',
     videoSrc: '/Video_prompt_for_collage_animation_40b3e6b1_1080p%20(online-video-cutter.com).mp4',
-    headingLines: ['This is my', 'Corporate', 'Business page'],
+    headingLines: ['Lead people.', 'Build what lasts.'],
     subtitle: 'Executive peak performance, high-impact leadership culture, and organizational breakthrough mastery.',
     storageKey: 'pravan_corporate_video_watched',
     themeColor: '#94a3b8',
@@ -142,7 +142,7 @@ export const ROLE_EXPERIENCES: Record<PersonaType, RoleExperienceConfig> = {
     id: 'government',
     title: 'Government Department',
     videoSrc: '/gvtanimetion.mp4',
-    headingLines: ['This is my', 'Government Page'],
+    headingLines: ['Leadership', 'in public service'],
     subtitle: 'Strategic institutional vision, nation-building synergy, and transformative public governance keynote programs.',
     storageKey: 'pravan_government_video_watched',
     themeColor: '#f59e0b',
@@ -152,7 +152,7 @@ export const ROLE_EXPERIENCES: Record<PersonaType, RoleExperienceConfig> = {
     id: 'ngo',
     title: 'NGO / Social Sector',
     videoSrc: '/animetion%20video%20(2)%20(online-video-cutter.com).mp4',
-    headingLines: ['This is my', 'NGO Page'],
+    headingLines: ['Purpose into', 'lasting impact'],
     subtitle: 'Grassroots empowerment, sustainable social impact, and uplifting community transformation.',
     storageKey: 'pravan_ngo_video_watched',
     themeColor: '#fb7185',
@@ -736,7 +736,7 @@ export default function Identify({
       {isActive && (
         <div className="absolute top-20 sm:top-24 right-4 sm:right-8 z-50 flex items-center gap-2.5 pointer-events-auto">
           {/* 1. Unmute / Sound Toggle Button */}
-          <button
+          {comingSoonOption.id !== 'student' ? <button
             onClick={toggleGlobalAudio}
             className="inline-flex items-center gap-1.5 px-3.5 sm:px-4 py-2 rounded-full bg-[#140e09]/90 hover:bg-[#24170d] backdrop-blur-md border border-[#dfa547]/50 text-amber-200 hover:text-white transition-all shadow-xl hover:shadow-[0_0_20px_rgba(223,165,71,0.4)] cursor-pointer hover:scale-105 active:scale-95 text-xs font-serif font-bold"
             aria-label={isAudioMuted ? 'Unmute Sound' : 'Mute Sound'}
@@ -752,7 +752,7 @@ export default function Identify({
                 <span className="hidden sm:inline">Sound On</span>
               </>
             )}
-          </button>
+          </button> : null}
 
           {/* 2. Skip Button on Cards View (Only 2nd time onwards) */}
           {viewMode === 'cards' && hasWatchedRoleVideo && !buttonsVisible && (
@@ -847,40 +847,48 @@ export default function Identify({
               />
 
               {/* Golden Mesh Shimmer matching site theme */}
-              <div className="absolute inset-0 bg-[radial-gradient(#dfa547_1px,transparent_1px)] [background-size:32px_32px] opacity-15 pointer-events-none" />
+              <div className="absolute inset-0 pointer-events-none opacity-[0.12]" style={{ backgroundImage: `radial-gradient(${activeRole.themeColor} 1px, transparent 1px)`, backgroundSize: '34px 34px' }} />
               <div className="absolute inset-0 bg-gradient-to-t from-[#090807]/30 via-transparent to-[#090807]/20 pointer-events-none" />
             </div>
 
             {/* PANEL 2: ROLE FULL PAGE (100vw, slides in from right side simultaneously) */}
             <div
               data-role-panel="true"
-              className="relative w-screen min-w-[100vw] max-w-[100vw] h-full flex-shrink-0 overflow-y-auto overflow-x-hidden flex flex-col items-stretch justify-start pt-16 sm:pt-20 pb-0 bg-[#090807] scroll-smooth"
+              data-role-theme={activeRole.id}
+              className={`relative w-screen min-w-[100vw] max-w-[100vw] h-full flex-shrink-0 overflow-y-auto overflow-x-hidden flex flex-col items-stretch justify-start pb-0 scroll-smooth ${activeRole.id === 'student' ? 'student-landing-panel pt-16 sm:pt-32' : 'bg-[#090807] pt-16 sm:pt-20'}`}
               style={{ width: '100vw', minWidth: '100vw', maxWidth: '100vw' }}
             >
               {/* Dynamic Theme Glow Orb */}
-              <div
+              {activeRole.id !== 'student' ? <div
                 className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] sm:w-[1050px] h-[500px] sm:h-[750px] rounded-full blur-[100px] sm:blur-[140px] pointer-events-none transition-colors duration-1000"
                 style={{
                   background: `radial-gradient(ellipse at center, ${activeRole.themeGlow} 0%, rgba(9,8,7,0) 75%)`,
                 }}
-              />
+              /> : null}
 
               {/* Golden Mesh Shimmer */}
-              <div className="absolute inset-0 bg-[radial-gradient(#dfa547_1px,transparent_1px)] [background-size:32px_32px] opacity-15 pointer-events-none" />
+              {activeRole.id !== 'student' ? <div className="absolute inset-0 pointer-events-none opacity-[0.12]" style={{ backgroundImage: `radial-gradient(${activeRole.themeColor} 1px, transparent 1px)`, backgroundSize: '34px 34px' }} /> : null}
 
               {/* Vignette Gradients */}
-              <div className="absolute inset-0 bg-gradient-to-t from-[#090807] via-transparent to-[#090807]/80 pointer-events-none" />
-              <div className="absolute inset-0 bg-gradient-to-r from-[#090807]/90 via-transparent to-[#090807]/90 pointer-events-none" />
+              {activeRole.id !== 'student' ? <>
+                <div className="absolute inset-0 bg-gradient-to-t from-[#090807] via-transparent to-[#090807]/80 pointer-events-none" />
+                <div className="absolute inset-0 bg-gradient-to-r from-[#090807]/90 via-transparent to-[#090807]/90 pointer-events-none" />
+              </> : null}
 
               {/* Page Content Container */}
               <div className="relative z-10 w-full max-w-6xl mx-auto px-4 sm:px-8 md:px-12 lg:px-16 flex flex-col gap-6 sm:gap-8 pointer-events-auto text-left flex-1">
                 {/* Header Row */}
-                <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-amber-200/15 pb-6">
+                <div className={`student-landing-hero flex flex-col md:flex-row md:items-center justify-between gap-7 border-b pb-8 sm:pb-10 ${activeRole.id === 'student' ? 'border-emerald-900/10' : ''}`} style={activeRole.id === 'student' ? undefined : { borderColor: `${activeRole.themeColor}30` }}>
                   <div className="max-w-2xl">
                     {/* Handwritten Caveat Headline */}
+                    {activeRole.id !== 'student' ? (
+                      <p className="role-theme-kicker mb-3 font-mono text-[10px] font-bold uppercase tracking-[0.34em] sm:text-xs" style={{ color: activeRole.themeColor }}>
+                        {activeRole.title} <span className="mx-2 opacity-40">/</span> A path designed for you
+                      </p>
+                    ) : null}
                     <h1
-                      className="individual-ink-glow font-bold leading-[0.9] text-[#f5c66d] drop-shadow-[0_2px_14px_rgba(0,0,0,0.85)] text-4xl sm:text-6xl md:text-7xl py-1 select-text"
-                      style={{ fontFamily: 'var(--font-caveat), cursive' }}
+                      className={`role-theme-heading font-bold leading-[0.98] text-4xl sm:text-6xl md:text-7xl py-1 select-text ${activeRole.id === 'student' ? 'text-[#123D27] tracking-[-0.045em]' : 'individual-ink-glow drop-shadow-[0_2px_14px_rgba(0,0,0,0.85)]'}`}
+                      style={{ fontFamily: activeRole.id === 'student' ? 'inherit' : 'var(--font-caveat), cursive', color: activeRole.id === 'student' ? undefined : activeRole.themeColor }}
                       aria-label={activeRole.headingLines.join(' ')}
                     >
                       {activeRole.headingLines.map((line, lineIndex) => (
@@ -900,11 +908,30 @@ export default function Identify({
                     </h1>
 
                     {/* Inspiring Subtitle */}
-                    <p className="font-serif italic text-amber-200/80 text-sm sm:text-base md:text-lg max-w-xl leading-relaxed mt-2">
-                      {activeRole.subtitle}
-                    </p>
+                    {activeRole.id !== 'student' ? (
+                      <p className="role-theme-subtitle font-serif italic text-sm sm:text-base md:text-lg max-w-xl leading-relaxed mt-4" style={{ color: `${activeRole.themeColor}d9` }}>
+                        {activeRole.subtitle}
+                      </p>
+                    ) : null}
+                    {activeRole.id === 'student' ? (
+                      <button type="button" onClick={() => handleGoToPersonaPage('student')} className="mt-6 inline-flex min-h-12 items-center gap-3 rounded-full bg-[#123D27] px-6 text-sm font-semibold text-white shadow-lg shadow-emerald-950/15 transition hover:-translate-y-0.5 hover:bg-[#1b5938]">
+                        Start your growth journey <ArrowRight className="h-4 w-4" />
+                      </button>
+                    ) : null}
                   </div>
-
+                  {activeRole.id === 'student' ? (
+                    <div aria-hidden="true" className="student-hero-art relative mx-auto flex h-48 w-48 shrink-0 items-center justify-center sm:h-60 sm:w-60 md:mr-8 md:h-64 md:w-64">
+                      <div className="absolute inset-2 rounded-full border border-emerald-800/15" />
+                      <div className="absolute inset-7 rounded-full border border-dashed border-emerald-800/20" />
+                      <div className="student-hero-orbit absolute inset-0 rounded-full border border-transparent border-t-[#67C994]" />
+                      <div className="relative flex h-36 w-36 flex-col items-center justify-center rounded-full bg-[#B8F7D0] text-center shadow-[0_20px_70px_rgba(39,128,76,0.18)] sm:h-44 sm:w-44">
+                        <GraduationCap className="mb-2 h-8 w-8 text-[#28784B]" />
+                        <span className="font-mono text-[9px] font-bold uppercase tracking-[0.22em] text-[#28784B]">Your potential</span>
+                        <span className="mt-1 font-serif text-2xl font-bold text-[#123D27]">in focus</span>
+                      </div>
+                      <span className="absolute right-2 top-9 h-3 w-3 rounded-full bg-[#52B77A] shadow-[0_0_20px_#52B77A]" />
+                    </div>
+                  ) : null}
                 </div>
 
                 {/* Each audience gets its own open, animated content layout */}
@@ -912,7 +939,7 @@ export default function Identify({
                   const presentation = ROLE_PAGE_PRESENTATION[activeRole.id];
                   const sections = ROLE_PAGE_SECTIONS[activeRole.id];
                   const layoutClass: Record<RolePageLayout, string> = {
-                    'student-cards': 'grid max-w-5xl grid-cols-1 gap-5 md:grid-cols-3 md:gap-6',
+                    'student-cards': 'max-w-5xl border-y border-emerald-900/10',
                     editorial: 'max-w-4xl border-y border-white/10',
                     program: 'grid max-w-5xl grid-cols-1 gap-x-8 md:grid-cols-3 md:divide-x md:divide-white/10',
                     executive: 'max-w-5xl divide-y divide-white/10 border-y border-white/20',
@@ -934,8 +961,8 @@ export default function Identify({
                           const content = (
                             <div>
                               <p className="mb-2 font-mono text-[10px] font-bold uppercase tracking-[0.24em]" style={{ color: activeRole.themeColor }}>{section.eyebrow}</p>
-                              <h2 className="font-serif text-2xl font-bold leading-tight text-white sm:text-3xl">{section.title}</h2>
-                              <p className="mt-3 max-w-2xl text-sm leading-relaxed text-slate-300/85 sm:text-base">{section.description}</p>
+                              <h2 className={`text-2xl font-bold leading-tight sm:text-3xl ${activeRole.id === 'student' ? 'font-sans text-[#123D27] tracking-[-0.025em]' : 'font-serif text-white'}`}>{section.title}</h2>
+                              <p className={`mt-3 max-w-2xl text-sm leading-relaxed sm:text-base ${activeRole.id === 'student' ? 'text-[#53695A]' : 'text-slate-300/85'}`}>{section.description}</p>
                             </div>
                           );
                           const marker = (
@@ -959,12 +986,7 @@ export default function Identify({
                           };
                           sectionClass += ` ${cardMotionClass[presentation.layout]}`;
                           if (presentation.layout === 'student-cards') {
-                            const cardVariant = index === 0
-                              ? 'border-amber-300/50 bg-gradient-to-br from-amber-300/15 via-[#17110a]/90 to-[#0b0907] shadow-[0_18px_45px_rgba(0,0,0,0.35)]'
-                              : index === 1
-                                ? 'border-white/15 bg-white/[0.055] backdrop-blur-xl shadow-[0_18px_45px_rgba(0,0,0,0.25)] md:translate-y-7'
-                                : 'border-dashed border-amber-200/35 bg-[#0c1315]/80 shadow-[0_18px_45px_rgba(0,0,0,0.35)]';
-                            sectionClass += ` ${direction} group relative flex min-h-[300px] flex-col justify-between overflow-hidden rounded-[1.7rem] border p-6 transition duration-500 hover:-translate-y-2 hover:shadow-[0_24px_55px_rgba(0,0,0,0.5)] sm:p-7 ${cardVariant}`;
+                            sectionClass += ` student-landing-section ${direction} relative grid grid-cols-[3.5rem_1fr] gap-4 border-b border-emerald-900/10 py-7 sm:grid-cols-[5rem_1fr] sm:gap-7 sm:py-9`;
                           }
                           if (presentation.layout === 'editorial') sectionClass += ` ${direction} mb-5 rounded-[2rem] border bg-white/[0.035] p-7 text-center shadow-[0_22px_55px_rgba(0,0,0,0.25)] sm:mb-7 sm:p-10 sm:py-12`;
                           if (presentation.layout === 'program') sectionClass += ` ${direction} min-h-[300px] rounded-3xl border bg-gradient-to-br from-[#10221d]/90 via-[#101713]/85 to-[#0b0d0c] p-6 shadow-[0_20px_45px_rgba(0,0,0,0.32)] md:mb-5 md:border-b md:px-6 md:py-8`;
@@ -974,8 +996,8 @@ export default function Identify({
                           if (presentation.layout === 'conversation') sectionClass += ` ${direction} mb-5 flex flex-col gap-5 rounded-[1.8rem] border bg-gradient-to-br from-[#21141b]/80 to-[#100d10]/95 p-6 shadow-[0_18px_42px_rgba(0,0,0,0.32)] sm:mb-7 sm:flex-row sm:items-center sm:p-8 ${index % 2 ? 'sm:flex-row-reverse sm:text-right' : ''}`;
 
                           return (
-                            <article key={`${activeRole.id}-section-${index}`} data-role-reveal className={sectionClass} style={{ transitionDelay: `${index * 70}ms`, borderColor: `${activeRole.themeColor}55` }}>
-                              {presentation.layout === 'student-cards' ? <><div className="pointer-events-none absolute -right-10 -top-10 h-36 w-36 rounded-full opacity-20 blur-3xl" style={{ backgroundColor: activeRole.themeColor }} /><div className="relative"><div className="mb-6 flex items-center justify-between"><span className="font-mono text-xs tracking-[0.25em]" style={{ color: activeRole.themeColor }}>0{index + 1} / 03</span><SectionIcon className="h-5 w-5" style={{ color: activeRole.themeColor }} /></div>{content}</div><button type="button" onClick={() => handleGoToPersonaPage(activeRole.id)} className={`relative mt-7 inline-flex min-h-11 items-center justify-between gap-3 px-4 py-3 text-left text-xs font-bold transition sm:text-sm ${index === 0 ? 'rounded-full bg-amber-300 text-[#1a1006] hover:bg-amber-200' : index === 1 ? 'rounded-xl border border-white/15 bg-white/[0.06] text-white hover:bg-white/[0.12]' : 'rounded-lg border border-dashed border-amber-200/35 text-amber-100 hover:bg-amber-200/10'}`}><span>{section.buttonLabel}</span><ChevronRight className="h-4 w-4 shrink-0 transition-transform group-hover:translate-x-1" /></button></> : null}
+                            <article key={`${activeRole.id}-section-${index}`} data-role-reveal className={sectionClass} style={{ transitionDelay: `${index * 70}ms`, borderColor: activeRole.id === 'student' ? undefined : `${activeRole.themeColor}55` }}>
+                              {presentation.layout === 'student-cards' ? <><span className="student-section-number font-mono text-sm font-semibold tracking-widest sm:text-base" style={{ color: activeRole.themeColor }}>0{index + 1}</span><div><p className="mb-2 font-mono text-[10px] font-bold uppercase tracking-[0.24em] text-[#41845C]">{section.eyebrow}</p>{content}</div></> : null}
                               {presentation.layout === 'editorial' ? <div className="mx-auto max-w-3xl"><p className="mb-4 font-mono text-[10px] font-bold uppercase tracking-[0.3em]" style={{ color: activeRole.themeColor }}>0{index + 1} <span className="px-2 opacity-50">/</span> {section.eyebrow}</p><h2 className="font-serif text-3xl font-semibold italic leading-tight text-white sm:text-5xl">{section.title}</h2><p className="mx-auto mt-5 max-w-2xl text-sm leading-7 text-slate-300/85 sm:text-base">{section.description}</p></div> : null}
                               {presentation.layout === 'program' ? <><div className="mb-5 flex items-center justify-between"><span className="text-xs font-mono tracking-[0.24em]" style={{ color: activeRole.themeColor }}>0{index + 1}</span><SectionIcon className="h-5 w-5" style={{ color: activeRole.themeColor }} /></div>{content}<div className="mt-5 h-px w-12" style={{ backgroundColor: activeRole.themeColor }} /></> : null}
                               {presentation.layout === 'executive' ? <><span className="font-mono text-4xl font-light tracking-tight" style={{ color: activeRole.themeColor }}>0{index + 1}</span>{content}</> : null}

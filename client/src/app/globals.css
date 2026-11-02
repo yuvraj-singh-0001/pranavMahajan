@@ -23,6 +23,18 @@ body {
   user-select: text;
 }
 
+.student-page-scroller {
+  overscroll-behavior-y: contain;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(49, 129, 83, 0.42) transparent;
+}
+
+.student-page-scroller::-webkit-scrollbar { width: 8px; }
+.student-page-scroller::-webkit-scrollbar-track { background: transparent; }
+.student-page-scroller::-webkit-scrollbar-thumb { border-radius: 999px; background: rgba(49, 129, 83, 0.42); }
+
 /* Absolute lock for Slide 0: zero micro-scroll or rubber-band bounce */
 .slide-item-locked {
   overflow: hidden !important;
@@ -958,6 +970,42 @@ html.quill-mode [data-chrome="true"] a * {
   filter: blur(7px);
   transition: opacity 700ms ease, transform 800ms cubic-bezier(0.2, 0.75, 0.25, 1), filter 800ms ease;
   will-change: opacity, transform, filter;
+}
+
+/* Give each audience page its own visual atmosphere after its introduction film. */
+[data-role-panel="true"] {
+  background-image: radial-gradient(ellipse at 50% 0%, rgba(223, 165, 71, 0.12), transparent 58%);
+  transition: background-color 700ms ease, background-image 700ms ease;
+}
+
+[data-role-theme="student"] { background-color: #F5FFF8 !important; background-image: radial-gradient(ellipse at 78% 14%, rgba(184,247,208,.58), transparent 32%), linear-gradient(135deg, #F7FFF9 0%, #F1FBF4 56%, #F8FFFA 100%); }
+[data-role-theme="individual"] { background-color: #0c0912 !important; background-image: radial-gradient(ellipse at 50% 0%, rgba(192,132,252,.22), transparent 58%), linear-gradient(135deg, #100b18, #0b0a10 62%, #100b15); }
+[data-role-theme="school"] { background-color: #08100d !important; background-image: radial-gradient(ellipse at 50% 0%, rgba(16,185,129,.2), transparent 58%), linear-gradient(135deg, #09140f, #0a0d0b 62%, #07100e); }
+[data-role-theme="corporate"] { background-color: #0a0e12 !important; background-image: radial-gradient(ellipse at 50% 0%, rgba(148,163,184,.2), transparent 58%), linear-gradient(135deg, #0c1117, #090c10 62%, #11100e); }
+[data-role-theme="government"] { background-color: #110e08 !important; background-image: radial-gradient(ellipse at 50% 0%, rgba(245,158,11,.2), transparent 58%), linear-gradient(135deg, #151007, #0d0c09 62%, #11100b); }
+[data-role-theme="ngo"] { background-color: #110a0d !important; background-image: radial-gradient(ellipse at 50% 0%, rgba(251,113,133,.2), transparent 58%), linear-gradient(135deg, #160b10, #0d090b 62%, #120a0e); }
+[data-role-theme="parent"] { background-color: #110a0e !important; background-image: radial-gradient(ellipse at 50% 0%, rgba(244,114,182,.2), transparent 58%), linear-gradient(135deg, #160b12, #0d090c 62%, #120a10); }
+
+.role-theme-heading { text-wrap: balance; }
+
+.student-landing-panel { color: #123D27; }
+.student-landing-hero { min-height: 340px; }
+.student-hero-orbit { animation: studentOrbit 18s linear infinite; }
+.student-section-number { padding-top: .2rem; }
+
+@keyframes studentOrbit { to { transform: rotate(360deg); } }
+
+@media (max-width: 767px) {
+  .student-landing-hero { min-height: auto; }
+  .student-hero-art { margin-top: .5rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .student-hero-orbit { animation: none; }
+}
+
+@media (max-width: 640px) {
+  .role-theme-kicker { letter-spacing: .22em; }
 }
 
 .role-story-from-left {
