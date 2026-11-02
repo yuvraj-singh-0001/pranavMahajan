@@ -112,11 +112,11 @@ export const ROLE_EXPERIENCES: Record<PersonaType, RoleExperienceConfig> = {
     id: 'school',
     title: 'Educational Institution',
     videoSrc: '/school-role.mp4',
-    headingLines: ['Shape the', 'school of tomorrow'],
-    subtitle: 'Empowering academic excellence, youth leadership culture, and transformative teacher-student synergy.',
+    headingLines: ['A new cycle', 'of learning'],
+    subtitle: 'Create space for students and educators to build confidence, spark curiosity, and turn everyday learning into lasting progress.',
     storageKey: 'pravan_school_video_watched',
-    themeColor: '#10b981',
-    themeGlow: 'rgba(16, 185, 129, 0.4)',
+    themeColor: '#D6AA61',
+    themeGlow: 'rgba(214, 170, 97, 0.28)',
   },
   individual: {
     id: 'individual',
@@ -187,9 +187,13 @@ const ROLE_PAGE_SECTIONS: Record<PersonaType, Array<{
     { eyebrow: 'PERSONAL MASTERY', title: 'Design your next chapter', description: 'Create meaningful goals and daily practices that support lasting personal growth.' },
   ],
   school: [
-    { eyebrow: 'STUDENT POTENTIAL', title: 'Confidence to grow', description: 'Inspire students to develop confidence, focus, and a stronger sense of possibility.' },
-    { eyebrow: 'YOUTH LEADERSHIP', title: 'Lead with purpose', description: 'Help young people practise responsibility, communication, and purposeful leadership.' },
-    { eyebrow: 'SCHOOL CULTURE', title: 'A stronger community', description: 'Bring students and educators together around wellbeing, aspiration, and shared growth.' },
+    { eyebrow: 'UNDERSTAND', title: 'See every learner', description: 'Start with students’ strengths, needs, and the goals that matter to your school community.' },
+    { eyebrow: 'INSPIRE', title: 'Open new possibilities', description: 'Spark curiosity, confidence, and a stronger belief in what each student can achieve.' },
+    { eyebrow: 'ENGAGE', title: 'Bring learning to life', description: 'Create energetic sessions that invite students to participate, reflect, and connect.' },
+    { eyebrow: 'PRACTISE', title: 'Build everyday skills', description: 'Give students practical ways to strengthen focus, communication, and self-belief.' },
+    { eyebrow: 'REFLECT', title: 'Notice the progress', description: 'Help learners recognise their growth and understand what is helping them move forward.' },
+    { eyebrow: 'SUPPORT', title: 'Grow together', description: 'Bring educators and students into a shared culture of encouragement and responsibility.' },
+    { eyebrow: 'CONTINUE', title: 'Carry it into tomorrow', description: 'Turn one meaningful experience into small actions that keep progress moving.' },
   ],
   corporate: [
     { eyebrow: 'EXECUTIVE FOCUS', title: 'Focused leadership', description: 'Equip leaders to make clear decisions and stay composed through demanding moments.' },
@@ -219,7 +223,7 @@ type RoleActionStyle = 'pill' | 'text' | 'outline' | 'none';
 const ROLE_PAGE_PRESENTATION: Record<PersonaType, { layout: RolePageLayout; actionStyle: RoleActionStyle; actionLabel: string }> = {
   student: { layout: 'student-cards', actionStyle: 'none', actionLabel: '' },
   individual: { layout: 'editorial', actionStyle: 'text', actionLabel: 'Explore personal mentoring' },
-  school: { layout: 'program', actionStyle: 'outline', actionLabel: 'Plan a school session' },
+  school: { layout: 'cycle', actionStyle: 'outline', actionLabel: 'Plan a school session' },
   corporate: { layout: 'executive', actionStyle: 'pill', actionLabel: 'Discuss a keynote' },
   government: { layout: 'cycle', actionStyle: 'none', actionLabel: '' },
   ngo: { layout: 'impact', actionStyle: 'text', actionLabel: 'Plan a community event' },
@@ -881,14 +885,14 @@ export default function Identify({
                 <div className={`student-landing-hero flex flex-col md:flex-row md:items-center justify-between gap-7 border-b pb-8 sm:pb-10 ${activeRole.id === 'student' ? 'border-emerald-900/10' : ''}`} style={activeRole.id === 'student' ? undefined : { borderColor: `${activeRole.themeColor}30` }}>
                   <div className="max-w-2xl">
                     {/* Handwritten Caveat Headline */}
-                    {activeRole.id !== 'student' ? (
+                    {activeRole.id !== 'student' && activeRole.id !== 'school' ? (
                       <p className="role-theme-kicker mb-3 font-mono text-[10px] font-bold uppercase tracking-[0.34em] sm:text-xs" style={{ color: activeRole.themeColor }}>
                         {activeRole.title} <span className="mx-2 opacity-40">/</span> A path designed for you
                       </p>
                     ) : null}
                     <h1
-                      className={`role-theme-heading font-bold leading-[0.98] text-4xl sm:text-6xl md:text-7xl py-1 select-text ${activeRole.id === 'student' ? 'text-[#123D27] tracking-[-0.045em]' : 'individual-ink-glow drop-shadow-[0_2px_14px_rgba(0,0,0,0.85)]'}`}
-                      style={{ fontFamily: activeRole.id === 'student' ? 'inherit' : 'var(--font-caveat), cursive', color: activeRole.id === 'student' ? undefined : activeRole.themeColor }}
+                      className={`role-theme-heading font-bold leading-[0.98] text-4xl sm:text-6xl md:text-7xl py-1 select-text ${activeRole.id === 'student' ? 'text-[#123D27] tracking-[-0.045em]' : activeRole.id === 'school' ? 'font-serif tracking-[-0.045em] text-[#F4EBDD]' : 'individual-ink-glow drop-shadow-[0_2px_14px_rgba(0,0,0,0.85)]'}`}
+                      style={{ fontFamily: activeRole.id === 'student' ? 'inherit' : activeRole.id === 'school' ? 'Georgia, serif' : 'var(--font-caveat), cursive', color: activeRole.id === 'student' || activeRole.id === 'school' ? undefined : activeRole.themeColor }}
                       aria-label={activeRole.headingLines.join(' ')}
                     >
                       {activeRole.headingLines.map((line, lineIndex) => (
@@ -943,7 +947,9 @@ export default function Identify({
                     editorial: 'max-w-4xl border-y border-white/10',
                     program: 'grid max-w-5xl grid-cols-1 gap-x-8 md:grid-cols-3 md:divide-x md:divide-white/10',
                     executive: 'max-w-5xl divide-y divide-white/10 border-y border-white/20',
-                    cycle: 'role-cycle-layout grid max-w-5xl grid-cols-1 gap-5 md:grid-cols-3 md:gap-6',
+                    cycle: activeRole.id === 'school'
+                      ? 'role-cycle-layout role-school-cycle grid max-w-6xl grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'
+                      : 'role-cycle-layout grid max-w-5xl grid-cols-1 gap-5 md:grid-cols-3 md:gap-6',
                     impact: 'max-w-3xl',
                     conversation: 'max-w-4xl',
                   };
@@ -954,9 +960,19 @@ export default function Identify({
                         <div aria-hidden="true" className="role-cycle-path" style={{ borderColor: `${activeRole.themeColor}66`, color: activeRole.themeColor }} />
                       ) : null}
 
+                      {activeRole.id === 'school' ? (
+                        <div className="role-school-cycle-intro relative z-10 mb-3 text-center sm:col-span-2 sm:mb-5 lg:col-span-3 xl:col-span-4">
+                          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.32em]" style={{ color: activeRole.themeColor }}>THE EDUCATION JOURNEY · 07 STEPS</p>
+                          <h2 className="mx-auto mt-3 max-w-2xl font-serif text-2xl font-semibold tracking-tight text-[#F4EBDD] sm:text-4xl">From potential to lasting progress.</h2>
+                          <p className="mx-auto mt-3 max-w-xl text-sm leading-6 text-stone-300/70 sm:text-base">A connected learning cycle for students, educators, and the whole school community.</p>
+                        </div>
+                      ) : null}
+
                       <div className={presentation.layout === 'executive' ? 'flex flex-col' : presentation.layout === 'program' || presentation.layout === 'student-cards' || presentation.layout === 'cycle' ? 'contents' : ''}>
                         {sections.map((section, index) => {
-                          const SectionIcon = [Sparkles, Target, Brain][index];
+                          const SectionIcon = activeRole.id === 'school'
+                            ? [School, Sparkles, Lightbulb, Target, Brain, Users, GraduationCap][index]
+                            : [Sparkles, Target, Brain][index % 3];
                           const direction = index === 0 ? 'role-story-from-left' : index === 1 ? 'role-story-from-right' : 'role-story-from-bottom';
                           const content = (
                             <div>
@@ -980,7 +996,7 @@ export default function Identify({
                             editorial: 'role-card-3d role-card-editorial',
                             program: 'role-card-3d role-card-school',
                             executive: 'role-card-3d role-card-executive',
-                            cycle: 'role-card-3d role-card-government',
+                            cycle: activeRole.id === 'school' ? 'role-card-3d role-card-school-cycle' : 'role-card-3d role-card-government',
                             impact: 'role-card-3d role-card-ngo',
                             conversation: 'role-card-3d role-card-parent',
                           };
@@ -991,7 +1007,7 @@ export default function Identify({
                           if (presentation.layout === 'editorial') sectionClass += ` ${direction} mb-5 rounded-[2rem] border bg-white/[0.035] p-7 text-center shadow-[0_22px_55px_rgba(0,0,0,0.25)] sm:mb-7 sm:p-10 sm:py-12`;
                           if (presentation.layout === 'program') sectionClass += ` ${direction} min-h-[300px] rounded-3xl border bg-gradient-to-br from-[#10221d]/90 via-[#101713]/85 to-[#0b0d0c] p-6 shadow-[0_20px_45px_rgba(0,0,0,0.32)] md:mb-5 md:border-b md:px-6 md:py-8`;
                           if (presentation.layout === 'executive') sectionClass += ` ${direction} mb-4 grid grid-cols-1 gap-4 rounded-2xl border bg-gradient-to-r from-[#111619]/95 via-[#101212]/90 to-[#17130e]/90 p-6 shadow-[0_18px_40px_rgba(0,0,0,0.35)] sm:grid-cols-[5rem_1fr] sm:gap-8 sm:p-8`;
-                          if (presentation.layout === 'cycle') sectionClass += ` ${direction} relative z-10 flex flex-col items-center rounded-[2rem] border bg-[#0a0c0c]/75 px-5 py-7 text-center shadow-[0_18px_42px_rgba(0,0,0,0.32)] sm:px-7 sm:py-9`;
+                          if (presentation.layout === 'cycle') sectionClass += ` ${direction} relative z-10 flex flex-col items-center rounded-[2rem] border bg-[#0a0c0c]/75 px-5 py-7 text-center shadow-[0_18px_42px_rgba(0,0,0,0.32)] sm:px-7 sm:py-9 ${activeRole.id === 'school' ? 'role-school-cycle-card min-h-[285px] justify-start' : ''}`;
                           if (presentation.layout === 'impact') sectionClass += ` ${direction} mb-5 flex flex-col items-center rounded-[2rem] border border-dashed bg-gradient-to-b from-[#1c1118]/85 to-[#0d0a0c]/90 p-7 text-center shadow-[0_18px_45px_rgba(0,0,0,0.3)] sm:mb-7 sm:p-10`;
                           if (presentation.layout === 'conversation') sectionClass += ` ${direction} mb-5 flex flex-col gap-5 rounded-[1.8rem] border bg-gradient-to-br from-[#21141b]/80 to-[#100d10]/95 p-6 shadow-[0_18px_42px_rgba(0,0,0,0.32)] sm:mb-7 sm:flex-row sm:items-center sm:p-8 ${index % 2 ? 'sm:flex-row-reverse sm:text-right' : ''}`;
 
@@ -1010,13 +1026,13 @@ export default function Identify({
                       </div>
 
                       {presentation.layout === 'cycle' ? (
-                        <p className="relative z-10 mt-4 text-center font-mono text-[10px] font-bold tracking-[0.28em] sm:col-span-3" style={{ color: activeRole.themeColor }}>
-                          VISION <span className="px-2 opacity-50">→</span> SERVICE <span className="px-2 opacity-50">→</span> IMPACT <span className="px-2 opacity-50">↻</span>
+                        <p className={`relative z-10 mt-4 text-center font-mono text-[10px] font-bold tracking-[0.2em] sm:col-span-2 lg:col-span-3 ${activeRole.id === 'school' ? 'xl:col-span-4' : ''}`} style={{ color: activeRole.themeColor }}>
+                          {activeRole.id === 'school' ? 'UNDERSTAND · INSPIRE · ENGAGE · PRACTISE · REFLECT · SUPPORT · CONTINUE' : <>VISION <span className="px-2 opacity-50">→</span> SERVICE <span className="px-2 opacity-50">→</span> IMPACT <span className="px-2 opacity-50">↻</span></>}
                         </p>
                       ) : null}
 
                       {presentation.actionStyle !== 'none' ? (
-                        <div className={`mt-8 ${presentation.actionStyle === 'text' ? 'text-center sm:text-left' : 'flex justify-center sm:justify-start'}`}>
+                        <div className={`mt-8 ${activeRole.id === 'school' ? 'sm:col-span-2 lg:col-span-3 xl:col-span-4 flex justify-center' : presentation.actionStyle === 'text' ? 'text-center sm:text-left' : 'flex justify-center sm:justify-start'}`}>
                           <button
                             type="button"
                             onClick={() => handleGoToPersonaPage(activeRole.id)}

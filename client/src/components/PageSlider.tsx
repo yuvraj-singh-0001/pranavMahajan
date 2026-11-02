@@ -2,18 +2,20 @@
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import Hero from './Hero';
 import Identify, { PersonaType } from './Identify';
 import GetInTouch from './GetInTouch';
 import CelestialRocketTransition from './CelestialRocketTransition';
 import Footer from './Footer';
-import { X, ChevronUp, ChevronDown } from 'lucide-react';
+import { X, ChevronUp, ChevronDown, ArrowLeft } from 'lucide-react';
 
 interface PageSliderProps {
   initialPersona?: PersonaType;
 }
 
 export default function PageSlider({ initialPersona }: PageSliderProps) {
+  const router = useRouter();
   const [current, setCurrent] = useState(initialPersona ? 1 : 0);
   const [boardState, setBoardState] = useState<'idle' | 'sweeping-forward' | 'sweeping-backward'>('idle');
   const [rocketActive, setRocketActive] = useState(false);
@@ -595,16 +597,29 @@ export default function PageSlider({ initialPersona }: PageSliderProps) {
 
       {/* TOP HEADER NAVBAR */}
       <header data-chrome="true" className="fixed top-0 left-0 right-0 z-50 px-4 sm:px-12 py-2.5 sm:py-5 flex items-center justify-between pointer-events-none bg-black/40 sm:bg-transparent backdrop-blur-md sm:backdrop-blur-none border-b border-amber-500/15 sm:border-b-0 transition-all duration-500">
-        <button
-          onClick={() => goToSlide(0)}
-          className="pointer-events-auto flex items-center gap-2 text-left group cursor-pointer transition-transform hover:scale-105"
-        >
-          <img
-            src="/pranav_mahajan_transparent.png"
-            alt="Pranav Mahajan Logo"
-            className="h-10 sm:h-16 md:h-20 w-auto object-contain drop-shadow-[0_4px_20px_rgba(223,165,71,0.4)]"
-          />
-        </button>
+        <div className="pointer-events-auto flex items-center">
+          {current > 0 ? (
+            <button
+              type="button"
+              onClick={() => prevSlide()}
+              aria-label="Go back to the previous page"
+              title="Back"
+              className="mr-2 flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-amber-500/30 bg-[#16120e]/90 text-amber-200 transition hover:bg-[#2e2318] sm:mr-3 sm:h-10 sm:w-10"
+            >
+              <ArrowLeft className="h-4 w-4" />
+            </button>
+          ) : null}
+          <button
+            onClick={() => goToSlide(0)}
+            className="flex items-center gap-2 text-left group cursor-pointer transition-transform hover:scale-105"
+          >
+            <img
+              src="/pranav_mahajan_transparent.png"
+              alt="Pranav Mahajan Logo"
+              className="h-10 sm:h-16 md:h-20 w-auto object-contain drop-shadow-[0_4px_20px_rgba(223,165,71,0.4)]"
+            />
+          </button>
+        </div>
 
         <div className="pointer-events-auto flex items-center gap-2 sm:gap-3">
           <Link
@@ -660,6 +675,10 @@ export default function PageSlider({ initialPersona }: PageSliderProps) {
             isActive={current === 1}
             onSelectPersona={(persona) => {
               setSelectedPersona(persona);
+              if (persona === 'individual' || persona === 'student' || persona === 'corporate') {
+                router.push(`/${persona}`);
+                return;
+              }
               const rolePath = persona ? `/${persona}` : '/';
               if (window.location.pathname !== rolePath) {
                 window.history.replaceState(null, '', rolePath);

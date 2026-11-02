@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import Link from 'next/link';
-import { ArrowDown, ArrowRight, Brain, Compass, Target, X } from 'lucide-react';
+import { ArrowDown, ArrowLeft, ArrowRight, Brain, Compass, Target, X } from 'lucide-react';
 import Footer from './Footer';
 
 const navigation = [
@@ -59,6 +59,9 @@ const reflections = [
 export default function IndividualLandingPage() {
   const [menuOpen, setMenuOpen] = useState(false);
   const scrollRootRef = useRef<HTMLDivElement>(null);
+  const edgeScrollRef = useRef(0);
+  const edgeScrollTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const touchStartYRef = useRef<number | null>(null);
 
   useEffect(() => {
     const root = scrollRootRef.current;
@@ -88,12 +91,56 @@ export default function IndividualLandingPage() {
     return () => window.removeEventListener('keydown', closeOnEscape);
   }, [menuOpen]);
 
+  useEffect(() => {
+    const root = scrollRootRef.current;
+    if (!root) return;
+    const handleWheel = (event: WheelEvent) => {
+      if (menuOpen || event.deltaY >= -24) {
+        if (event.deltaY >= 0) edgeScrollRef.current = 0;
+        return;
+      }
+      if (root.scrollTop > 3) {
+        edgeScrollRef.current = 0;
+        return;
+      }
+      edgeScrollRef.current += event.deltaY;
+      if (edgeScrollTimerRef.current) clearTimeout(edgeScrollTimerRef.current);
+      edgeScrollTimerRef.current = setTimeout(() => { edgeScrollRef.current = 0; }, 300);
+      if (edgeScrollRef.current <= -140) {
+        edgeScrollRef.current = 0;
+        window.history.back();
+      }
+    };
+    const handleTouchStart = (event: TouchEvent) => {
+      touchStartYRef.current = event.touches[0]?.clientY ?? null;
+    };
+    const handleTouchEnd = (event: TouchEvent) => {
+      const startY = touchStartYRef.current;
+      touchStartYRef.current = null;
+      if (menuOpen || startY === null || root.scrollTop > 3) return;
+      const endY = event.changedTouches[0]?.clientY;
+      if (endY !== undefined && endY - startY > 120) window.history.back();
+    };
+    root.addEventListener('wheel', handleWheel, { passive: true });
+    root.addEventListener('touchstart', handleTouchStart, { passive: true });
+    root.addEventListener('touchend', handleTouchEnd, { passive: true });
+    return () => {
+      root.removeEventListener('wheel', handleWheel);
+      root.removeEventListener('touchstart', handleTouchStart);
+      root.removeEventListener('touchend', handleTouchEnd);
+      if (edgeScrollTimerRef.current) clearTimeout(edgeScrollTimerRef.current);
+    };
+  }, [menuOpen]);
+
   return (
     <div ref={scrollRootRef} className="individual-page-scroll h-dvh overflow-y-auto overflow-x-clip text-[#203029]">
       <header className="fixed inset-x-0 top-0 z-50 flex items-center justify-between border-b border-amber-500/15 bg-black/40 px-4 py-2.5 backdrop-blur-md sm:border-b-0 sm:bg-transparent sm:px-12 sm:py-5 sm:backdrop-blur-none">
-        <Link href="/" aria-label="Pranav Mahajan home" className="inline-flex items-center">
+        <div className="flex items-center gap-2 sm:gap-3">
+          <button type="button" aria-label="Go back to the previous page" title="Back" onClick={() => window.history.length > 1 ? window.history.back() : window.location.assign('/')} className="flex h-9 w-9 items-center justify-center rounded-full border border-[#8E7650]/20 bg-[#FFFCF7]/90 text-[#8A6328] transition hover:bg-[#EEE5D5] sm:h-10 sm:w-10"><ArrowLeft className="h-4 w-4" /></button>
+          <Link href="/" aria-label="Pranav Mahajan home" className="inline-flex items-center">
           <img src="/pranav_mahajan_transparent.png" alt="Pranav Mahajan" className="h-10 w-auto object-contain drop-shadow-[0_4px_20px_rgba(223,165,71,0.4)] sm:h-16 md:h-20" />
-        </Link>
+          </Link>
+        </div>
         <div className="flex items-center gap-2 sm:gap-3">
           <Link href="/signup" className="inline-flex items-center justify-center rounded-full border border-amber-500/50 bg-[#1e1710]/90 px-3.5 py-1.5 text-xs font-bold tracking-wide text-amber-200 shadow-[0_4px_16px_rgba(223,165,71,0.2)] backdrop-blur-md transition hover:scale-105 hover:border-amber-400 hover:bg-[#2e2318] hover:text-white sm:px-5 sm:py-2">Sign Up</Link>
           <button type="button" aria-label={menuOpen ? 'Close navigation menu' : 'Open navigation menu'} aria-expanded={menuOpen} onClick={() => setMenuOpen((open) => !open)} className="flex h-9 w-9 flex-col items-center justify-center gap-1 rounded-xl border border-amber-500/30 bg-[#16120e]/90 text-white shadow-xs backdrop-blur-md transition hover:bg-[#221b14] sm:h-10 sm:w-10 sm:rounded-2xl">

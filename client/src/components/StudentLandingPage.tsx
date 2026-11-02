@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import {
+  ArrowLeft,
   ArrowDown,
   ArrowRight,
   BookOpenCheck,
@@ -61,6 +62,9 @@ const studentChallenges = [
 export default function StudentLandingPage() {
   const [menuOpen, setMenuOpen] = useState(false);
   const pageScrollRef = useRef<HTMLDivElement>(null);
+  const edgeScrollRef = useRef(0);
+  const edgeScrollTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const touchStartYRef = useRef<number | null>(null);
 
   useEffect(() => {
     const scrollRoot = pageScrollRef.current;
@@ -90,16 +94,60 @@ export default function StudentLandingPage() {
     return () => window.removeEventListener('keydown', handleEscape);
   }, [menuOpen]);
 
+  useEffect(() => {
+    const root = pageScrollRef.current;
+    if (!root) return;
+    const handleWheel = (event: WheelEvent) => {
+      if (menuOpen || event.deltaY >= -24) {
+        if (event.deltaY >= 0) edgeScrollRef.current = 0;
+        return;
+      }
+      if (root.scrollTop > 3) {
+        edgeScrollRef.current = 0;
+        return;
+      }
+      edgeScrollRef.current += event.deltaY;
+      if (edgeScrollTimerRef.current) clearTimeout(edgeScrollTimerRef.current);
+      edgeScrollTimerRef.current = setTimeout(() => { edgeScrollRef.current = 0; }, 300);
+      if (edgeScrollRef.current <= -140) {
+        edgeScrollRef.current = 0;
+        window.history.back();
+      }
+    };
+    const handleTouchStart = (event: TouchEvent) => {
+      touchStartYRef.current = event.touches[0]?.clientY ?? null;
+    };
+    const handleTouchEnd = (event: TouchEvent) => {
+      const startY = touchStartYRef.current;
+      touchStartYRef.current = null;
+      if (menuOpen || startY === null || root.scrollTop > 3) return;
+      const endY = event.changedTouches[0]?.clientY;
+      if (endY !== undefined && endY - startY > 120) window.history.back();
+    };
+    root.addEventListener('wheel', handleWheel, { passive: true });
+    root.addEventListener('touchstart', handleTouchStart, { passive: true });
+    root.addEventListener('touchend', handleTouchEnd, { passive: true });
+    return () => {
+      root.removeEventListener('wheel', handleWheel);
+      root.removeEventListener('touchstart', handleTouchStart);
+      root.removeEventListener('touchend', handleTouchEnd);
+      if (edgeScrollTimerRef.current) clearTimeout(edgeScrollTimerRef.current);
+    };
+  }, [menuOpen]);
+
   return (
     <div ref={pageScrollRef} className="student-page-scroller h-dvh overflow-y-auto overflow-x-clip bg-[#F7F1E5] text-[#163D29]">
       <header className="fixed inset-x-0 top-0 z-50 flex items-center justify-between border-b border-amber-500/15 bg-black/40 px-4 py-2.5 backdrop-blur-md transition-all duration-500 sm:border-b-0 sm:bg-transparent sm:px-12 sm:py-5 sm:backdrop-blur-none">
-        <Link href="/" aria-label="Pranav Mahajan home" className="pointer-events-auto inline-flex items-center">
+        <div className="pointer-events-auto flex items-center gap-2 sm:gap-3">
+          <button type="button" aria-label="Go back to the previous page" title="Back" onClick={() => window.history.length > 1 ? window.history.back() : window.location.assign('/')} className="flex h-9 w-9 items-center justify-center rounded-full border border-emerald-800/20 bg-[#F7F1E5]/90 text-[#28784B] transition hover:bg-[#B8F7D0] sm:h-10 sm:w-10"><ArrowLeft className="h-4 w-4" /></button>
+          <Link href="/" aria-label="Pranav Mahajan home" className="inline-flex items-center">
           <img
             src="/pranav_mahajan_transparent.png"
             alt="Pranav Mahajan"
             className="h-10 w-auto object-contain drop-shadow-[0_4px_20px_rgba(223,165,71,0.4)] sm:h-16 md:h-20"
           />
-        </Link>
+          </Link>
+        </div>
         <div className="pointer-events-auto flex items-center gap-2 sm:gap-3">
           <Link href="/signup" className="inline-flex items-center justify-center rounded-full border border-amber-500/50 bg-[#1e1710]/90 px-3.5 py-1.5 text-xs font-bold tracking-wide text-amber-200 shadow-[0_4px_16px_rgba(223,165,71,0.2)] backdrop-blur-md transition hover:scale-105 hover:border-amber-400 hover:bg-[#2e2318] hover:text-white sm:px-5 sm:py-2">
             Sign Up
