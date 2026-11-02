@@ -25,6 +25,7 @@ import QuillCursor from './QuillCursor';
 import ScholarPenCursor from './ScholarPenCursor';
 import RoleCursor from './RoleCursor';
 import Footer from './Footer';
+import { useSectionUrl } from '@/hooks/useSectionUrl';
 
 export type PersonaType =
   | 'student'
@@ -37,8 +38,10 @@ export type PersonaType =
 
 interface IdentifyProps {
   initialPersona?: PersonaType;
+  initialSection?: string;
   isActive?: boolean;
   onSelectPersona?: (persona: PersonaType) => void;
+  onRoleExperienceComplete?: (persona: PersonaType) => void;
   onGoToPersonaPage?: (persona: PersonaType) => void;
   onBackToHero?: () => void;
   onViewModeChange?: (mode: 'cards' | 'coming-soon') => void;
@@ -232,8 +235,10 @@ const ROLE_PAGE_PRESENTATION: Record<PersonaType, { layout: RolePageLayout; acti
 
 export default function Identify({
   initialPersona,
+  initialSection,
   isActive = true,
   onSelectPersona,
+  onRoleExperienceComplete,
   onGoToPersonaPage,
   onBackToHero,
   onViewModeChange,
@@ -242,6 +247,8 @@ export default function Identify({
   resetRef,
 }: IdentifyProps) {
   const [selected, setSelected] = useState<PersonaType | null>(initialPersona ?? null);
+  const rolePanelRef = useRef<HTMLDivElement>(null);
+  const roleSelectionFlowRef = useRef(false);
   const [showPrompt, setShowPrompt] = useState(false);
   const [shakePrompt, setShakePrompt] = useState(false);
   const promptTimerRef = useRef<NodeJS.Timeout | null>(null);
@@ -312,6 +319,10 @@ export default function Identify({
       v.pause();
     }
     setRoleVideoEnded(true);
+    if (roleSelectionFlowRef.current) {
+      roleSelectionFlowRef.current = false;
+      onRoleExperienceComplete?.(activeRole.id);
+    }
   };
   const backToCardsRef = useRef<(() => void) | null>(null);
   const timeoutsRef = useRef<NodeJS.Timeout[]>([]);
@@ -406,6 +417,7 @@ export default function Identify({
 
   const handleBackToCards = () => {
     if (flipState !== 'idle') return;
+    roleSelectionFlowRef.current = false;
     if (roleVideoRef.current) {
       roleVideoRef.current.pause();
       roleVideoRef.current.currentTime = 0;
@@ -478,6 +490,7 @@ export default function Identify({
   };
 
   const resetAllAnimations = () => {
+    roleSelectionFlowRef.current = false;
     clearAllTimers();
     if (promptTimerRef.current) clearTimeout(promptTimerRef.current);
     setSelected(null);
@@ -587,6 +600,7 @@ export default function Identify({
 
   const handleSelect = (id: PersonaType) => {
     if (flipState !== 'idle') return;
+    roleSelectionFlowRef.current = true;
     explicitlySelectedRoleRef.current = id;
     setRoleVideoEnded(false);
     setSelected(id);
@@ -602,6 +616,7 @@ export default function Identify({
   const currentOption = selected ? PERSONAS.find((p) => p.id === selected) : null;
   const comingSoonOption = currentOption || PERSONAS[0];
   const activeRole: RoleExperienceConfig = ROLE_EXPERIENCES[selected || comingSoonOption.id] || ROLE_EXPERIENCES.student;
+  useSectionUrl(rolePanelRef, `/${activeRole.id}`, initialSection, viewMode === 'coming-soon');
 
   // Synchronize Role video playback when entering/exiting coming-soon view
   useEffect(() => {
@@ -700,6 +715,10 @@ export default function Identify({
       v.pause();
     }
     setRoleVideoEnded(true);
+    if (roleSelectionFlowRef.current) {
+      roleSelectionFlowRef.current = false;
+      onRoleExperienceComplete?.(activeRole.id);
+    }
   };
 
   const handleGoToPersonaPage = (persona: PersonaType) => {
@@ -857,6 +876,7 @@ export default function Identify({
 
             {/* PANEL 2: ROLE FULL PAGE (100vw, slides in from right side simultaneously) */}
             <div
+              ref={rolePanelRef}
               data-role-panel="true"
               data-role-theme={activeRole.id}
               className={`relative w-screen min-w-[100vw] max-w-[100vw] h-full flex-shrink-0 overflow-y-auto overflow-x-hidden flex flex-col items-stretch justify-start pb-0 scroll-smooth ${activeRole.id === 'student' ? 'student-landing-panel pt-16 sm:pt-32' : 'bg-[#090807] pt-16 sm:pt-20'}`}
@@ -1012,7 +1032,7 @@ export default function Identify({
                           if (presentation.layout === 'conversation') sectionClass += ` ${direction} mb-5 flex flex-col gap-5 rounded-[1.8rem] border bg-gradient-to-br from-[#21141b]/80 to-[#100d10]/95 p-6 shadow-[0_18px_42px_rgba(0,0,0,0.32)] sm:mb-7 sm:flex-row sm:items-center sm:p-8 ${index % 2 ? 'sm:flex-row-reverse sm:text-right' : ''}`;
 
                           return (
-                            <article key={`${activeRole.id}-section-${index}`} data-role-reveal className={sectionClass} style={{ transitionDelay: `${index * 70}ms`, borderColor: activeRole.id === 'student' ? undefined : `${activeRole.themeColor}55` }}>
+                            <article key={`${activeRole.id}-section-${index}`} data-role-reveal data-url-section={index === 0 ? 'focus' : index === 1 ? 'confidence' : index === 2 ? 'growth' : `step-${index + 1}`} className={sectionClass} style={{ transitionDelay: `${index * 70}ms`, borderColor: activeRole.id === 'student' ? undefined : `${activeRole.themeColor}55` }}>
                               {presentation.layout === 'student-cards' ? <><span className="student-section-number font-mono text-sm font-semibold tracking-widest sm:text-base" style={{ color: activeRole.themeColor }}>0{index + 1}</span><div><p className="mb-2 font-mono text-[10px] font-bold uppercase tracking-[0.24em] text-[#41845C]">{section.eyebrow}</p>{content}</div></> : null}
                               {presentation.layout === 'editorial' ? <div className="mx-auto max-w-3xl"><p className="mb-4 font-mono text-[10px] font-bold uppercase tracking-[0.3em]" style={{ color: activeRole.themeColor }}>0{index + 1} <span className="px-2 opacity-50">/</span> {section.eyebrow}</p><h2 className="font-serif text-3xl font-semibold italic leading-tight text-white sm:text-5xl">{section.title}</h2><p className="mx-auto mt-5 max-w-2xl text-sm leading-7 text-slate-300/85 sm:text-base">{section.description}</p></div> : null}
                               {presentation.layout === 'program' ? <><div className="mb-5 flex items-center justify-between"><span className="text-xs font-mono tracking-[0.24em]" style={{ color: activeRole.themeColor }}>0{index + 1}</span><SectionIcon className="h-5 w-5" style={{ color: activeRole.themeColor }} /></div>{content}<div className="mt-5 h-px w-12" style={{ backgroundColor: activeRole.themeColor }} /></> : null}

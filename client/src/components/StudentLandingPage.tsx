@@ -14,6 +14,7 @@ import {
   X,
 } from 'lucide-react';
 import Footer from './Footer';
+import { useSectionUrl } from '@/hooks/useSectionUrl';
 
 const navigation = [
   { href: '#top', label: 'Home' },
@@ -59,12 +60,13 @@ const studentChallenges = [
   },
 ];
 
-export default function StudentLandingPage() {
+export default function StudentLandingPage({ initialSection }: { initialSection?: string } = {}) {
   const [menuOpen, setMenuOpen] = useState(false);
   const pageScrollRef = useRef<HTMLDivElement>(null);
   const edgeScrollRef = useRef(0);
   const edgeScrollTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const touchStartYRef = useRef<number | null>(null);
+  useSectionUrl(pageScrollRef, '/student', initialSection);
 
   useEffect(() => {
     const scrollRoot = pageScrollRef.current;
@@ -98,14 +100,14 @@ export default function StudentLandingPage() {
     const root = pageScrollRef.current;
     if (!root) return;
     const handleWheel = (event: WheelEvent) => {
-      if (menuOpen || event.deltaY >= -24) {
-        if (event.deltaY >= 0) edgeScrollRef.current = 0;
-        return;
-      }
-      if (root.scrollTop > 3) {
+      if (menuOpen || Math.abs(event.deltaY) < 24) return;
+      const atTop = root.scrollTop <= 3;
+      const towardPrevious = atTop && event.deltaY < 0;
+      if (!towardPrevious) {
         edgeScrollRef.current = 0;
         return;
       }
+      if (edgeScrollRef.current && Math.sign(edgeScrollRef.current) !== Math.sign(event.deltaY)) edgeScrollRef.current = 0;
       edgeScrollRef.current += event.deltaY;
       if (edgeScrollTimerRef.current) clearTimeout(edgeScrollTimerRef.current);
       edgeScrollTimerRef.current = setTimeout(() => { edgeScrollRef.current = 0; }, 300);
@@ -120,9 +122,12 @@ export default function StudentLandingPage() {
     const handleTouchEnd = (event: TouchEvent) => {
       const startY = touchStartYRef.current;
       touchStartYRef.current = null;
-      if (menuOpen || startY === null || root.scrollTop > 3) return;
+      if (menuOpen || startY === null) return;
       const endY = event.changedTouches[0]?.clientY;
-      if (endY !== undefined && endY - startY > 120) window.history.back();
+      if (endY === undefined) return;
+      const distance = endY - startY;
+      const atTop = root.scrollTop <= 3;
+      if (atTop && distance > 120) window.history.back();
     };
     root.addEventListener('wheel', handleWheel, { passive: true });
     root.addEventListener('touchstart', handleTouchStart, { passive: true });
@@ -139,7 +144,8 @@ export default function StudentLandingPage() {
     <div ref={pageScrollRef} className="student-page-scroller h-dvh overflow-y-auto overflow-x-clip bg-[#F7F1E5] text-[#163D29]">
       <header className="fixed inset-x-0 top-0 z-50 flex items-center justify-between border-b border-amber-500/15 bg-black/40 px-4 py-2.5 backdrop-blur-md transition-all duration-500 sm:border-b-0 sm:bg-transparent sm:px-12 sm:py-5 sm:backdrop-blur-none">
         <div className="pointer-events-auto flex items-center gap-2 sm:gap-3">
-          <button type="button" aria-label="Go back to the previous page" title="Back" onClick={() => window.history.length > 1 ? window.history.back() : window.location.assign('/')} className="flex h-9 w-9 items-center justify-center rounded-full border border-emerald-800/20 bg-[#F7F1E5]/90 text-[#28784B] transition hover:bg-[#B8F7D0] sm:h-10 sm:w-10"><ArrowLeft className="h-4 w-4" /></button>
+          <button type="button" aria-label="Go back to the previous page" title="Back" onClick={() => window.history.length > 1 && document.referrer.startsWith(window.location.origin) ? window.history.back() : window.location.assign('/')} className="flex h-9 w-9 items-center justify-center rounded-full border border-emerald-800/20 bg-[#F7F1E5]/90 text-[#28784B] transition hover:bg-[#B8F7D0] sm:h-10 sm:w-10"><ArrowLeft className="h-4 w-4" /></button>
+          <Link href="/signup" aria-label="Continue to the next step" title="Next" className="flex h-9 w-9 items-center justify-center rounded-full border border-emerald-800/20 bg-[#F7F1E5]/90 text-[#28784B] transition hover:bg-[#B8F7D0] sm:h-10 sm:w-10"><ArrowRight className="h-4 w-4" /></Link>
           <Link href="/" aria-label="Pranav Mahajan home" className="inline-flex items-center">
           <img
             src="/pranav_mahajan_transparent.png"
@@ -205,7 +211,7 @@ export default function StudentLandingPage() {
       </aside>
 
       <main className="flex flex-col">
-        <section id="top" className="order-1 relative mx-auto grid min-h-[760px] max-w-7xl scroll-mt-24 items-center gap-10 px-5 pb-16 pt-28 sm:px-10 sm:pt-36 lg:min-h-[800px] lg:grid-cols-[1.05fr_.95fr] lg:gap-4 lg:px-16 lg:pt-36">
+        <section id="top" data-url-section="top" className="order-1 relative mx-auto grid min-h-[760px] max-w-7xl scroll-mt-24 items-center gap-10 px-5 pb-16 pt-28 sm:px-10 sm:pt-36 lg:min-h-[800px] lg:grid-cols-[1.05fr_.95fr] lg:gap-4 lg:px-16 lg:pt-36">
           <div className="relative z-10 max-w-2xl">
             <p className="mb-5 inline-flex items-center gap-2 rounded-full border border-emerald-900/10 bg-white/70 px-4 py-2 font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-[#318153] shadow-sm sm:text-xs">
               <span className="h-2 w-2 rounded-full bg-[#58BD7B]" /> A student growth experience
@@ -249,7 +255,7 @@ export default function StudentLandingPage() {
           </a>
         </section>
 
-        <section id="the-approach" className="order-2 scroll-mt-24 mx-auto max-w-7xl px-5 py-8 sm:px-10 sm:py-10 lg:px-16 lg:py-12">
+        <section id="the-approach" data-url-section="the-approach" className="order-2 scroll-mt-24 mx-auto max-w-7xl px-5 py-8 sm:px-10 sm:py-10 lg:px-16 lg:py-12">
           <h2 className="sr-only">Explore focus, exam confidence, and student growth</h2>
           <div className="grid gap-4 md:grid-cols-3 md:gap-5">
             {outcomes.map((item) => {
@@ -274,7 +280,7 @@ export default function StudentLandingPage() {
           </div>
         </section>
 
-        <section className="order-3 mx-auto w-full max-w-7xl px-5 pb-16 pt-8 sm:px-10 sm:pb-20 lg:px-16">
+        <section id="problem" data-url-section="problem" className="order-3 mx-auto w-full max-w-7xl px-5 pb-16 pt-8 sm:px-10 sm:pb-20 lg:px-16">
           <div data-student-reveal className="border-t border-[#927644]/20 pt-10 sm:pt-14">
             <div className="grid gap-5 sm:grid-cols-[.8fr_1.2fr] sm:gap-12">
               <div>
@@ -299,7 +305,7 @@ export default function StudentLandingPage() {
           </div>
         </section>
 
-        <section className="order-4 px-5 pb-16 sm:px-10 sm:pb-20 lg:px-16">
+        <section id="next-step" data-url-section="next-step" className="order-4 px-5 pb-16 sm:px-10 sm:pb-20 lg:px-16">
           <div data-student-reveal className="mx-auto flex max-w-7xl flex-col items-start gap-7 rounded-[2rem] bg-[#123D27] px-6 py-10 text-white shadow-[0_24px_80px_rgba(18,61,39,0.18)] sm:px-12 sm:py-14 lg:flex-row lg:items-end lg:justify-between lg:px-16">
             <div className="max-w-2xl">
               <p className="font-mono text-[10px] font-bold uppercase tracking-[0.24em] text-[#B8F7D0] sm:text-xs">YOUR NEXT CHAPTER STARTS WITH ONE STEP</p>

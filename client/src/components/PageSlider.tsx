@@ -8,13 +8,14 @@ import Identify, { PersonaType } from './Identify';
 import GetInTouch from './GetInTouch';
 import CelestialRocketTransition from './CelestialRocketTransition';
 import Footer from './Footer';
-import { X, ChevronUp, ChevronDown, ArrowLeft } from 'lucide-react';
+import { X, ChevronUp, ChevronDown, ArrowLeft, ArrowRight } from 'lucide-react';
 
 interface PageSliderProps {
   initialPersona?: PersonaType;
+  initialSection?: string;
 }
 
-export default function PageSlider({ initialPersona }: PageSliderProps) {
+export default function PageSlider({ initialPersona, initialSection }: PageSliderProps) {
   const router = useRouter();
   const [current, setCurrent] = useState(initialPersona ? 1 : 0);
   const [boardState, setBoardState] = useState<'idle' | 'sweeping-forward' | 'sweeping-backward'>('idle');
@@ -48,17 +49,37 @@ export default function PageSlider({ initialPersona }: PageSliderProps) {
   const wheelAccumulatorRef = useRef(0);
   const wheelResetTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // A hard refresh from a role URL starts the full site cleanly at Home.
+  // Keep the visible slider page in sync with deep links and browser Back/Forward.
   useEffect(() => {
-    if (!initialPersona) return;
-    const navigation = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming | undefined;
-    if (navigation?.type !== 'reload') return;
-
-    window.history.replaceState(null, '', '/');
-    setCurrent(0);
-    setSelectedPersona(null);
-    setIdentifyMode('cards');
-    identifyResetRef.current?.();
+    const syncPageFromUrl = () => {
+      if (window.location.hash === '#contact') {
+        setCurrent(2);
+        return;
+      }
+      if (window.location.hash === '#roles') {
+        setCurrent(1);
+        setSelectedPersona(null);
+        setIdentifyMode('cards');
+        identifyResetRef.current?.();
+        return;
+      }
+      if (initialPersona) {
+        setCurrent(1);
+        setSelectedPersona(initialPersona);
+        setIdentifyMode('coming-soon');
+      } else {
+        setCurrent(0);
+        setSelectedPersona(null);
+        setIdentifyMode('cards');
+      }
+    };
+    syncPageFromUrl();
+    window.addEventListener('popstate', syncPageFromUrl);
+    window.addEventListener('hashchange', syncPageFromUrl);
+    return () => {
+      window.removeEventListener('popstate', syncPageFromUrl);
+      window.removeEventListener('hashchange', syncPageFromUrl);
+    };
   }, [initialPersona]);
 
   // 3 Primary Slides:
@@ -75,10 +96,24 @@ export default function PageSlider({ initialPersona }: PageSliderProps) {
     }, 1800);
   }, []);
 
+  const syncSlideUrl = useCallback((targetIndex: number) => {
+    const persona = selectedPersona ?? initialPersona;
+    const destination = targetIndex === 0
+      ? '/'
+      : targetIndex === 1
+        ? persona ? `/${persona}` : '/#roles'
+        : `${persona ? `/${persona}` : ''}#contact`;
+    const currentUrl = `${window.location.pathname}${window.location.hash}`;
+    if (currentUrl !== destination) {
+      window.history.pushState({ pageSliderSlide: targetIndex }, '', destination);
+    }
+  }, [initialPersona, selectedPersona]);
+
   const handleRocketApproach = useCallback(() => {
     setCurrent(rocketTargetIndex);
+    syncSlideUrl(rocketTargetIndex);
     slidesRef.current[rocketTargetIndex]?.scrollTo({ top: 0, behavior: 'instant' });
-  }, [rocketTargetIndex]);
+  }, [rocketTargetIndex, syncSlideUrl]);
 
   const handleRocketComplete = useCallback(() => {
     setCurrent(rocketTargetIndex);
@@ -105,6 +140,7 @@ export default function PageSlider({ initialPersona }: PageSliderProps) {
   const goToSlide = useCallback((targetIndex: number, explicitDirection?: 'forward' | 'backward') => {
     if (isLockedRef.current || rocketActive) return;
     if (targetIndex < 0 || targetIndex >= totalSlides || targetIndex === current) return;
+    syncSlideUrl(targetIndex);
 
     // Leaving Hero (Slide 0) going forward -> Trigger high-speed rocket transit
     if (current === 0 && targetIndex > 0) {
@@ -142,7 +178,7 @@ export default function PageSlider({ initialPersona }: PageSliderProps) {
       setBoardState('idle');
       isLockedRef.current = false;
     }, 870);
-  }, [current, totalSlides, rocketActive]);
+  }, [current, totalSlides, rocketActive, syncSlideUrl]);
 
   const nextSlide = useCallback(() => {
     if (current < totalSlides - 1) {
@@ -154,12 +190,13 @@ export default function PageSlider({ initialPersona }: PageSliderProps) {
     // If on Slide 1 in Coming Soon view, return to 6 Cards instead of leaving to Hero
     if (current === 1 && identifyMode === 'coming-soon' && identifyBackRef.current) {
       identifyBackRef.current();
+      router.push('/#roles');
       return;
     }
     if (current > 0) {
       goToSlide(current - 1, 'backward');
     }
-  }, [current, identifyMode, goToSlide]);
+  }, [current, identifyMode, goToSlide, router]);
 
   // Wheel listener: user can read down page before slide transition triggers!
   useEffect(() => {
@@ -609,6 +646,17 @@ export default function PageSlider({ initialPersona }: PageSliderProps) {
               <ArrowLeft className="h-4 w-4" />
             </button>
           ) : null}
+          {current < totalSlides - 1 ? (
+            <button
+              type="button"
+              onClick={() => nextSlide()}
+              aria-label="Go forward to the next page"
+              title="Forward"
+              className="mr-2 flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-amber-500/30 bg-[#16120e]/90 text-amber-200 transition hover:bg-[#2e2318] sm:mr-3 sm:h-10 sm:w-10"
+            >
+              <ArrowRight className="h-4 w-4" />
+            </button>
+          ) : null}
           <button
             onClick={() => goToSlide(0)}
             className="flex items-center gap-2 text-left group cursor-pointer transition-transform hover:scale-105"
@@ -672,17 +720,14 @@ export default function PageSlider({ initialPersona }: PageSliderProps) {
         >
           <Identify
             initialPersona={initialPersona}
+            initialSection={initialSection}
             isActive={current === 1}
             onSelectPersona={(persona) => {
               setSelectedPersona(persona);
-              if (persona === 'individual' || persona === 'student' || persona === 'corporate') {
-                router.push(`/${persona}`);
-                return;
-              }
-              const rolePath = persona ? `/${persona}` : '/';
-              if (window.location.pathname !== rolePath) {
-                window.history.replaceState(null, '', rolePath);
-              }
+              if (!persona) router.push('/#roles');
+            }}
+            onRoleExperienceComplete={(persona) => {
+              router.push(`/${persona}`);
             }}
             onGoToPersonaPage={(p) => {
               setSelectedPersona(p);

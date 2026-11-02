@@ -14,6 +14,7 @@ import {
   X,
 } from 'lucide-react';
 import Footer from './Footer';
+import { useSectionUrl } from '@/hooks/useSectionUrl';
 
 const steps = [
   { number: '01', title: 'Listen', text: 'Understand your people, priorities, and the moment your organisation is facing.' },
@@ -21,12 +22,13 @@ const steps = [
   { number: '03', title: 'Move forward', text: 'Leave teams with ideas and actions they can carry into their everyday work.' },
 ];
 
-export default function CorporateLandingPage() {
+export default function CorporateLandingPage({ initialSection }: { initialSection?: string } = {}) {
   const scrollRootRef = useRef<HTMLDivElement>(null);
   const edgeScrollRef = useRef(0);
   const edgeScrollTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const touchStartYRef = useRef<number | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
+  useSectionUrl(scrollRootRef, '/corporate', initialSection);
 
   useEffect(() => {
     const root = scrollRootRef.current;
@@ -53,11 +55,9 @@ export default function CorporateLandingPage() {
     const handleEdgeScroll = (event: WheelEvent) => {
       if (menuOpen || Math.abs(event.deltaY) < 24) return;
       const atTop = root.scrollTop <= 3;
-      const atBottom = root.scrollTop + root.clientHeight >= root.scrollHeight - 4;
       const fastUpAtTop = atTop && event.deltaY < 0;
-      const fastDownAtBottom = atBottom && event.deltaY > 0;
 
-      if (!fastUpAtTop && !fastDownAtBottom) {
+      if (!fastUpAtTop) {
         edgeScrollRef.current = 0;
         return;
       }
@@ -69,9 +69,6 @@ export default function CorporateLandingPage() {
       if (edgeScrollRef.current <= -140) {
         edgeScrollRef.current = 0;
         window.history.back();
-      } else if (edgeScrollRef.current >= 140) {
-        edgeScrollRef.current = 0;
-        window.history.forward();
       }
     };
     const handleTouchStart = (event: TouchEvent) => {
@@ -85,9 +82,7 @@ export default function CorporateLandingPage() {
       if (endY === undefined) return;
       const distance = endY - startY;
       const atTop = root.scrollTop <= 3;
-      const atBottom = root.scrollTop + root.clientHeight >= root.scrollHeight - 4;
       if (atTop && distance > 120) window.history.back();
-      else if (atBottom && distance < -120) window.history.forward();
     };
 
     root.addEventListener('wheel', handleEdgeScroll, { passive: true });
@@ -114,7 +109,8 @@ export default function CorporateLandingPage() {
     <div ref={scrollRootRef} className="corporate-scroll h-dvh overflow-y-auto overflow-x-clip text-[#17233D]">
       <header className="pointer-events-none fixed inset-x-0 top-0 z-40 flex items-center justify-between px-4 py-3 sm:px-10 sm:py-4 lg:px-16">
         <div className="pointer-events-auto flex items-center gap-2 sm:gap-3">
-          <button type="button" aria-label="Go back to the previous page" title="Back" onClick={() => window.history.length > 1 ? window.history.back() : window.location.assign('/')} className="flex h-9 w-9 items-center justify-center rounded-full border border-[#3155FF]/20 bg-[#FFF4DC]/85 text-[#3155FF] transition hover:bg-[#A8D5BA] sm:h-10 sm:w-10"><ArrowLeft className="h-4 w-4" /></button>
+          <button type="button" aria-label="Go back to the previous page" title="Back" onClick={() => window.history.length > 1 && document.referrer.startsWith(window.location.origin) ? window.history.back() : window.location.assign('/')} className="flex h-9 w-9 items-center justify-center rounded-full border border-[#3155FF]/20 bg-[#FFF4DC]/85 text-[#3155FF] transition hover:bg-[#A8D5BA] sm:h-10 sm:w-10"><ArrowLeft className="h-4 w-4" /></button>
+          <Link href="/signup" aria-label="Continue to the next step" title="Next" className="flex h-9 w-9 items-center justify-center rounded-full border border-[#3155FF]/20 bg-[#FFF4DC]/85 text-[#3155FF] transition hover:bg-[#A8D5BA] sm:h-10 sm:w-10"><ArrowRight className="h-4 w-4" /></Link>
           <Link href="/" aria-label="Pranav Mahajan home" className="inline-flex items-center">
           <img src="/pranav_mahajan_transparent.png" alt="Pranav Mahajan" className="h-10 w-auto object-contain sm:h-14" />
           </Link>
@@ -137,7 +133,7 @@ export default function CorporateLandingPage() {
       </aside>
 
       <main>
-        <section id="top" className="corporate-hero relative isolate w-full overflow-hidden">
+        <section id="top" data-url-section="top" className="corporate-hero relative isolate w-full overflow-hidden">
           <div aria-hidden="true" className="corporate-hero-wash pointer-events-none absolute -right-40 top-20 -z-10 h-[520px] w-[520px] rounded-full bg-[#A8D5BA]/50 blur-[100px] sm:h-[720px] sm:w-[720px]" />
           <div className="relative mx-auto grid min-h-[760px] max-w-[1440px] items-center gap-12 px-5 pb-16 pt-28 sm:px-10 sm:pt-32 lg:min-h-[820px] lg:grid-cols-[1.02fr_.98fr] lg:gap-8 lg:px-16 lg:pt-28">
           <div className="relative z-10 max-w-2xl">
@@ -183,7 +179,7 @@ export default function CorporateLandingPage() {
           </div>
         </section>
 
-        <section id="approach" className="mx-auto w-full max-w-[1440px] scroll-mt-24 px-5 pb-16 pt-8 sm:px-10 sm:pb-20 sm:pt-10 lg:px-16 lg:pb-24 lg:pt-12">
+        <section id="approach" data-url-section="approach" className="mx-auto w-full max-w-[1440px] scroll-mt-24 px-5 pb-16 pt-8 sm:px-10 sm:pb-20 sm:pt-10 lg:px-16 lg:pb-24 lg:pt-12">
           <div data-corporate-reveal className="mb-4 max-w-3xl sm:mb-6">
             <p className="font-mono text-[10px] font-bold uppercase tracking-[.24em] text-[#3155FF] sm:text-xs">A HUMAN-CENTRED APPROACH</p>
             <h2 className="mt-4 text-3xl font-semibold leading-tight tracking-[-.045em] text-[#17233D] sm:text-5xl">Strong organisations start with how people feel, think, and work.</h2>
@@ -198,7 +194,7 @@ export default function CorporateLandingPage() {
           </figure>
         </section>
 
-        <section className="relative overflow-hidden bg-[#A8D5BA]/45 px-5 py-16 sm:px-10 sm:py-20 lg:px-16 lg:py-24">
+        <section id="action" data-url-section="action" className="relative overflow-hidden bg-[#A8D5BA]/45 px-5 py-16 sm:px-10 sm:py-20 lg:px-16 lg:py-24">
           <div aria-hidden="true" className="pointer-events-none absolute -right-20 top-1/2 h-80 w-80 -translate-y-1/2 rounded-full border border-[#3155FF]/10 sm:h-[34rem] sm:w-[34rem]" />
           <div className="relative mx-auto grid max-w-[1312px] gap-10 lg:grid-cols-[.8fr_1.2fr] lg:gap-20">
             <div data-corporate-reveal>
@@ -217,7 +213,7 @@ export default function CorporateLandingPage() {
           </div>
         </section>
 
-        <section id="contact" className="px-5 py-16 sm:px-10 sm:py-20 lg:px-16 lg:py-24">
+        <section id="contact" data-url-section="contact" className="px-5 py-16 sm:px-10 sm:py-20 lg:px-16 lg:py-24">
           <div data-corporate-reveal className="corporate-cta relative mx-auto max-w-[1312px] overflow-hidden rounded-[2rem] bg-[#3155FF] px-6 py-10 text-white shadow-[0_28px_75px_rgba(49,85,255,.24)] sm:px-12 sm:py-14 lg:flex lg:items-end lg:justify-between lg:gap-12 lg:px-16">
             <div aria-hidden="true" className="pointer-events-none absolute -right-14 -top-36 h-80 w-80 rounded-full border border-white/20 sm:h-[30rem] sm:w-[30rem]" />
             <div className="relative z-10 max-w-3xl"><p className="font-mono text-[10px] font-bold uppercase tracking-[.24em] text-[#DCE5FF] sm:text-xs">A STRONGER NEXT CHAPTER</p><h2 className="mt-4 text-3xl font-semibold leading-tight tracking-[-.045em] sm:text-5xl">Make space for the people behind the progress.</h2><p className="mt-4 max-w-2xl text-sm leading-7 text-white/80 sm:text-base sm:leading-8">Tell us what your organisation is working through and what you want your people to take forward.</p></div>

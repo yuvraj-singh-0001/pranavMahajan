@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import Link from 'next/link';
 import { ArrowDown, ArrowLeft, ArrowRight, Brain, Compass, Target, X } from 'lucide-react';
 import Footer from './Footer';
+import { useSectionUrl } from '@/hooks/useSectionUrl';
 
 const navigation = [
   { href: '#top', label: 'Home' },
@@ -56,12 +57,13 @@ const reflections = [
   },
 ];
 
-export default function IndividualLandingPage() {
+export default function IndividualLandingPage({ initialSection }: { initialSection?: string } = {}) {
   const [menuOpen, setMenuOpen] = useState(false);
   const scrollRootRef = useRef<HTMLDivElement>(null);
   const edgeScrollRef = useRef(0);
   const edgeScrollTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const touchStartYRef = useRef<number | null>(null);
+  useSectionUrl(scrollRootRef, '/individual', initialSection);
 
   useEffect(() => {
     const root = scrollRootRef.current;
@@ -95,14 +97,14 @@ export default function IndividualLandingPage() {
     const root = scrollRootRef.current;
     if (!root) return;
     const handleWheel = (event: WheelEvent) => {
-      if (menuOpen || event.deltaY >= -24) {
-        if (event.deltaY >= 0) edgeScrollRef.current = 0;
-        return;
-      }
-      if (root.scrollTop > 3) {
+      if (menuOpen || Math.abs(event.deltaY) < 24) return;
+      const atTop = root.scrollTop <= 3;
+      const towardPrevious = atTop && event.deltaY < 0;
+      if (!towardPrevious) {
         edgeScrollRef.current = 0;
         return;
       }
+      if (edgeScrollRef.current && Math.sign(edgeScrollRef.current) !== Math.sign(event.deltaY)) edgeScrollRef.current = 0;
       edgeScrollRef.current += event.deltaY;
       if (edgeScrollTimerRef.current) clearTimeout(edgeScrollTimerRef.current);
       edgeScrollTimerRef.current = setTimeout(() => { edgeScrollRef.current = 0; }, 300);
@@ -117,9 +119,12 @@ export default function IndividualLandingPage() {
     const handleTouchEnd = (event: TouchEvent) => {
       const startY = touchStartYRef.current;
       touchStartYRef.current = null;
-      if (menuOpen || startY === null || root.scrollTop > 3) return;
+      if (menuOpen || startY === null) return;
       const endY = event.changedTouches[0]?.clientY;
-      if (endY !== undefined && endY - startY > 120) window.history.back();
+      if (endY === undefined) return;
+      const distance = endY - startY;
+      const atTop = root.scrollTop <= 3;
+      if (atTop && distance > 120) window.history.back();
     };
     root.addEventListener('wheel', handleWheel, { passive: true });
     root.addEventListener('touchstart', handleTouchStart, { passive: true });
@@ -136,7 +141,8 @@ export default function IndividualLandingPage() {
     <div ref={scrollRootRef} className="individual-page-scroll h-dvh overflow-y-auto overflow-x-clip text-[#203029]">
       <header className="fixed inset-x-0 top-0 z-50 flex items-center justify-between border-b border-amber-500/15 bg-black/40 px-4 py-2.5 backdrop-blur-md sm:border-b-0 sm:bg-transparent sm:px-12 sm:py-5 sm:backdrop-blur-none">
         <div className="flex items-center gap-2 sm:gap-3">
-          <button type="button" aria-label="Go back to the previous page" title="Back" onClick={() => window.history.length > 1 ? window.history.back() : window.location.assign('/')} className="flex h-9 w-9 items-center justify-center rounded-full border border-[#8E7650]/20 bg-[#FFFCF7]/90 text-[#8A6328] transition hover:bg-[#EEE5D5] sm:h-10 sm:w-10"><ArrowLeft className="h-4 w-4" /></button>
+          <button type="button" aria-label="Go back to the previous page" title="Back" onClick={() => window.history.length > 1 && document.referrer.startsWith(window.location.origin) ? window.history.back() : window.location.assign('/')} className="flex h-9 w-9 items-center justify-center rounded-full border border-[#8E7650]/20 bg-[#FFFCF7]/90 text-[#8A6328] transition hover:bg-[#EEE5D5] sm:h-10 sm:w-10"><ArrowLeft className="h-4 w-4" /></button>
+          <Link href="/signup" aria-label="Continue to the next step" title="Next" className="flex h-9 w-9 items-center justify-center rounded-full border border-[#8E7650]/20 bg-[#FFFCF7]/90 text-[#8A6328] transition hover:bg-[#EEE5D5] sm:h-10 sm:w-10"><ArrowRight className="h-4 w-4" /></Link>
           <Link href="/" aria-label="Pranav Mahajan home" className="inline-flex items-center">
           <img src="/pranav_mahajan_transparent.png" alt="Pranav Mahajan" className="h-10 w-auto object-contain drop-shadow-[0_4px_20px_rgba(223,165,71,0.4)] sm:h-16 md:h-20" />
           </Link>
@@ -162,7 +168,7 @@ export default function IndividualLandingPage() {
       </aside>
 
       <main className="flex flex-col">
-        <section id="top" className="order-1 relative mx-auto grid min-h-[740px] max-w-7xl scroll-mt-24 items-center gap-10 px-5 pb-16 pt-28 sm:px-10 sm:pt-36 lg:min-h-[790px] lg:grid-cols-[.92fr_1.08fr] lg:gap-4 lg:px-16 lg:pt-36">
+        <section id="top" data-url-section="top" className="order-1 relative mx-auto grid min-h-[740px] max-w-7xl scroll-mt-24 items-center gap-10 px-5 pb-16 pt-28 sm:px-10 sm:pt-36 lg:min-h-[790px] lg:grid-cols-[.92fr_1.08fr] lg:gap-4 lg:px-16 lg:pt-36">
           <div className="relative z-10 max-w-2xl">
             <p className="mb-5 inline-flex items-center gap-2 rounded-full border border-[#8E7650]/15 bg-[#FFFCF7]/80 px-4 py-2 font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-[#806333] shadow-sm sm:text-xs"><span className="h-2 w-2 rounded-full bg-[#9A8054]" /> Personal growth for every life stage</p>
             <h1 className="max-w-2xl text-[2.7rem] font-semibold leading-[1.02] tracking-[-0.055em] text-[#203029] sm:text-6xl lg:text-[4.6rem]">Become more fully yourself.<br /><span className="text-[#8A6328]">At every stage of life.</span></h1>
@@ -188,7 +194,7 @@ export default function IndividualLandingPage() {
           <a href="#pathways" className="absolute bottom-5 left-1/2 hidden -translate-x-1/2 items-center gap-2 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-[#7E745F] transition hover:text-[#8A6328] lg:inline-flex">Scroll to explore <ArrowDown className="h-3.5 w-3.5" /></a>
         </section>
 
-        <section id="pathways" className="order-2 mx-auto w-full max-w-7xl scroll-mt-24 px-5 py-8 sm:px-10 sm:py-10 lg:px-16 lg:py-12">
+        <section id="pathways" data-url-section="pathways" className="order-2 mx-auto w-full max-w-7xl scroll-mt-24 px-5 py-8 sm:px-10 sm:py-10 lg:px-16 lg:py-12">
           <div className="mb-8 max-w-2xl sm:mb-10">
             <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-[#8A6328] sm:text-xs">A PERSONAL PATHWAY</p>
             <h2 className="mt-3 text-3xl font-semibold leading-tight tracking-[-0.04em] text-[#203029] sm:text-4xl">Three ways to move forward.</h2>
@@ -218,7 +224,7 @@ export default function IndividualLandingPage() {
           </div>
         </section>
 
-        <section id="next-step" className="order-3 mx-auto w-full max-w-7xl px-5 pb-16 pt-8 sm:px-10 sm:pb-20 lg:px-16">
+        <section id="problem" data-url-section="problem" className="order-3 mx-auto w-full max-w-7xl px-5 pb-16 pt-8 sm:px-10 sm:pb-20 lg:px-16">
           <div data-individual-reveal className="border-t border-[#8E7650]/20 pt-10 sm:pt-14">
             <div className="grid gap-5 sm:grid-cols-[.8fr_1.2fr] sm:gap-12">
               <div><p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-[#8A6328] sm:text-xs">COMMON CHALLENGES, PRACTICAL RESPONSES</p><h2 className="mt-4 max-w-md text-3xl font-semibold leading-tight tracking-[-0.04em] text-[#203029] sm:text-4xl">Every chapter can begin with one thoughtful step.</h2></div>
@@ -229,7 +235,7 @@ export default function IndividualLandingPage() {
           </div>
         </section>
 
-        <section id="next-step" className="order-4 px-5 pb-16 sm:px-10 sm:pb-20 lg:px-16">
+        <section id="next-step" data-url-section="next-step" className="order-4 px-5 pb-16 sm:px-10 sm:pb-20 lg:px-16">
           <div data-individual-reveal className="mx-auto flex max-w-7xl flex-col items-start gap-7 rounded-[2rem] bg-[#253D2D] px-6 py-10 text-white shadow-[0_24px_80px_rgba(37,61,45,0.18)] sm:px-12 sm:py-14 lg:flex-row lg:items-end lg:justify-between lg:px-16">
             <div className="max-w-2xl"><p className="font-mono text-[10px] font-bold uppercase tracking-[0.24em] text-[#E7D8B9] sm:text-xs">YOUR NEXT CHAPTER STARTS WITH ONE STEP</p><h2 className="mt-4 text-3xl font-semibold leading-tight tracking-[-0.04em] sm:text-5xl">Make room for clarity, resilience, and possibility.</h2><p className="mt-4 max-w-xl text-sm leading-6 text-[#F5F0E6]/75 sm:text-base sm:leading-7">Whatever your age, role, or starting point, tell us what kind of personal growth you are looking for.</p></div>
             <Link href="/signup" className="group inline-flex min-h-12 shrink-0 items-center gap-3 rounded-full bg-[#EFE4D0] px-6 text-sm font-bold text-[#253D2D] transition hover:-translate-y-0.5 hover:bg-white">Get started <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" /></Link>
