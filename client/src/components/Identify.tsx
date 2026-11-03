@@ -26,6 +26,7 @@ import ScholarPenCursor from './ScholarPenCursor';
 import RoleCursor from './RoleCursor';
 import Footer from './Footer';
 import { useSectionUrl } from '@/hooks/useSectionUrl';
+import { fadeVideoAudio, restoreVideoAudio } from '@/utils/videoAudio';
 
 export type PersonaType =
   | 'student'
@@ -421,6 +422,7 @@ export default function Identify({
     if (roleVideoRef.current) {
       roleVideoRef.current.pause();
       roleVideoRef.current.currentTime = 0;
+      restoreVideoAudio(roleVideoRef.current);
     }
     setRoleVideoPlaying(false);
     setRoleVideoEnded(false);
@@ -504,6 +506,7 @@ export default function Identify({
     if (roleVideoRef.current) {
       roleVideoRef.current.pause();
       roleVideoRef.current.currentTime = 0;
+      restoreVideoAudio(roleVideoRef.current);
     }
     setRoleVideoEnded(false);
     setRoleVideoPlaying(false);
@@ -547,6 +550,7 @@ export default function Identify({
       }
       resetAllAnimations();
       video.currentTime = 0;
+      restoreVideoAudio(video);
       // Fast video playback as requested
       video.playbackRate = 1.65;
 
@@ -578,6 +582,7 @@ export default function Identify({
   const handleTimeUpdate = () => {
     const video = videoRef.current;
     if (!video || !video.duration) return;
+    fadeVideoAudio(video);
 
     // Start writing text as soon as video reaches 40% progress
     const progress = video.currentTime / video.duration;
@@ -590,6 +595,7 @@ export default function Identify({
     const video = videoRef.current;
     if (video) {
       // Freeze on final unrolled frame without disappearing or looping
+      video.volume = 0;
       video.pause();
     }
     // If not already triggered, trigger sequence now smoothly
@@ -647,6 +653,7 @@ export default function Identify({
       const v = roleVideoRef.current;
       if (v) {
         v.currentTime = 0;
+        restoreVideoAudio(v);
         v.playbackRate = 1.0;
         const playPromise = v.play();
         if (playPromise !== undefined) {
@@ -663,6 +670,7 @@ export default function Identify({
       if (v) {
         v.pause();
         v.currentTime = 0;
+        restoreVideoAudio(v);
       }
       setRoleVideoPlaying(false);
       setRoleVideoEnded(false);
@@ -690,6 +698,7 @@ export default function Identify({
   const handleRoleTimeUpdate = () => {
     const v = roleVideoRef.current;
     if (!v || !v.duration) return;
+    fadeVideoAudio(v);
     if (v.currentTime / v.duration >= 0.7) {
       if (activeRole) {
         try {
@@ -712,6 +721,7 @@ export default function Identify({
       } catch { }
     }
     if (v) {
+      v.volume = 0;
       v.pause();
     }
     setRoleVideoEnded(true);

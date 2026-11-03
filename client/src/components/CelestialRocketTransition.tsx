@@ -2,6 +2,7 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import { ArrowUpRight, Volume2, VolumeX } from 'lucide-react';
+import { fadeVideoAudio, restoreVideoAudio } from '@/utils/videoAudio';
 
 interface CelestialRocketTransitionProps {
   isActive: boolean;
@@ -47,6 +48,7 @@ export default function CelestialRocketTransition({
       hasTriggeredApproachRef.current = false;
       setIsFadingOut(false);
       video.currentTime = 0;
+      restoreVideoAudio(video);
       video.playbackRate = playbackSpeed;
       video.muted = isAudioMuted;
 
@@ -70,6 +72,7 @@ export default function CelestialRocketTransition({
   const handleTimeUpdate = () => {
     const video = videoRef.current;
     if (!video || !video.duration) return;
+    fadeVideoAudio(video);
 
     if (video.playbackRate !== playbackSpeed) {
       video.playbackRate = playbackSpeed;
@@ -101,6 +104,7 @@ export default function CelestialRocketTransition({
   };
 
   const handleEnded = () => {
+    if (videoRef.current) videoRef.current.volume = 0;
     try {
       localStorage.setItem('pravan_rocket_transition_watched', 'true');
       setHasWatchedTransition(true);

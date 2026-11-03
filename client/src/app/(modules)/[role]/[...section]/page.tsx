@@ -1,6 +1,7 @@
-import { Suspense } from 'react';
+import { Suspense, use } from 'react';
 import { notFound } from 'next/navigation';
 import CorporateLandingPage from '@/components/CorporateLandingPage';
+import GovernmentLandingPage from '@/components/GovernmentLandingPage';
 import IndividualLandingPage from '@/components/IndividualLandingPage';
 import PageSlider from '@/components/PageSlider';
 import StudentLandingPage from '@/components/StudentLandingPage';
@@ -20,12 +21,12 @@ export default function RoleSectionPage({
   );
 }
 
-async function RoleSectionContent({
+function RoleSectionContent({
   params,
 }: {
   params: Promise<{ role: string; section: string[] }>;
 }) {
-  const { role, section } = await params;
+  const { role, section } = use(params);
   if (!roles.includes(role as PersonaType)) notFound();
 
   const initialSection = section[0];
@@ -36,6 +37,8 @@ async function RoleSectionContent({
       return <IndividualLandingPage initialSection={initialSection} />;
     case 'corporate':
       return <CorporateLandingPage initialSection={initialSection} />;
+    case 'government':
+      return <GovernmentLandingPage initialSection={initialSection} />;
     default:
       return <PageSlider initialPersona={role as PersonaType} initialSection={initialSection} />;
   }

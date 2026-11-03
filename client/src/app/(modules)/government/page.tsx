@@ -1,5 +1,5 @@
 import { Metadata } from 'next';
-import PageSlider from '@/components/PageSlider';
+import GovernmentLandingPage from '@/components/GovernmentLandingPage';
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://pranavmahajan.com';
 
@@ -28,5 +28,5 @@ export const metadata: Metadata = {
 };
 
 export default function GovernmentPage() {
-  return <PageSlider initialPersona="government" />;
+  return <GovernmentLandingPage />;
 }
