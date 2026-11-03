@@ -15,6 +15,8 @@ import {
 import { PersonaType } from './Identify';
 import SiteFooter from './SiteFooter';
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+
 interface GetInTouchProps {
   selectedPersona?: PersonaType | null;
   onBackToPathway?: () => void;
@@ -33,6 +35,8 @@ export default function GetInTouch({
     message: '',
   });
   const [sent, setSent] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState('');
 
   useEffect(() => {
     if (selectedPersona) {
@@ -68,9 +72,39 @@ export default function GetInTouch({
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setSent(true);
+    setSubmitError('');
+
+    if (!role) {
+      setSubmitError('Please choose the profile that best describes you.');
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      const response = await fetch(`${API_BASE_URL}/inquiries/${role}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: formData.name,
+          email: formData.email,
+          organization: formData.org,
+          message: formData.message,
+        }),
+      });
+      const result = await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Your inquiry could not be sent. Please try again.');
+      }
+
+      setSent(true);
+    } catch (error) {
+      setSubmitError(error instanceof Error ? error.message : 'Could not connect to the inquiry service. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -239,12 +273,15 @@ export default function GetInTouch({
                   className="w-full px-4 py-3 rounded-xl bg-[#0e0c0a] border border-amber-500/30 text-white placeholder-slate-500 text-xs focus:outline-none focus:border-[#dfa547]"
                 />
 
+                {submitError ? <p role="alert" className="rounded-xl border border-rose-500/30 bg-rose-950/30 px-4 py-3 text-xs text-rose-200">{submitError}</p> : null}
+
                 <button
                   type="submit"
-                  className="ochre-pill-button w-full py-3.5 text-sm font-bold shadow-md hover:shadow-lg flex items-center justify-center gap-2 cursor-pointer transition-transform hover:scale-[1.01]"
+                  disabled={isSubmitting}
+                  className="ochre-pill-button w-full py-3.5 text-sm font-bold shadow-md hover:shadow-lg flex items-center justify-center gap-2 cursor-pointer transition-transform hover:scale-[1.01] disabled:cursor-wait disabled:opacity-70"
                 >
                   <Send className="w-4 h-4" />
-                  <span>Send Official Inquiry</span>
+                  <span>{isSubmitting ? 'Sending Inquiry...' : 'Send Official Inquiry'}</span>
                 </button>
               </form>
             )}

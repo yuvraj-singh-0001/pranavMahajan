@@ -30,6 +30,10 @@ Open [http://localhost:3000](http://localhost:3000)
 ```bash
 cd server
 npm install
-npm start
+npm run dev
 ```
-Runs on [http://localhost:5000](http://localhost:5000)
+Create `server/.env` from `server/.env.example` and set `MONGODB_URI` to your local MongoDB or Atlas connection string. The API waits for MongoDB before it starts on [http://localhost:5000](http://localhost:5000).
+
+Role inquiry endpoints are `POST /api/inquiries/student`, `/individual`, `/school`, `/corporate`, `/government`, `/ngo`, and `/parent`. Submitted inquiries are saved in the MongoDB `inquiries` collection with their selected role. `GET /api/portfolio` serves the portfolio data, and `GET /health` checks API availability.
+
+For the client, set `NEXT_PUBLIC_API_URL=http://localhost:5000/api` in `client/.env.local` (or use the same value from `client/.env.example`).

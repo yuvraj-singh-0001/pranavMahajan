@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { ArrowDown, ArrowLeft, ArrowRight, Brain, Compass, Target, X } from 'lucide-react';
 import Footer from './Footer';
 import { useSectionUrl } from '@/hooks/useSectionUrl';
+import RoleCursor from './RoleCursor';
 
 const navigation = [
   { href: '#top', label: 'Home' },
@@ -139,6 +140,7 @@ export default function IndividualLandingPage({ initialSection }: { initialSecti
 
   return (
     <div ref={scrollRootRef} className="individual-page-scroll h-dvh overflow-y-auto overflow-x-clip text-[#203029]">
+      <RoleCursor role="individual" isActive />
       <header className="fixed inset-x-0 top-0 z-50 flex items-center justify-between border-b border-amber-500/15 bg-black/40 px-4 py-2.5 backdrop-blur-md sm:border-b-0 sm:bg-transparent sm:px-12 sm:py-5 sm:backdrop-blur-none">
         <div className="flex items-center gap-2 sm:gap-3">
           <button type="button" aria-label="Go back to the previous page" title="Back" onClick={() => window.history.length > 1 && document.referrer.startsWith(window.location.origin) ? window.history.back() : window.location.assign('/')} className="flex h-9 w-9 items-center justify-center rounded-full border border-[#8E7650]/20 bg-[#FFFCF7]/90 text-[#8A6328] transition hover:bg-[#EEE5D5] sm:h-10 sm:w-10"><ArrowLeft className="h-4 w-4" /></button>
