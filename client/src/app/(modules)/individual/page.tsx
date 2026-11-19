@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next';
-import IndividualLandingPage from '@/components/IndividualLandingPage';
+import IndividualLandingPage from './components/IndividualLandingPage';
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://pranavmahajan.com';
 
