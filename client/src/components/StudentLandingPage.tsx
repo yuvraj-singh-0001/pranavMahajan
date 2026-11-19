@@ -96,6 +96,10 @@ export default function StudentLandingPage({ initialSection }: { initialSection?
     return () => window.removeEventListener('keydown', handleEscape);
   }, [menuOpen]);
 
+  const handleBackToRoles = () => {
+    window.location.assign('/#roles');
+  };
+
   useEffect(() => {
     const root = pageScrollRef.current;
     if (!root) return;
@@ -111,10 +115,7 @@ export default function StudentLandingPage({ initialSection }: { initialSection?
       edgeScrollRef.current += event.deltaY;
       if (edgeScrollTimerRef.current) clearTimeout(edgeScrollTimerRef.current);
       edgeScrollTimerRef.current = setTimeout(() => { edgeScrollRef.current = 0; }, 300);
-      if (edgeScrollRef.current <= -140) {
-        edgeScrollRef.current = 0;
-        window.history.back();
-      }
+      // edge scroll back disabled
     };
     const handleTouchStart = (event: TouchEvent) => {
       touchStartYRef.current = event.touches[0]?.clientY ?? null;
@@ -127,7 +128,7 @@ export default function StudentLandingPage({ initialSection }: { initialSection?
       if (endY === undefined) return;
       const distance = endY - startY;
       const atTop = root.scrollTop <= 3;
-      if (atTop && distance > 120) window.history.back();
+      if (atTop && distance > 120) handleBackToRoles();
     };
     root.addEventListener('wheel', handleWheel, { passive: true });
     root.addEventListener('touchstart', handleTouchStart, { passive: true });
@@ -144,8 +145,6 @@ export default function StudentLandingPage({ initialSection }: { initialSection?
     <div ref={pageScrollRef} className="student-page-scroller h-dvh overflow-y-auto overflow-x-clip bg-[#F7F1E5] text-[#163D29]">
       <header className="fixed inset-x-0 top-0 z-50 flex items-center justify-between border-b border-amber-500/15 bg-black/40 px-4 py-2.5 backdrop-blur-md transition-all duration-500 sm:border-b-0 sm:bg-transparent sm:px-12 sm:py-5 sm:backdrop-blur-none">
         <div className="pointer-events-auto flex items-center gap-2 sm:gap-3">
-          <button type="button" aria-label="Go back to the previous page" title="Back" onClick={() => window.history.length > 1 && document.referrer.startsWith(window.location.origin) ? window.history.back() : window.location.assign('/')} className="flex h-9 w-9 items-center justify-center rounded-full border border-emerald-800/20 bg-[#F7F1E5]/90 text-[#28784B] transition hover:bg-[#B8F7D0] sm:h-10 sm:w-10"><ArrowLeft className="h-4 w-4" /></button>
-          <Link href="/signup" aria-label="Continue to the next step" title="Next" className="flex h-9 w-9 items-center justify-center rounded-full border border-emerald-800/20 bg-[#F7F1E5]/90 text-[#28784B] transition hover:bg-[#B8F7D0] sm:h-10 sm:w-10"><ArrowRight className="h-4 w-4" /></Link>
           <Link href="/" aria-label="Pranav Mahajan home" className="inline-flex items-center">
           <img
             src="/pranav_mahajan_transparent.png"
@@ -321,9 +320,9 @@ export default function StudentLandingPage({ initialSection }: { initialSection?
       </main>
 
       <Footer
-        onNavigateHome={() => { window.location.href = '/'; }}
-        onNavigateRoles={() => { window.location.href = '/'; }}
-        onNavigateContact={() => { window.location.href = '/signup'; }}
+        onNavigateHome={() => { window.location.assign('/'); }}
+        onNavigateRoles={handleBackToRoles}
+        onNavigateContact={() => { window.location.assign('/signup'); }}
       />
 
       <style jsx global>{`

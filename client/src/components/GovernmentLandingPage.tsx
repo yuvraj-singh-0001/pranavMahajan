@@ -93,8 +93,6 @@ export default function GovernmentLandingPage({ initialSection }: { initialSecti
     <div ref={scrollRootRef} className="government-page h-dvh overflow-y-auto overflow-x-clip text-[#F4F0E7]">
       <header className="pointer-events-none fixed inset-x-0 top-0 z-40 flex items-center justify-between px-4 py-3 sm:px-10 sm:py-4 lg:px-16">
         <div className="pointer-events-auto flex items-center gap-2 sm:gap-3">
-          <button type="button" aria-label="Go back to the previous page" title="Back" onClick={() => window.history.length > 1 && document.referrer.startsWith(window.location.origin) ? window.history.back() : window.location.assign('/')} className="flex h-9 w-9 items-center justify-center rounded-full border border-[#C7A66B]/35 bg-[#101C29]/85 text-[#E7C787] backdrop-blur-md transition hover:bg-[#1B2B3B] sm:h-10 sm:w-10"><ArrowLeft className="h-4 w-4" /></button>
-          <Link href="/signup" aria-label="Continue to the next step" title="Next" className="flex h-9 w-9 items-center justify-center rounded-full border border-[#C7A66B]/35 bg-[#101C29]/85 text-[#E7C787] backdrop-blur-md transition hover:bg-[#1B2B3B] sm:h-10 sm:w-10"><ArrowRight className="h-4 w-4" /></Link>
           <Link href="/" aria-label="Pranav Mahajan home" className="pointer-events-auto inline-flex items-center">
             <img src="/pranav_mahajan_transparent.png" alt="Pranav Mahajan" className="h-10 w-auto object-contain drop-shadow-[0_4px_20px_rgba(199,166,107,0.25)] sm:h-14 md:h-16" />
           </Link>
@@ -220,9 +218,9 @@ export default function GovernmentLandingPage({ initialSection }: { initialSecti
       </main>
 
       <Footer
-        onNavigateHome={() => { window.location.href = '/'; }}
-        onNavigateRoles={() => { window.location.href = '/#roles'; }}
-        onNavigateContact={() => { window.location.href = '/signup'; }}
+        onNavigateHome={() => { window.location.assign('/'); }}
+        onNavigateRoles={() => { window.location.assign('/#roles'); }}
+        onNavigateContact={() => { window.location.assign('/signup'); }}
       />
 
       <style jsx global>{`

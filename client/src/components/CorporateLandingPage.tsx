@@ -49,6 +49,10 @@ export default function CorporateLandingPage({ initialSection }: { initialSectio
     return () => observer.disconnect();
   }, []);
 
+  const handleBackToRoles = () => {
+    window.location.assign('/#roles');
+  };
+
   useEffect(() => {
     const root = scrollRootRef.current;
     if (!root) return;
@@ -66,10 +70,7 @@ export default function CorporateLandingPage({ initialSection }: { initialSectio
       if (edgeScrollTimerRef.current) clearTimeout(edgeScrollTimerRef.current);
       edgeScrollTimerRef.current = setTimeout(() => { edgeScrollRef.current = 0; }, 280);
 
-      if (edgeScrollRef.current <= -140) {
-        edgeScrollRef.current = 0;
-        window.history.back();
-      }
+      // edge scroll back disabled
     };
     const handleTouchStart = (event: TouchEvent) => {
       touchStartYRef.current = event.touches[0]?.clientY ?? null;
@@ -82,7 +83,7 @@ export default function CorporateLandingPage({ initialSection }: { initialSectio
       if (endY === undefined) return;
       const distance = endY - startY;
       const atTop = root.scrollTop <= 3;
-      if (atTop && distance > 120) window.history.back();
+      if (atTop && distance > 120) handleBackToRoles();
     };
 
     root.addEventListener('wheel', handleEdgeScroll, { passive: true });
@@ -109,8 +110,6 @@ export default function CorporateLandingPage({ initialSection }: { initialSectio
     <div ref={scrollRootRef} className="corporate-scroll h-dvh overflow-y-auto overflow-x-clip text-[#17233D]">
       <header className="pointer-events-none fixed inset-x-0 top-0 z-40 flex items-center justify-between px-4 py-3 sm:px-10 sm:py-4 lg:px-16">
         <div className="pointer-events-auto flex items-center gap-2 sm:gap-3">
-          <button type="button" aria-label="Go back to the previous page" title="Back" onClick={() => window.history.length > 1 && document.referrer.startsWith(window.location.origin) ? window.history.back() : window.location.assign('/')} className="flex h-9 w-9 items-center justify-center rounded-full border border-[#3155FF]/20 bg-[#FFF4DC]/85 text-[#3155FF] transition hover:bg-[#A8D5BA] sm:h-10 sm:w-10"><ArrowLeft className="h-4 w-4" /></button>
-          <Link href="/signup" aria-label="Continue to the next step" title="Next" className="flex h-9 w-9 items-center justify-center rounded-full border border-[#3155FF]/20 bg-[#FFF4DC]/85 text-[#3155FF] transition hover:bg-[#A8D5BA] sm:h-10 sm:w-10"><ArrowRight className="h-4 w-4" /></Link>
           <Link href="/" aria-label="Pranav Mahajan home" className="inline-flex items-center">
           <img src="/pranav_mahajan_transparent.png" alt="Pranav Mahajan" className="h-10 w-auto object-contain sm:h-14" />
           </Link>
@@ -223,9 +222,9 @@ export default function CorporateLandingPage({ initialSection }: { initialSectio
       </main>
 
       <Footer
-        onNavigateHome={() => { window.location.href = '/'; }}
-        onNavigateRoles={() => { window.location.href = '/'; }}
-        onNavigateContact={() => { window.location.href = '/signup'; }}
+        onNavigateHome={() => { window.location.assign('/'); }}
+        onNavigateRoles={handleBackToRoles}
+        onNavigateContact={() => { window.location.assign('/signup'); }}
       />
 
       <style jsx global>{`

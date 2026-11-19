@@ -2,14 +2,16 @@
 
 import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import Link from 'next/link';
-import { ArrowDown, ArrowLeft, ArrowRight, Brain, Compass, Target, X } from 'lucide-react';
-import Footer from './Footer';
+import { ArrowRight, Brain, Compass, Target, X } from 'lucide-react';
+import Footer from '@/components/Footer';
 import { useSectionUrl } from '@/hooks/useSectionUrl';
-import RoleCursor from './RoleCursor';
+import RoleCursor from '@/components/RoleCursor';
+import ExploreLifeAndGrowth from './ExploreLifeAndGrowth';
 
 const navigation = [
-  { href: '#top', label: 'Home' },
-  { href: '#pathways', label: 'Personal growth' },
+  { href: '#top', label: 'Explore Life & Growth' },
+  { href: '#pathways', label: 'Personal growth pathways' },
+  { href: '#problem', label: 'Common challenges' },
   { href: '#next-step', label: 'Take the next step' },
 ];
 
@@ -39,7 +41,7 @@ const pathways = [
     title: 'Turn intention into everyday progress',
     description: 'Build small, meaningful routines that support the goals and personal growth that matter to you.',
     action: 'Find your next step',
-    accent: '#9A5B43',
+    accent: '#8A6328',
   },
 ];
 
@@ -61,9 +63,6 @@ const reflections = [
 export default function IndividualLandingPage({ initialSection }: { initialSection?: string } = {}) {
   const [menuOpen, setMenuOpen] = useState(false);
   const scrollRootRef = useRef<HTMLDivElement>(null);
-  const edgeScrollRef = useRef(0);
-  const edgeScrollTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const touchStartYRef = useRef<number | null>(null);
   useSectionUrl(scrollRootRef, '/individual', initialSection);
 
   useEffect(() => {
@@ -94,59 +93,17 @@ export default function IndividualLandingPage({ initialSection }: { initialSecti
     return () => window.removeEventListener('keydown', closeOnEscape);
   }, [menuOpen]);
 
-  useEffect(() => {
-    const root = scrollRootRef.current;
-    if (!root) return;
-    const handleWheel = (event: WheelEvent) => {
-      if (menuOpen || Math.abs(event.deltaY) < 24) return;
-      const atTop = root.scrollTop <= 3;
-      const towardPrevious = atTop && event.deltaY < 0;
-      if (!towardPrevious) {
-        edgeScrollRef.current = 0;
-        return;
-      }
-      if (edgeScrollRef.current && Math.sign(edgeScrollRef.current) !== Math.sign(event.deltaY)) edgeScrollRef.current = 0;
-      edgeScrollRef.current += event.deltaY;
-      if (edgeScrollTimerRef.current) clearTimeout(edgeScrollTimerRef.current);
-      edgeScrollTimerRef.current = setTimeout(() => { edgeScrollRef.current = 0; }, 300);
-      if (edgeScrollRef.current <= -140) {
-        edgeScrollRef.current = 0;
-        window.history.back();
-      }
-    };
-    const handleTouchStart = (event: TouchEvent) => {
-      touchStartYRef.current = event.touches[0]?.clientY ?? null;
-    };
-    const handleTouchEnd = (event: TouchEvent) => {
-      const startY = touchStartYRef.current;
-      touchStartYRef.current = null;
-      if (menuOpen || startY === null) return;
-      const endY = event.changedTouches[0]?.clientY;
-      if (endY === undefined) return;
-      const distance = endY - startY;
-      const atTop = root.scrollTop <= 3;
-      if (atTop && distance > 120) window.history.back();
-    };
-    root.addEventListener('wheel', handleWheel, { passive: true });
-    root.addEventListener('touchstart', handleTouchStart, { passive: true });
-    root.addEventListener('touchend', handleTouchEnd, { passive: true });
-    return () => {
-      root.removeEventListener('wheel', handleWheel);
-      root.removeEventListener('touchstart', handleTouchStart);
-      root.removeEventListener('touchend', handleTouchEnd);
-      if (edgeScrollTimerRef.current) clearTimeout(edgeScrollTimerRef.current);
-    };
-  }, [menuOpen]);
+  const handleBackToRoles = () => {
+    window.location.assign('/#roles');
+  };
 
   return (
     <div ref={scrollRootRef} className="individual-page-scroll h-dvh overflow-y-auto overflow-x-clip text-[#203029]">
       <RoleCursor role="individual" isActive />
-      <header className="fixed inset-x-0 top-0 z-50 flex items-center justify-between border-b border-amber-500/15 bg-black/40 px-4 py-2.5 backdrop-blur-md sm:border-b-0 sm:bg-transparent sm:px-12 sm:py-5 sm:backdrop-blur-none">
+      <header className="fixed inset-x-0 top-0 z-50 flex items-center justify-between border-b border-amber-500/15 bg-black/40 px-4 py-2.5 backdrop-blur-md sm:border-b-0 sm:bg-transparent sm:px-10 lg:px-14 2xl:px-20 sm:py-5 sm:backdrop-blur-none">
         <div className="flex items-center gap-2 sm:gap-3">
-          <button type="button" aria-label="Go back to the previous page" title="Back" onClick={() => window.history.length > 1 && document.referrer.startsWith(window.location.origin) ? window.history.back() : window.location.assign('/')} className="flex h-9 w-9 items-center justify-center rounded-full border border-[#8E7650]/20 bg-[#FFFCF7]/90 text-[#8A6328] transition hover:bg-[#EEE5D5] sm:h-10 sm:w-10"><ArrowLeft className="h-4 w-4" /></button>
-          <Link href="/signup" aria-label="Continue to the next step" title="Next" className="flex h-9 w-9 items-center justify-center rounded-full border border-[#8E7650]/20 bg-[#FFFCF7]/90 text-[#8A6328] transition hover:bg-[#EEE5D5] sm:h-10 sm:w-10"><ArrowRight className="h-4 w-4" /></Link>
           <Link href="/" aria-label="Pranav Mahajan home" className="inline-flex items-center">
-          <img src="/pranav_mahajan_transparent.png" alt="Pranav Mahajan" className="h-10 w-auto object-contain drop-shadow-[0_4px_20px_rgba(223,165,71,0.4)] sm:h-16 md:h-20" />
+            <img src="/pranav_mahajan_transparent.png" alt="Pranav Mahajan" className="h-10 w-auto object-contain drop-shadow-[0_4px_20px_rgba(223,165,71,0.4)] sm:h-16 md:h-20" />
           </Link>
         </div>
         <div className="flex items-center gap-2 sm:gap-3">
@@ -170,38 +127,17 @@ export default function IndividualLandingPage({ initialSection }: { initialSecti
       </aside>
 
       <main className="flex flex-col">
-        <section id="top" data-url-section="top" className="order-1 relative mx-auto grid min-h-[740px] max-w-7xl scroll-mt-24 items-center gap-10 px-5 pb-16 pt-28 sm:px-10 sm:pt-36 lg:min-h-[790px] lg:grid-cols-[.92fr_1.08fr] lg:gap-4 lg:px-16 lg:pt-36">
-          <div className="relative z-10 max-w-2xl">
-            <p className="mb-5 inline-flex items-center gap-2 rounded-full border border-[#8E7650]/15 bg-[#FFFCF7]/80 px-4 py-2 font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-[#806333] shadow-sm sm:text-xs"><span className="h-2 w-2 rounded-full bg-[#9A8054]" /> Personal growth for every life stage</p>
-            <h1 className="max-w-2xl text-[2.7rem] font-semibold leading-[1.02] tracking-[-0.055em] text-[#203029] sm:text-6xl lg:text-[4.6rem]">Become more fully yourself.<br /><span className="text-[#8A6328]">At every stage of life.</span></h1>
-            <p className="mt-6 max-w-xl text-base leading-7 text-[#586056] sm:text-lg sm:leading-8">A thoughtful space to understand what matters to you, meet change with a steadier mindset, and take meaningful steps forward—wherever you are starting from.</p>
-            <p className="mt-4 max-w-xl text-sm leading-6 text-[#6A7067] sm:text-base sm:leading-7">For students, teachers, professionals, parents, and older adults. Open to people of every gender, background, and life experience.</p>
-            <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
-              <Link href="/signup" className="group inline-flex min-h-12 items-center justify-center gap-3 rounded-full bg-[#253D2D] px-6 text-sm font-semibold text-white shadow-lg shadow-[#253D2D]/15 transition hover:-translate-y-0.5 hover:bg-[#35543D]">Explore personal growth <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" /></Link>
-              <a href="#pathways" className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full px-5 text-sm font-semibold text-[#765925] transition hover:bg-[#FFFCF7]/70">Discover the approach <ArrowDown className="h-4 w-4" /></a>
-            </div>
-            <div className="mt-10 flex flex-wrap gap-x-7 gap-y-3 border-t border-[#8E7650]/15 pt-5 text-xs font-medium text-[#626A60] sm:text-sm">
-              <span className="inline-flex items-center gap-2"><CheckMark /> Personal clarity</span>
-              <span className="inline-flex items-center gap-2"><CheckMark /> Habits for meaningful growth</span>
-            </div>
-          </div>
+        {/* 1. EXPLORE LIFE & GROWTH (Infinity Mind-Map Component at the very top of the page) */}
+        <ExploreLifeAndGrowth id="top" dataUrlSection="top" />
 
-          <div className="individual-hero-art mx-auto w-full max-w-[760px] lg:justify-self-end lg:translate-x-8 xl:translate-x-12">
-            <img
-              src="/AI-Guided%20Next%20Move%20Interface.png"
-              alt="AI guided next move interface showing clarity, resilience, and purposeful habits"
-              className="h-auto w-full rounded-[2rem] object-contain drop-shadow-[0_24px_55px_rgba(64,48,23,0.12)]"
-            />
-          </div>
-          <a href="#pathways" className="absolute bottom-5 left-1/2 hidden -translate-x-1/2 items-center gap-2 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-[#7E745F] transition hover:text-[#8A6328] lg:inline-flex">Scroll to explore <ArrowDown className="h-3.5 w-3.5" /></a>
-        </section>
-
-        <section id="pathways" data-url-section="pathways" className="order-2 mx-auto w-full max-w-7xl scroll-mt-24 px-5 py-8 sm:px-10 sm:py-10 lg:px-16 lg:py-12">
-          <div className="mb-8 max-w-2xl sm:mb-10">
+        {/* 2. 3-CYCLE PATHWAYS SECTION (Three ways to move forward) */}
+        <section id="pathways" data-url-section="pathways" className="mx-auto w-full max-w-[1720px] 2xl:max-w-[1840px] scroll-mt-24 px-5 py-12 sm:px-10 sm:py-16 lg:px-14 2xl:px-20 lg:py-20">
+          <div className="mb-8 max-w-2xl sm:mb-12">
             <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-[#8A6328] sm:text-xs">A PERSONAL PATHWAY</p>
             <h2 className="mt-3 text-3xl font-semibold leading-tight tracking-[-0.04em] text-[#203029] sm:text-4xl">Three ways to move forward.</h2>
+            <p className="mt-3 text-sm leading-relaxed text-[#586056] sm:text-base">Focus on one area of practice or explore all three in rhythm as your needs change.</p>
           </div>
-          <div className="individual-pathways-map relative mx-auto max-w-[1080px] py-3 sm:py-5">
+          <div className="individual-pathways-map relative mx-auto max-w-[1240px] 2xl:max-w-[1400px] py-3 sm:py-5">
             <svg aria-hidden="true" className="individual-path-connectors pointer-events-none absolute inset-0 hidden h-full w-full md:block" viewBox="0 0 1080 350" preserveAspectRatio="none">
               <defs>
                 <marker id="pathway-arrow-clarity" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#8A6328" /></marker>
@@ -210,23 +146,46 @@ export default function IndividualLandingPage({ initialSection }: { initialSecti
               <path className="individual-path-flow individual-path-flow-one" d="M330 175 C345 90 375 90 390 175" markerEnd="url(#pathway-arrow-clarity)" />
               <path className="individual-path-flow individual-path-flow-two" d="M690 175 C705 260 735 260 750 175" markerEnd="url(#pathway-arrow-resilience)" />
             </svg>
-            <div className="relative z-10 grid grid-cols-1 justify-items-center gap-5 md:grid-cols-3 md:gap-0">
-            {pathways.map((item, index) => {
-              const Icon = item.icon;
-              return <article key={item.number} data-individual-reveal className={`individual-path-node individual-path-node-${index + 1} group relative flex h-[min(84vw,18.75rem)] w-[min(84vw,18.75rem)] flex-col items-center justify-center overflow-hidden rounded-full border-2 bg-[#FBF7EE] px-7 text-center shadow-[0_18px_45px_rgba(64,48,23,0.09)] md:h-[18.75rem] md:w-[18.75rem]`} style={{ transitionDelay: `${index * 180}ms`, borderColor: item.accent, '--node-accent': item.accent } as CSSProperties}>
-                <span className="individual-node-sweep absolute inset-[7px] rounded-full border border-transparent border-t-[var(--node-accent)]" />
-                <span className="relative z-10 mb-3 flex h-11 w-11 items-center justify-center rounded-2xl bg-[#EFE4D0]" style={{ color: item.accent }}><Icon aria-hidden="true" className="h-5 w-5" /></span>
-                <p className="relative z-10 font-mono text-[9px] font-bold uppercase tracking-[0.2em]" style={{ color: item.accent }}>{item.number} <span className="opacity-45">/ 03 · {item.label}</span></p>
-                <h3 className="relative z-10 mt-2 max-w-[15rem] text-lg font-semibold leading-snug tracking-tight text-[#253D2D] sm:text-xl">{item.title}</h3>
-                <p className="relative z-10 mt-2 max-w-[15rem] text-xs leading-5 text-[#586056] sm:text-[13px]">{item.description}</p>
-                <Link href="/signup" className="relative z-10 mt-4 inline-flex min-h-9 items-center gap-2 rounded-full border px-4 text-[11px] font-semibold transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#253D2D] hover:text-white" style={{ color: item.accent, borderColor: `${item.accent}66` }}>{item.action}<ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" /></Link>
-              </article>;
-            })}
+            <div className="relative z-10 grid grid-cols-1 justify-items-center gap-5 md:grid-cols-3 md:gap-4 xl:gap-8">
+              {pathways.map((item, index) => {
+                const Icon = item.icon;
+                return (
+                  <article
+                    key={item.number}
+                    data-individual-reveal
+                    className={`individual-path-node individual-path-node-${index + 1} group relative flex h-[min(84vw,18.75rem)] w-[min(84vw,18.75rem)] flex-col items-center justify-center overflow-hidden rounded-full border-2 bg-[#FBF7EE] px-7 text-center shadow-[0_18px_45px_rgba(64,48,23,0.09)] md:h-[18.75rem] md:w-[18.75rem] lg:h-[20rem] lg:w-[20rem] xl:h-[21rem] xl:w-[21rem]`}
+                    style={{ transitionDelay: `${index * 180}ms`, borderColor: item.accent, '--node-accent': item.accent } as CSSProperties}
+                  >
+                    <span className="individual-node-sweep absolute inset-[7px] rounded-full border border-transparent border-t-[var(--node-accent)]" />
+                    <span className="relative z-10 mb-3 flex h-11 w-11 items-center justify-center rounded-2xl bg-[#EFE4D0]" style={{ color: item.accent }}>
+                      <Icon aria-hidden="true" className="h-5 w-5" />
+                    </span>
+                    <p className="relative z-10 font-mono text-[9px] font-bold uppercase tracking-[0.2em]" style={{ color: item.accent }}>
+                      {item.number} <span className="opacity-45">/ 03 · {item.label}</span>
+                    </p>
+                    <h3 className="relative z-10 mt-2 max-w-[15rem] text-lg font-semibold leading-snug tracking-tight text-[#253D2D] sm:text-xl">
+                      {item.title}
+                    </h3>
+                    <p className="relative z-10 mt-2 max-w-[15rem] text-xs leading-5 text-[#586056] sm:text-[13px]">
+                      {item.description}
+                    </p>
+                    <Link
+                      href="/signup"
+                      className="relative z-10 mt-4 inline-flex min-h-9 items-center gap-2 rounded-full border px-4 text-[11px] font-semibold transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#253D2D] hover:text-white"
+                      style={{ color: item.accent, borderColor: `${item.accent}66` }}
+                    >
+                      {item.action}
+                      <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
+                    </Link>
+                  </article>
+                );
+              })}
             </div>
           </div>
         </section>
 
-        <section id="problem" data-url-section="problem" className="order-3 mx-auto w-full max-w-7xl px-5 pb-16 pt-8 sm:px-10 sm:pb-20 lg:px-16">
+        {/* 3. COMMON CHALLENGES */}
+        <section id="problem" data-url-section="problem" className="mx-auto w-full max-w-[1720px] 2xl:max-w-[1840px] px-5 pb-16 pt-8 sm:px-10 sm:pb-20 lg:px-14 2xl:px-20">
           <div data-individual-reveal className="border-t border-[#8E7650]/20 pt-10 sm:pt-14">
             <div className="grid gap-5 sm:grid-cols-[.8fr_1.2fr] sm:gap-12">
               <div><p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-[#8A6328] sm:text-xs">COMMON CHALLENGES, PRACTICAL RESPONSES</p><h2 className="mt-4 max-w-md text-3xl font-semibold leading-tight tracking-[-0.04em] text-[#203029] sm:text-4xl">Every chapter can begin with one thoughtful step.</h2></div>
@@ -237,18 +196,22 @@ export default function IndividualLandingPage({ initialSection }: { initialSecti
           </div>
         </section>
 
-        <section id="next-step" data-url-section="next-step" className="order-4 px-5 pb-16 sm:px-10 sm:pb-20 lg:px-16">
-          <div data-individual-reveal className="mx-auto flex max-w-7xl flex-col items-start gap-7 rounded-[2rem] bg-[#253D2D] px-6 py-10 text-white shadow-[0_24px_80px_rgba(37,61,45,0.18)] sm:px-12 sm:py-14 lg:flex-row lg:items-end lg:justify-between lg:px-16">
+        {/* 4. NEXT STEP */}
+        <section id="next-step" data-url-section="next-step" className="px-5 pb-16 sm:px-10 sm:pb-20 lg:px-14 2xl:px-20">
+          <div data-individual-reveal className="mx-auto flex max-w-[1720px] 2xl:max-w-[1840px] flex-col items-start gap-7 rounded-[2rem] bg-[#253D2D] px-6 py-10 text-white shadow-[0_24px_80px_rgba(37,61,45,0.18)] sm:px-12 sm:py-14 lg:flex-row lg:items-end lg:justify-between lg:px-16">
             <div className="max-w-2xl"><p className="font-mono text-[10px] font-bold uppercase tracking-[0.24em] text-[#E7D8B9] sm:text-xs">YOUR NEXT CHAPTER STARTS WITH ONE STEP</p><h2 className="mt-4 text-3xl font-semibold leading-tight tracking-[-0.04em] sm:text-5xl">Make room for clarity, resilience, and possibility.</h2><p className="mt-4 max-w-xl text-sm leading-6 text-[#F5F0E6]/75 sm:text-base sm:leading-7">Whatever your age, role, or starting point, tell us what kind of personal growth you are looking for.</p></div>
             <Link href="/signup" className="group inline-flex min-h-12 shrink-0 items-center gap-3 rounded-full bg-[#EFE4D0] px-6 text-sm font-bold text-[#253D2D] transition hover:-translate-y-0.5 hover:bg-white">Get started <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" /></Link>
           </div>
         </section>
       </main>
 
-      <Footer onNavigateHome={() => { window.location.href = '/'; }} onNavigateRoles={() => { window.location.href = '/'; }} onNavigateContact={() => { window.location.href = '/signup'; }} />
+      <Footer onNavigateHome={() => { window.location.assign('/'); }} onNavigateRoles={handleBackToRoles} onNavigateContact={() => { window.location.assign('/signup'); }} />
 
       <style jsx global>{`
-        .individual-page-scroll { background-image: radial-gradient(ellipse at 76% 12%, rgba(221,192,132,.17), transparent 32%), linear-gradient(150deg, #FBF7EE 0%, #F7F1E5 54%, #F5EDDE 100%); }
+        .individual-page-scroll {
+          scroll-behavior: smooth;
+          background-image: radial-gradient(ellipse at 76% 12%, rgba(221,192,132,.17), transparent 32%), linear-gradient(150deg, #FBF7EE 0%, #F7F1E5 54%, #F5EDDE 100%);
+        }
         .individual-path-flow { fill: none; stroke-width: 2; stroke-dasharray: 5 8; animation: individualPathFlow 9s linear infinite; }
         .individual-path-flow-one { stroke: #8A6328; }
         .individual-path-flow-two { stroke: #607B5E; animation-direction: reverse; }
@@ -265,8 +228,4 @@ export default function IndividualLandingPage({ initialSection }: { initialSecti
       `}</style>
     </div>
   );
-}
-
-function CheckMark() {
-  return <span aria-hidden="true" className="inline-flex h-4 w-4 items-center justify-center rounded-full bg-[#E7D8B9] text-[10px] font-bold text-[#65512D]">✓</span>;
 }
