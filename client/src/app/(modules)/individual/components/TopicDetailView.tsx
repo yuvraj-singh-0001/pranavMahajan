@@ -6,6 +6,9 @@ import { ArrowRight, ArrowLeft, CheckCircle2, Compass, Sparkles, BookOpen, X } f
 import { getTopicById, TOPICS } from '@/data/topicsData';
 import Footer from '@/components/Footer';
 import RoleCursor from '@/components/RoleCursor';
+import LoveRelationshipsView from './LoveRelationshipsView';
+import HealthWellbeingView from './HealthWellbeingView';
+import PersonalDevelopmentView from './PersonalDevelopmentView';
 
 const navigation = [
   { href: '/individual#top', label: 'Explore Life & Growth' },
@@ -34,6 +37,18 @@ export default function TopicDetailView({ slug }: { slug: string }) {
   }, [slug]);
 
   if (!topic) return null;
+
+  if (topic.id === 'love-relationships') {
+    return <LoveRelationshipsView />;
+  }
+
+  if (topic.id === 'health-wellbeing') {
+    return <HealthWellbeingView />;
+  }
+
+  if (topic.id === 'personal-development') {
+    return <PersonalDevelopmentView />;
+  }
 
   const currentIndex = TOPICS.findIndex((t) => t.id === topic.id);
   const prevTopic = currentIndex > 0 ? TOPICS[currentIndex - 1] : TOPICS[TOPICS.length - 1];

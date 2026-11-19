@@ -219,7 +219,7 @@ export default function ExploreLifeAndGrowth({
     <section
       id={id}
       data-url-section={dataUrlSection}
-      className={`relative mx-auto w-full max-w-[1880px] min-h-dvh lg:h-dvh lg:max-h-dvh flex flex-col justify-center px-3.5 sm:px-6 md:px-8 lg:px-8 xl:px-12 2xl:px-16 pt-12 pb-4 sm:pt-14 sm:pb-6 lg:pt-16 lg:pb-6 overflow-hidden ${className}`}
+      className={`relative mx-auto w-full max-w-[1880px] min-h-dvh flex flex-col justify-center px-3.5 sm:px-6 md:px-8 lg:px-8 xl:px-12 2xl:px-16 pt-16 pb-6 lg:pt-20 lg:pb-10 ${className}`}
     >
       {/* Background Pastel Waves & Ethereal Fluid Glow */}
       <div
@@ -617,7 +617,7 @@ const TopicCard = React.forwardRef<
       href={`/individual/${topic.id}`}
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
-      className={`group relative flex w-full items-center gap-2.5 sm:gap-3 xl:gap-3.5 rounded-full border bg-white px-3.5 py-1.5 sm:px-4 sm:py-2 xl:px-4.5 xl:py-2.5 2xl:px-5 2xl:py-2.5 shadow-[0_4px_16px_rgba(0,0,0,0.03)] backdrop-blur-md transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-0.5 hover:shadow-[0_10px_28px_rgba(0,0,0,0.07)] ${topic.cardBorder}`}
+      className={`group relative flex w-full items-center gap-2.5 sm:gap-3 xl:gap-3.5 rounded-full border bg-white px-3.5 py-2 sm:px-4 sm:py-2.5 xl:px-4.5 xl:py-2.5 2xl:px-5 2xl:py-3 shadow-[0_4px_16px_rgba(0,0,0,0.03)] backdrop-blur-md transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-0.5 hover:shadow-[0_10px_28px_rgba(0,0,0,0.07)] ${topic.cardBorder}`}
       style={{
         background: `linear-gradient(90deg, ${topic.cardTintStart} 0%, #ffffff 45%, #ffffff 100%)`,
         animation: `cardEntrance 0.55s cubic-bezier(0.16, 1, 0.3, 1) ${animationDelay}ms both`,
@@ -633,14 +633,14 @@ const TopicCard = React.forwardRef<
 
       {/* Left: Icon Squircle Badge (Professional compact size) */}
       <div
-        className={`flex h-9 w-9 sm:h-9.5 sm:w-9.5 xl:h-10 xl:w-10 2xl:h-10.5 2xl:w-10.5 shrink-0 items-center justify-center rounded-xl sm:rounded-2xl shadow-xs transition-transform duration-300 group-hover:scale-108 ${topic.badgeBg}`}
+        className={`flex h-9.5 w-9.5 sm:h-10 sm:w-10 xl:h-11 xl:w-11 2xl:h-11.5 2xl:w-11.5 shrink-0 items-center justify-center rounded-xl sm:rounded-2xl shadow-xs transition-transform duration-300 group-hover:scale-108 ${topic.badgeBg}`}
       >
-        {topic.iconRenderer('h-4.5 w-4.5 sm:h-5 sm:w-5 xl:h-5.5 xl:w-5.5')}
+        {topic.iconRenderer('h-5 w-5 sm:h-5.5 sm:w-5.5 xl:h-6 xl:w-6')}
       </div>
 
       {/* Title Text (Refined executive font size, clear and balanced) */}
-      <div className="min-w-0 flex-1 pl-0.5 pr-1.5">
-        <h3 className="font-sans text-[11.5px] sm:text-xs lg:text-[12.5px] xl:text-[13.5px] 2xl:text-[14px] font-bold leading-tight sm:leading-snug text-slate-900 group-hover:text-indigo-950 transition-colors">
+      <div className="min-w-0 flex-1 pl-1 pr-1.5">
+        <h3 className="font-sans text-[13px] sm:text-[14px] lg:text-[14px] xl:text-[15.5px] 2xl:text-[16.5px] font-bold leading-tight sm:leading-snug text-slate-900 group-hover:text-indigo-950 transition-colors">
           {topic.title}
         </h3>
       </div>
@@ -648,9 +648,9 @@ const TopicCard = React.forwardRef<
       {/* Right: Circular Arrow Button (Sleek and polished) */}
       <div className="shrink-0 ml-auto pr-0.5">
         <div
-          className={`flex h-7 w-7 sm:h-7.5 sm:w-7.5 xl:h-8 xl:w-8 items-center justify-center rounded-full border bg-white shadow-xs transition-all duration-300 group-hover:scale-110 group-hover:translate-x-0.5 ${topic.arrowBorder} ${topic.arrowHoverBg}`}
+          className={`flex h-7.5 w-7.5 sm:h-8 sm:w-8 xl:h-8.5 xl:w-8.5 items-center justify-center rounded-full border bg-white shadow-xs transition-all duration-300 group-hover:scale-110 group-hover:translate-x-0.5 ${topic.arrowBorder} ${topic.arrowHoverBg}`}
         >
-          <ArrowRight className="h-3 w-3 sm:h-3.5 sm:w-3.5 transition-transform group-hover:translate-x-0.5" />
+          <ArrowRight className="h-3.5 w-3.5 sm:h-4 sm:w-4 transition-transform group-hover:translate-x-0.5" />
         </div>
       </div>
     </Link>

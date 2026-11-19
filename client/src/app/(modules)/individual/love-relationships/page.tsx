@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import TopicDetailView from '../components/TopicDetailView';
+import LoveRelationshipsView from '../components/LoveRelationshipsView';
 import { getTopicById } from '@/data/topicsData';
 
 const SLUG = 'love-relationships';
@@ -7,11 +7,11 @@ const SLUG = 'love-relationships';
 export function generateMetadata(): Metadata {
   const topic = getTopicById(SLUG);
   return {
-    title: `${topic?.title ?? 'Love Relationships'} | Pranav Mahajan`,
-    description: topic?.tagline,
+    title: `Love, Relationships, Marriage & Family Dynamics | Pranav Mahajan`,
+    description: topic?.tagline ?? 'Build deeper intimacy, mutual trust, and healthy emotional boundaries.',
   };
 }
 
 export default function Page() {
-  return <TopicDetailView slug={SLUG} />;
+  return <LoveRelationshipsView />;
 }
