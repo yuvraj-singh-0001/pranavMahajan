@@ -33,6 +33,30 @@ import {
 import Footer from '@/components/Footer';
 import RoleCursor from '@/components/RoleCursor';
 
+// 7 Lifespan Personal Development Disciplines (Featured in Sanctuary Panorama)
+const GROWTH_DISCIPLINES = [
+  { id: 'journaling', label: 'Journaling & Reflection', tag: 'DAILY CLARITY', icon: BookOpen, desc: 'Daily self-reflection, gratitude, and goal alignment.' },
+  { id: 'reading', label: 'Deep Reading & Study', tag: 'INTELLECTUAL DEPTH', icon: Compass, desc: 'Absorbing timeless wisdom and mental models.' },
+  { id: 'speaking', label: 'Public Speaking & Poise', tag: 'VOICE & PRESENCE', icon: Zap, desc: 'Articulate communication and leadership presence.' },
+  { id: 'meditation', label: 'Mindful Stillness', tag: 'NEURAL RESET', icon: Activity, desc: 'Inner stillness and nervous system equilibrium.' },
+  { id: 'strategy', label: 'Strategic Planning & Chess', tag: 'LIFE ARCHITECTURE', icon: Target, desc: '90-day vision mapping and systematic execution.' },
+  { id: 'skills', label: 'Skill Mastery & Music', tag: 'NEUROPLASTICITY', icon: Brain, desc: 'Deliberate practice of new crafts and instruments.' },
+  { id: 'mentorship', label: 'Mentorship & Dialogue', tag: 'WISDOM TRANSFER', icon: Award, desc: 'Active learning from trusted advisors and peers.' },
+];
+
+// All 10 Individual Growth Pathways / Dimensions (Dimension 02 is Current)
+const OTHER_PATHWAYS = [
+  { number: '01', title: 'Health & Wellbeing', href: '/individual/health-wellbeing', tag: 'VitalLife & Somatics' },
+  { number: '03', title: 'Love & Family Dynamics', href: '/individual/love-relationships', tag: 'Intimacy & Trust' },
+  { number: '04', title: 'Parenting & Child Dev', href: '/individual/parenting-child', tag: 'Conscious Parenting' },
+  { number: '05', title: 'Social Relationships & Poise', href: '/individual/social-relationships', tag: 'Presence & Status' },
+  { number: '06', title: 'Student Life & Youth', href: '/individual/student-life', tag: 'Deep Focus & Exams' },
+  { number: '07', title: 'Professional Excellence', href: '/individual/professional-development', tag: 'Executive Mastery' },
+  { number: '08', title: 'Spirituality & Philosophy', href: '/individual/spirituality-philosophy', tag: 'Inner Stillness' },
+  { number: '09', title: 'Life Transitions & Aging', href: '/individual/life-transitions', tag: 'Graceful Adaptation' },
+  { number: '10', title: 'Digital & Tech Literacy', href: '/individual/technology-literacy', tag: 'Attention Sovereignty' },
+];
+
 // 5 Purposeful Transformation Focuses (Mindset Calibration Matrix)
 const CALIBRATION_FOCUSES = [
   {
@@ -276,6 +300,7 @@ const MENTAL_MODELS = [
 export default function PersonalDevelopmentView() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [activeFocus, setActiveFocus] = useState(CALIBRATION_FOCUSES[0]);
+  const [activeDiscipline, setActiveDiscipline] = useState(GROWTH_DISCIPLINES[0]);
   const [isPlayingAudio, setIsPlayingAudio] = useState(false);
   const [activeOsPhase, setActiveOsPhase] = useState(DAILY_OS_ROUTINE[0]);
   const [showScrollTop, setShowScrollTop] = useState(false);
@@ -440,124 +465,149 @@ export default function PersonalDevelopmentView() {
         </div>
       </aside>
 
-      {/* HERO SECTION: Purposeful Light Editorial Canvas (Zero Background Image) */}
-      <section className="relative overflow-hidden pt-28 sm:pt-32 md:pt-36 pb-10 sm:pb-14 px-4 sm:px-8 lg:px-12 2xl:px-16">
+      {/* =========================================================================
+          HERO SECTION: 16:9 PANORAMIC MARBLE SANCTUARY WITH BALANCED SOFT MIST
+         ========================================================================= */}
+      <section className="relative min-h-[92vh] flex flex-col justify-center overflow-hidden pt-24 sm:pt-28 md:pt-32 pb-12 sm:pb-16 px-4 sm:px-8 lg:px-12 2xl:px-18">
         
-        {/* Soft Purposeful Light Glowing Orbs (Warm Champagne & Soft Purple) */}
-        <div className="pointer-events-none absolute -top-32 left-1/2 -translate-x-1/2 h-[500px] w-[750px] rounded-full bg-gradient-to-b from-purple-200/50 via-amber-100/30 to-transparent blur-[120px]" />
-        <div className="pointer-events-none absolute top-40 right-10 h-[360px] w-[360px] rounded-full bg-violet-200/40 blur-[100px]" />
-        <div className="pointer-events-none absolute top-32 left-10 h-[340px] w-[340px] rounded-full bg-amber-200/30 blur-[90px]" />
+        {/* Full-Bleed 16:9 Continuous Panoramic Background with Balanced Soft Mist Overlay */}
+        <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
+          <img
+            src="/personal-development-hero.jpg?v=1"
+            alt="Personal Development Sanctuary Panorama with 7 Disciplines"
+            className="w-full h-full object-cover object-center filter saturate-[1.05] brightness-[1.01]"
+          />
+          {/* Subtle Balanced Vignettes (Soft left text backing, crystal clear sanctuary characters) */}
+          <div className="absolute inset-0 bg-gradient-to-t from-[#FAF7F2] via-[#FAF7F2]/25 to-transparent pointer-events-none" />
+          <div className="absolute inset-0 bg-gradient-to-r from-[#FAF7F2]/90 via-[#FAF7F2]/20 to-[#FAF7F2]/30 pointer-events-none" />
+          <div className="absolute inset-0 bg-gradient-to-b from-[#FAF7F2]/50 via-transparent to-transparent pointer-events-none" />
+        </div>
 
-        <div className="relative z-10 max-w-7xl mx-auto">
-          
-          {/* Main Hero Card & Headline */}
-          <div className="max-w-3xl mx-auto text-center">
+        <div className="relative z-10 max-w-7xl mx-auto w-full flex items-center my-auto">
+          {/* LEFT: Clean Minimal Headline & Controls (Right side completely open for panoramic wallpaper) */}
+          <div className="max-w-xl flex flex-col items-start select-text">
             
             {/* Animated Floating Dimension Badge */}
-            <div className="inline-flex items-center gap-2 rounded-full border border-purple-900/15 bg-white/80 px-4 py-1.5 backdrop-blur-md shadow-xs mb-4 transition hover:scale-105 hover:bg-white hover:border-purple-400">
-              <span className="flex h-2 w-2 rounded-full bg-purple-600 animate-pulse" />
-              <span className="font-mono text-xs font-bold uppercase tracking-wider text-[#5B21B6]">
+            <div className="inline-flex items-center gap-2 rounded-full border border-purple-900/10 bg-white/85 px-3.5 py-1 backdrop-blur-md shadow-xs mb-3">
+              <span className="h-2 w-2 rounded-full bg-[#7C3AED] animate-pulse" />
+              <span className="font-mono text-[11px] font-bold uppercase tracking-wider text-[#5B21B6]">
                 Dimension 02 &bull; Purpose &amp; Personal Agency
               </span>
             </div>
 
             {/* Purposeful Editorial Title */}
-            <h1 className="text-3xl sm:text-5xl lg:text-[58px] font-extrabold tracking-tight leading-[1.12] font-serif text-[#1C1628]">
+            <h1 className="text-3xl sm:text-5xl lg:text-[56px] font-extrabold tracking-tight text-[#1C1628] leading-[1.12] font-serif">
               Personal Growth &amp; <br />
-              <span className="bg-gradient-to-r from-[#6D28D9] via-[#8B5CF6] to-[#D97706] bg-clip-text text-transparent">
-                Purposeful Mastery.
-              </span>
+              Habits<span className="text-[#7C3AED]">.</span>
             </h1>
 
-            {/* Crisp Frosted Tagline */}
-            <div className="mt-4 inline-flex items-center gap-2 rounded-2xl border border-purple-900/10 bg-white/85 px-4 py-2 backdrop-blur-md shadow-xs">
+            {/* Modern Minimal Tagline in Frosted Glass Pill */}
+            <div className="mt-3.5 inline-flex items-center gap-2 rounded-2xl border border-purple-900/10 bg-white/85 px-4 py-2 backdrop-blur-md shadow-xs">
               <span className="text-[#7C3AED] text-sm">✦</span>
               <p className="text-xs sm:text-sm font-medium text-[#382D4A] leading-relaxed">
-                Transform vague intentions into friction-free daily discipline, sharpen focus, and construct a life of deep personal agency.
+                Atomic habits, deep cognitive focus, and unwavering personal agency.
               </p>
             </div>
 
-            {/* Interactive Action Buttons */}
-            <div className="mt-6 flex flex-wrap items-center justify-center gap-3.5">
-              {/* Audio Reflection Button */}
+            {/* Action Buttons */}
+            <div className="mt-5 flex flex-wrap items-center gap-3">
               <button
                 type="button"
                 onClick={() => setIsPlayingAudio(!isPlayingAudio)}
-                aria-label={isPlayingAudio ? 'Pause growth reflection' : 'Listen to 1-minute growth reflection'}
-                className={`group flex items-center gap-2.5 rounded-full border border-purple-900/15 bg-white/90 px-4 py-2.5 shadow-sm backdrop-blur-md transition-all duration-300 hover:scale-105 hover:bg-white hover:border-purple-400 ${
+                aria-label={isPlayingAudio ? 'Pause reflection' : 'Listen to 1-minute intro'}
+                className={`group flex items-center gap-2 rounded-full border border-purple-800/20 bg-white/90 px-4 py-2 text-xs font-bold text-[#1C1628] shadow-xs backdrop-blur-md transition hover:scale-105 hover:bg-white ${
                   isPlayingAudio ? 'ring-2 ring-purple-400 bg-purple-50' : ''
                 }`}
               >
-                <div className="flex h-6 w-6 items-center justify-center rounded-full bg-gradient-to-tr from-[#6D28D9] to-[#8B5CF6] text-white shadow-xs">
-                  {isPlayingAudio ? (
-                    <Pause className="h-3 w-3 animate-pulse" />
-                  ) : (
-                    <Play className="h-3 w-3 fill-current ml-0.5" />
-                  )}
+                <div className="flex h-5 w-5 items-center justify-center rounded-full bg-[#7C3AED] text-white">
+                  {isPlayingAudio ? <Pause className="h-2.5 w-2.5" /> : <Play className="h-2.5 w-2.5 ml-0.5 fill-current" />}
                 </div>
-                <span className="text-xs font-bold text-[#1C1628]">
-                  {isPlayingAudio ? 'Playing Reflection...' : 'Listen Intro'}
-                </span>
-                <div className="flex items-center gap-0.5 ml-1">
-                  <span className={`h-2.5 w-0.5 rounded-full bg-[#7C3AED] ${isPlayingAudio ? 'animate-pulse' : 'opacity-40'}`} />
-                  <span className={`h-3.5 w-0.5 rounded-full bg-[#7C3AED] ${isPlayingAudio ? 'animate-bounce' : 'opacity-40'}`} />
-                  <span className={`h-2 w-0.5 rounded-full bg-[#7C3AED] ${isPlayingAudio ? 'animate-pulse' : 'opacity-40'}`} />
-                </div>
+                <span>{isPlayingAudio ? 'Playing...' : 'Listen Intro'}</span>
               </button>
 
-              {/* Primary CTA Button */}
               <Link
                 href="/signup?role=individual&topic=Personal%20Development"
-                className="group inline-flex items-center gap-2.5 rounded-full bg-gradient-to-r from-[#5B21B6] via-[#6D28D9] to-[#7C3AED] px-6 py-2.5 text-xs sm:text-sm font-bold text-white shadow-[0_8px_25px_rgba(91,33,182,0.3)] transition-all duration-300 hover:scale-105 hover:shadow-[0_12px_32px_rgba(91,33,182,0.4)] active:scale-95"
+                className="group inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-[#5B21B6] via-[#6D28D9] to-[#7C3AED] px-5 py-2 text-xs font-bold text-white shadow-md hover:scale-105 active:scale-95 transition"
               >
-                <span>Start Your Growth Journey</span>
-                <div className="flex h-4 w-4 items-center justify-center rounded-full bg-white/20 transition-transform duration-300 group-hover:translate-x-1">
-                  <ArrowRight className="h-2.5 w-2.5" />
-                </div>
+                <span>Start Your Journey</span>
+                <ArrowRight className="h-3 w-3 transition-transform group-hover:translate-x-0.5" />
               </Link>
             </div>
 
-            {/* Active Audio Card Preview */}
-            {isPlayingAudio && (
-              <div className="mt-4 mx-auto flex items-center gap-3 rounded-2xl border border-purple-400/40 bg-white/95 p-3.5 shadow-md backdrop-blur-md max-w-md animate-in fade-in slide-in-from-top-2 text-left">
-                <Volume2 className="h-4 w-4 text-[#7C3AED] animate-pulse shrink-0" />
-                <div className="text-xs">
-                  <p className="font-bold text-[#1C1628]">Purpose &amp; Agency &bull; Pranav Mahajan</p>
-                  <p className="text-[#514368] italic text-[11px]">&ldquo;Growth is not an accidental occurrence; it is the natural consequence of consistent curiosity and disciplined agency.&rdquo;</p>
-                </div>
-              </div>
-            )}
-          </div>
+            {/* 7 Quick Anchor Buttons For The Sanctuary Disciplines */}
+            <div className="mt-6 w-full max-w-lg">
+              <span className="font-mono text-[10px] font-bold uppercase tracking-wider text-[#5B21B6] block mb-2">
+                7 Sanctuary Growth Disciplines
+              </span>
 
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
+                {GROWTH_DISCIPLINES.slice(0, 4).map((d) => {
+                  const Icon = d.icon;
+                  const isSelected = activeDiscipline.id === d.id;
+                  return (
+                    <button
+                      key={d.id}
+                      type="button"
+                      onClick={() => setActiveDiscipline(d)}
+                      className={`flex items-center gap-1.5 rounded-xl p-2 text-left transition border ${
+                        isSelected
+                          ? 'bg-[#5B21B6] text-white shadow-xs border-transparent scale-[1.02]'
+                          : 'bg-white/75 text-[#1C1628] hover:bg-white border-white/80 shadow-2xs'
+                      }`}
+                    >
+                      <div className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-md ${isSelected ? 'bg-white/20' : 'bg-purple-100 text-[#7C3AED]'}`}>
+                        <Icon className="h-2.5 w-2.5" />
+                      </div>
+                      <p className="text-[10px] font-bold truncate leading-tight">{d.label.split('&')[0].trim()}</p>
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* 1-Line Minimal Tip Box */}
+              <div className="mt-2.5 rounded-xl border border-purple-900/10 bg-white/80 p-2.5 backdrop-blur-xs flex items-center justify-between gap-2 shadow-2xs">
+                <div className="flex items-center gap-2 overflow-hidden">
+                  <CheckCircle2 className="h-3.5 w-3.5 text-purple-600 shrink-0" />
+                  <p className="text-[11.5px] text-[#1C1628] font-medium truncate">
+                    <strong className="text-[#5B21B6]">{activeDiscipline.label}:</strong> {activeDiscipline.desc}
+                  </p>
+                </div>
+                <span className="text-[9px] font-mono text-[#7C3AED] bg-purple-50 px-2 py-0.5 rounded-full shrink-0 font-bold">
+                  {activeDiscipline.tag}
+                </span>
+              </div>
+            </div>
+
+          </div>
         </div>
       </section>
 
-      {/* ULTRA-MODERN ANIMATED MINDSET CALIBRATION MATRIX (What the user requested) */}
-      <section className="relative px-4 sm:px-8 lg:px-12 max-w-7xl mx-auto py-8">
+      {/* ULTRA-MODERN ANIMATED MINDSET CALIBRATION MATRIX */}
+      <section className="relative px-4 sm:px-8 lg:px-12 max-w-7xl mx-auto py-10">
         
         {/* Matrix Header with Live Pulse */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between gap-3 mb-6">
+        <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between gap-3 mb-7">
           <div>
-            <div className="inline-flex items-center gap-2 font-mono text-[11px] font-bold uppercase tracking-[0.2em] text-[#7C3AED]">
-              <span className="flex h-2 w-2 rounded-full bg-purple-600 animate-ping" />
+            <div className="inline-flex items-center gap-2 font-mono text-xs sm:text-sm font-bold uppercase tracking-[0.2em] text-[#7C3AED]">
+              <span className="flex h-2.5 w-2.5 rounded-full bg-purple-600 animate-ping" />
               <span>Interactive Calibration Station</span>
             </div>
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-[#1C1628] font-serif mt-1">
+            <h2 className="text-2xl sm:text-3.5xl lg:text-4xl font-extrabold text-[#1C1628] font-serif mt-1.5">
               Mindset Calibration Matrix
             </h2>
-            <p className="text-xs text-[#5B4C72] mt-0.5">
+            <p className="text-sm sm:text-base text-[#5B4C72] mt-1 font-medium">
               5 Core Transformation Focuses &bull; Click to Calibrate from Friction to Agency
             </p>
           </div>
 
-          <div className="inline-flex items-center gap-1.5 rounded-full border border-purple-900/10 bg-white/80 px-3 py-1 shadow-2xs text-[10px] font-mono text-[#5B21B6] font-bold">
-            <Sparkles className="h-3 w-3 text-amber-500" />
+          <div className="inline-flex items-center gap-2 rounded-full border border-purple-900/10 bg-white/90 px-4 py-1.5 shadow-xs text-xs sm:text-sm font-mono text-[#5B21B6] font-bold">
+            <Sparkles className="h-4 w-4 text-amber-500" />
             <span>Active Focus: {activeFocus.category}</span>
           </div>
         </div>
 
         {/* 5 Animated Dynamic Focus Cards Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3.5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
           {CALIBRATION_FOCUSES.map((focus) => {
             const Icon = focus.icon;
             const isSelected = activeFocus.id === focus.id;
@@ -565,45 +615,47 @@ export default function PersonalDevelopmentView() {
               <div
                 key={focus.id}
                 onClick={() => setActiveFocus(focus)}
-                className={`group relative flex flex-col justify-between rounded-3xl p-4 sm:p-5 cursor-pointer transition-all duration-300 backdrop-blur-xl border ${
+                className={`group relative flex flex-col justify-between rounded-3xl p-5 sm:p-6 cursor-pointer transition-all duration-300 backdrop-blur-xl border ${
                   isSelected
-                    ? 'bg-white border-[#7C3AED] shadow-[0_16px_36px_rgba(124,58,237,0.18)] -translate-y-1.5 ring-2 ring-purple-400/30'
-                    : 'bg-white/75 border-purple-900/10 hover:bg-white hover:border-purple-300 shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:-translate-y-1'
+                    ? 'bg-white border-[#7C3AED] shadow-[0_16px_36px_rgba(124,58,237,0.18)] -translate-y-1.5 ring-2 ring-purple-400/40'
+                    : 'bg-white/80 border-purple-900/10 hover:bg-white hover:border-purple-300 shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:-translate-y-1'
                 }`}
               >
                 {/* Top Number & Category */}
                 <div>
-                  <div className="flex items-center justify-between mb-3">
-                    <span className={`font-mono text-xs font-extrabold ${isSelected ? 'text-[#7C3AED]' : 'text-purple-400'}`}>
+                  <div className="flex items-center justify-between mb-3.5">
+                    <span className={`font-mono text-sm sm:text-base font-extrabold ${isSelected ? 'text-[#7C3AED]' : 'text-purple-400'}`}>
                       {focus.number}
                     </span>
                     <div
-                      className={`flex h-8 w-8 items-center justify-center rounded-xl transition-transform group-hover:scale-110 ${
+                      className={`flex h-10 w-10 items-center justify-center rounded-2xl transition-transform group-hover:scale-110 ${
                         isSelected ? 'bg-[#5B21B6] text-white shadow-xs' : 'bg-purple-100 text-[#7C3AED]'
                       }`}
                     >
-                      <Icon className="h-4 w-4" />
+                      <Icon className="h-5 w-5" />
                     </div>
                   </div>
 
-                  <p className="font-mono text-[10px] font-bold uppercase tracking-wider text-[#7C3AED]">
+                  <p className="font-mono text-xs sm:text-sm font-extrabold uppercase tracking-wider text-[#7C3AED]">
                     {focus.category}
                   </p>
 
                   {/* Dynamic Shift Indicator: Problem -> Solution */}
-                  <div className="mt-2 space-y-1">
-                    <div className="flex items-center justify-between text-xs">
-                      <span className="font-bold text-rose-700/80 line-through decoration-rose-400 text-[11px]">
+                  <div className="mt-2.5 space-y-1.5">
+                    <div className="flex flex-col gap-0.5">
+                      <span className="font-bold text-rose-700 line-through decoration-rose-400 text-xs sm:text-sm">
                         {focus.problem}
                       </span>
-                      <span className="text-purple-400 text-[10px] font-mono">➔</span>
-                      <span className="font-extrabold text-[#1C1628] text-xs">
-                        {focus.solution}
-                      </span>
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-purple-500 text-xs font-mono font-bold">➔</span>
+                        <span className="font-extrabold text-[#1C1628] text-sm sm:text-base">
+                          {focus.solution}
+                        </span>
+                      </div>
                     </div>
 
                     {/* Animated Flow Progress Bar */}
-                    <div className="h-1.5 w-full bg-purple-100 rounded-full overflow-hidden mt-2">
+                    <div className="h-2 w-full bg-purple-100 rounded-full overflow-hidden mt-2.5">
                       <div
                         className={`h-full transition-all duration-700 rounded-full ${
                           isSelected
@@ -614,22 +666,22 @@ export default function PersonalDevelopmentView() {
                     </div>
                   </div>
 
-                  <p className="mt-3 text-[11px] leading-tight text-[#5B4C72] line-clamp-2">
+                  <p className="mt-3.5 text-xs sm:text-sm leading-snug text-[#4A3C60] font-medium line-clamp-3">
                     {focus.tagline}
                   </p>
                 </div>
 
                 {/* Bottom Metric Pill */}
-                <div className="mt-4 pt-3 border-t border-purple-900/10 flex items-center justify-between">
-                  <span className="text-[10px] font-mono font-bold text-[#5B21B6] bg-purple-50 px-2 py-0.5 rounded-md">
+                <div className="mt-4 pt-3.5 border-t border-purple-900/10 flex items-center justify-between">
+                  <span className="text-xs font-mono font-bold text-[#5B21B6] bg-purple-50 px-2.5 py-1 rounded-lg">
                     {focus.metricTag}
                   </span>
                   <div
-                    className={`flex h-5 w-5 items-center justify-center rounded-full transition-colors ${
+                    className={`flex h-6 w-6 items-center justify-center rounded-full transition-colors ${
                       isSelected ? 'bg-[#5B21B6] text-white' : 'bg-purple-100 text-[#7C3AED]'
                     }`}
                   >
-                    <ChevronRight className="h-3 w-3" />
+                    <ChevronRight className="h-3.5 w-3.5" />
                   </div>
                 </div>
               </div>
@@ -644,15 +696,15 @@ export default function PersonalDevelopmentView() {
         {/* Section Heading */}
         <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between gap-4 mb-8">
           <div>
-            <div className="inline-flex items-center gap-1.5 font-mono text-xs font-bold uppercase tracking-[0.2em] text-[#7C3AED]">
-              <TrendingUp className="h-3.5 w-3.5" />
+            <div className="inline-flex items-center gap-2 font-mono text-xs sm:text-sm font-bold uppercase tracking-[0.2em] text-[#7C3AED]">
+              <TrendingUp className="h-4 w-4" />
               <span>Transformation Studio</span>
             </div>
-            <h2 className="text-2xl sm:text-4xl font-extrabold text-[#1C1628] mt-1 font-serif">
+            <h2 className="text-2xl sm:text-4xl font-extrabold text-[#1C1628] mt-1.5 font-serif">
               {activeFocus.category}: The Friction Point &amp; The Purposeful Breakthrough
             </h2>
           </div>
-          <p className="text-xs sm:text-sm text-[#55476C] max-w-md">
+          <p className="text-sm sm:text-base text-[#55476C] max-w-md font-medium">
             Pehle dekhein asli psychological bottleneck kya hai, aur fir Pranav Mahajan ka actionable execution framework dekhein.
           </p>
         </div>
@@ -664,56 +716,56 @@ export default function PersonalDevelopmentView() {
           <div className="lg:col-span-5 rounded-3xl border border-rose-300/60 bg-[#FFF5F2] p-6 sm:p-8 backdrop-blur-xl shadow-lg flex flex-col justify-between">
             <div>
               <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-2">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-rose-100 text-rose-700 shadow-xs">
-                    <Hourglass className="h-4 w-4" />
+                <div className="flex items-center gap-2.5">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-rose-100 text-rose-700 shadow-xs">
+                    <Hourglass className="h-5 w-5" />
                   </div>
                   <div>
-                    <span className="font-mono text-[10px] font-bold uppercase tracking-wider text-rose-700">
+                    <span className="font-mono text-xs font-bold uppercase tracking-wider text-rose-700">
                       The Friction Point
                     </span>
-                    <h3 className="text-sm font-bold text-[#2A151B]">Asli Problem Kya Aati Hai?</h3>
+                    <h3 className="text-base font-bold text-[#2A151B]">Asli Problem Kya Aati Hai?</h3>
                   </div>
                 </div>
-                <span className="text-[10px] font-mono text-rose-800 bg-rose-200/60 px-2.5 py-1 rounded-full font-bold">
+                <span className="text-xs font-mono text-rose-800 bg-rose-200/60 px-3 py-1 rounded-full font-bold">
                   Bottleneck
                 </span>
               </div>
 
-              <h4 className="text-xl font-bold text-[#2A151B] font-serif mb-2">
+              <h4 className="text-xl sm:text-2xl font-bold text-[#2A151B] font-serif mb-3">
                 {activeFocus.problemTitle}
               </h4>
 
-              <p className="text-xs sm:text-sm text-[#5B323D] italic leading-relaxed mb-5 bg-white/70 p-3.5 rounded-2xl border border-rose-200/70">
+              <p className="text-sm sm:text-base text-[#5B323D] italic leading-relaxed mb-5 bg-white/70 p-4 rounded-2xl border border-rose-200/70">
                 &ldquo;{activeFocus.problemQuote}&rdquo;
               </p>
 
-              <div className="rounded-2xl border border-rose-200 bg-white/80 p-4 mb-5">
-                <span className="font-mono text-[10px] font-bold uppercase tracking-wider text-rose-700 block mb-1">
+              <div className="rounded-2xl border border-rose-200 bg-white/80 p-4.5 mb-5">
+                <span className="font-mono text-xs sm:text-sm font-bold uppercase tracking-wider text-rose-700 block mb-1.5">
                   Why Willpower Fails (Root Cause)
                 </span>
-                <p className="text-xs text-[#44222B] leading-relaxed">
+                <p className="text-sm sm:text-base text-[#44222B] leading-relaxed font-medium">
                   {activeFocus.problemRootCause}
                 </p>
               </div>
 
               {/* Symptoms Checklist */}
               <div>
-                <span className="font-mono text-[10px] font-bold uppercase tracking-wider text-rose-800 block mb-2">
+                <span className="font-mono text-xs sm:text-sm font-bold uppercase tracking-wider text-rose-800 block mb-2.5">
                   Real-Life Symptoms
                 </span>
-                <div className="space-y-2">
+                <div className="space-y-2.5">
                   {activeFocus.problemSymptoms.map((sym, sIdx) => (
-                    <div key={sIdx} className="flex items-start gap-2.5 text-xs text-[#44222B]">
-                      <span className="h-1.5 w-1.5 rounded-full bg-rose-500 shrink-0 mt-1.5" />
-                      <span className="leading-snug">{sym}</span>
+                    <div key={sIdx} className="flex items-start gap-3 text-sm sm:text-base text-[#44222B]">
+                      <span className="h-2 w-2 rounded-full bg-rose-500 shrink-0 mt-2" />
+                      <span className="leading-snug font-medium">{sym}</span>
                     </div>
                   ))}
                 </div>
               </div>
             </div>
 
-            <div className="mt-6 pt-4 border-t border-rose-200/80 flex items-center justify-between text-xs text-rose-700 font-mono font-bold">
+            <div className="mt-6 pt-4 border-t border-rose-200/80 flex items-center justify-between text-xs sm:text-sm text-rose-700 font-mono font-bold">
               <span>Status: High Resistance</span>
               <span>Solution Opposite &rarr;</span>
             </div>
@@ -723,44 +775,44 @@ export default function PersonalDevelopmentView() {
           <div className="lg:col-span-7 rounded-3xl border border-purple-900/15 bg-white p-6 sm:p-8 backdrop-blur-xl shadow-[0_20px_45px_rgba(91,33,182,0.08)] flex flex-col justify-between">
             <div>
               <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-2">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-purple-100 text-[#5B21B6] shadow-xs">
-                    <Zap className="h-4 w-4" />
+                <div className="flex items-center gap-2.5">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-purple-100 text-[#5B21B6] shadow-xs">
+                    <Zap className="h-5 w-5" />
                   </div>
                   <div>
-                    <span className="font-mono text-[10px] font-bold uppercase tracking-wider text-[#5B21B6]">
+                    <span className="font-mono text-xs font-bold uppercase tracking-wider text-[#5B21B6]">
                       Pranav&apos;s Solution Framework
                     </span>
-                    <h3 className="text-sm font-bold text-[#1C1628]">The Actionable Breakthrough</h3>
+                    <h3 className="text-base font-bold text-[#1C1628]">The Actionable Breakthrough</h3>
                   </div>
                 </div>
-                <span className="text-[10px] font-mono text-[#5B21B6] bg-purple-50 px-2.5 py-1 rounded-full border border-purple-200 font-bold">
+                <span className="text-xs font-mono text-[#5B21B6] bg-purple-50 px-3 py-1 rounded-full border border-purple-200 font-bold">
                   {activeFocus.solutionTag}
                 </span>
               </div>
 
-              <h4 className="text-xl sm:text-2xl font-bold text-[#1C1628] font-serif mb-2">
+              <h4 className="text-2xl sm:text-3xl font-bold text-[#1C1628] font-serif mb-3">
                 {activeFocus.solutionTitle}
               </h4>
 
-              <p className="text-xs sm:text-sm text-[#46385D] leading-relaxed mb-5">
+              <p className="text-sm sm:text-base text-[#46385D] leading-relaxed mb-6 font-medium">
                 {activeFocus.solutionDesc}
               </p>
 
               {/* 3 Actionable Execution Steps */}
-              <div className="space-y-2.5 mb-5">
-                <span className="font-mono text-[10px] font-bold uppercase tracking-wider text-[#5B21B6] block">
+              <div className="space-y-3 mb-6">
+                <span className="font-mono text-xs sm:text-sm font-bold uppercase tracking-wider text-[#5B21B6] block">
                   3-Step Execution Protocol
                 </span>
                 {activeFocus.solutionSteps.map((step, idx) => (
                   <div
                     key={idx}
-                    className="flex items-start gap-3 rounded-2xl bg-[#F8F5F0] p-3.5 border border-purple-900/5 transition hover:bg-white hover:shadow-xs"
+                    className="flex items-start gap-3.5 rounded-2xl bg-[#F8F5F0] p-4 border border-purple-900/5 transition hover:bg-white hover:shadow-xs"
                   >
-                    <div className="flex h-5 w-5 items-center justify-center rounded-full bg-purple-100 text-[#5B21B6] text-xs font-bold shrink-0 mt-0.5">
+                    <div className="flex h-6 w-6 items-center justify-center rounded-full bg-purple-100 text-[#5B21B6] text-xs sm:text-sm font-bold shrink-0 mt-0.5">
                       {idx + 1}
                     </div>
-                    <p className="text-xs sm:text-sm text-[#241E2F] font-semibold leading-relaxed">
+                    <p className="text-sm sm:text-base text-[#241E2F] font-semibold leading-relaxed">
                       {step}
                     </p>
                   </div>
@@ -768,26 +820,26 @@ export default function PersonalDevelopmentView() {
               </div>
 
               {/* Pranav Mahajan Coaching Maxim Box */}
-              <div className="rounded-2xl border border-purple-900/10 bg-gradient-to-r from-purple-50 to-amber-50/60 p-4">
-                <p className="text-xs italic text-[#2E1F47] font-serif leading-relaxed">
+              <div className="rounded-2xl border border-purple-900/10 bg-gradient-to-r from-purple-50 to-amber-50/60 p-4.5">
+                <p className="text-sm sm:text-base italic text-[#2E1F47] font-serif leading-relaxed">
                   &ldquo;{activeFocus.pranavMaxim}&rdquo;
                 </p>
-                <p className="mt-1 text-[10px] font-mono font-bold uppercase text-[#7C3AED]">
+                <p className="mt-1.5 text-xs font-mono font-bold uppercase text-[#7C3AED]">
                   — Pranav Mahajan &bull; Core Maxim
                 </p>
               </div>
             </div>
 
             <div className="mt-6 pt-4 border-t border-purple-900/10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-              <span className="text-xs text-[#55476C] font-mono">
+              <span className="text-xs sm:text-sm text-[#55476C] font-mono">
                 Master this breakthrough in 1-on-1 mentorship
               </span>
               <Link
                 href={`/signup?role=individual&topic=${encodeURIComponent(`Personal Development (${activeFocus.category} Focus)`)}`}
-                className="inline-flex items-center gap-2 rounded-full bg-[#5B21B6] px-6 py-2.5 text-xs font-bold text-white shadow-md hover:bg-[#4C1D95] transition"
+                className="inline-flex items-center gap-2 rounded-full bg-[#5B21B6] px-6 py-3 text-xs sm:text-sm font-bold text-white shadow-md hover:bg-[#4C1D95] transition"
               >
                 <span>Master {activeFocus.category} with Pranav</span>
-                <ArrowRight className="h-3.5 w-3.5" />
+                <ArrowRight className="h-4 w-4" />
               </Link>
             </div>
           </div>
@@ -799,15 +851,15 @@ export default function PersonalDevelopmentView() {
       <section className="relative px-4 sm:px-8 lg:px-12 max-w-7xl mx-auto py-12">
         <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between gap-4 mb-8">
           <div>
-            <div className="inline-flex items-center gap-1.5 font-mono text-xs font-bold uppercase tracking-[0.2em] text-[#7C3AED]">
-              <Clock className="h-3.5 w-3.5" />
+            <div className="inline-flex items-center gap-2 font-mono text-xs sm:text-sm font-bold uppercase tracking-[0.2em] text-[#7C3AED]">
+              <Clock className="h-4 w-4" />
               <span>Daily Cadence Architecture</span>
             </div>
-            <h2 className="text-2xl sm:text-4xl font-extrabold text-[#1C1628] mt-1 font-serif">
+            <h2 className="text-2xl sm:text-4xl font-extrabold text-[#1C1628] mt-1.5 font-serif">
               The 24-Hour Personal Operating System
             </h2>
           </div>
-          <p className="text-xs sm:text-sm text-[#55476C] max-w-md">
+          <p className="text-sm sm:text-base text-[#55476C] max-w-md font-medium">
             How high-agency individuals structure their hours to maximize deep work, eliminate afternoon fatigue, and protect mental clarity.
           </p>
         </div>
@@ -828,33 +880,33 @@ export default function PersonalDevelopmentView() {
                 }`}
               >
                 <div>
-                  <div className="flex items-center justify-between mb-3">
-                    <span className="font-mono text-xs font-extrabold text-[#7C3AED]">
+                  <div className="flex items-center justify-between mb-3.5">
+                    <span className="font-mono text-sm sm:text-base font-extrabold text-[#7C3AED]">
                       {routine.time}
                     </span>
-                    <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-purple-100 text-[#5B21B6] group-hover:scale-105 transition-transform">
-                      <Icon className="h-4.5 w-4.5" />
+                    <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-purple-100 text-[#5B21B6] group-hover:scale-105 transition-transform">
+                      <Icon className="h-5 w-5" />
                     </div>
                   </div>
 
-                  <span className="inline-block text-[10px] font-mono font-bold uppercase tracking-wider text-[#D97706] bg-amber-50 px-2 py-0.5 rounded-full mb-2">
+                  <span className="inline-block text-xs font-mono font-bold uppercase tracking-wider text-[#D97706] bg-amber-50 px-2.5 py-1 rounded-full mb-2">
                     {routine.phase}
                   </span>
 
-                  <h3 className="text-base font-bold text-[#1C1628] leading-snug">
+                  <h3 className="text-lg sm:text-xl font-bold text-[#1C1628] leading-snug">
                     {routine.title}
                   </h3>
 
-                  <p className="mt-2 text-xs text-[#55476C] leading-relaxed">
+                  <p className="mt-2.5 text-sm text-[#4A3C60] leading-relaxed font-medium">
                     {routine.principle}
                   </p>
                 </div>
 
-                <div className="mt-4 pt-3 border-t border-purple-900/10 rounded-xl bg-[#FAF7F2] p-2.5">
-                  <span className="text-[10px] font-mono font-bold uppercase text-[#5B21B6] block mb-0.5">
+                <div className="mt-5 pt-3.5 border-t border-purple-900/10 rounded-2xl bg-[#FAF7F2] p-3">
+                  <span className="text-xs font-mono font-bold uppercase text-[#5B21B6] block mb-1">
                     Micro-Habit Cue
                   </span>
-                  <p className="text-[11px] font-semibold text-[#1C1628] leading-tight">
+                  <p className="text-xs sm:text-sm font-semibold text-[#1C1628] leading-tight">
                     {routine.action}
                   </p>
                 </div>
@@ -867,13 +919,13 @@ export default function PersonalDevelopmentView() {
       {/* SECTION 3: 6 MENTAL MODELS OF PRANAV MAHAJAN */}
       <section className="relative px-4 sm:px-8 lg:px-12 max-w-7xl mx-auto py-12">
         <div className="text-center max-w-2xl mx-auto mb-10">
-          <p className="font-mono text-xs font-bold uppercase tracking-[0.2em] text-[#7C3AED]">
+          <p className="font-mono text-xs sm:text-sm font-bold uppercase tracking-[0.2em] text-[#7C3AED]">
             Cognitive Upgrades
           </p>
-          <h2 className="text-2xl sm:text-4xl font-extrabold text-[#1C1628] mt-1 font-serif">
+          <h2 className="text-2xl sm:text-4xl font-extrabold text-[#1C1628] mt-1.5 font-serif">
             6 Non-Negotiable Mental Models
           </h2>
-          <p className="mt-2 text-xs sm:text-sm text-[#55476C]">
+          <p className="mt-2.5 text-sm sm:text-base text-[#55476C] font-medium">
             Core psychological principles that Pranav Mahajan installs during 1-on-1 mentorship to build unshakeable self-command:
           </p>
         </div>
@@ -885,29 +937,29 @@ export default function PersonalDevelopmentView() {
               className="rounded-3xl border border-purple-900/10 bg-white/85 p-6 backdrop-blur-xl shadow-xs transition-all duration-300 hover:border-purple-300 hover:-translate-y-1 hover:shadow-md flex flex-col justify-between"
             >
               <div>
-                <div className="flex items-center justify-between mb-3">
-                  <span className="font-mono text-xs font-extrabold text-[#7C3AED]">
+                <div className="flex items-center justify-between mb-3.5">
+                  <span className="font-mono text-xs sm:text-sm font-extrabold text-[#7C3AED]">
                     MODEL 0{idx + 1}
                   </span>
-                  <Award className="h-4 w-4 text-amber-500" />
+                  <Award className="h-4.5 w-4.5 text-amber-500" />
                 </div>
 
-                <h3 className="text-base font-bold text-[#1C1628] leading-tight">
+                <h3 className="text-lg sm:text-xl font-bold text-[#1C1628] leading-tight">
                   {model.title}
                 </h3>
 
-                <span className="inline-block mt-1 text-[11px] font-semibold text-[#5B21B6]">
+                <span className="inline-block mt-1.5 text-xs sm:text-sm font-bold text-[#5B21B6]">
                   {model.rule}
                 </span>
 
-                <p className="mt-2.5 text-xs text-[#55476C] leading-relaxed">
+                <p className="mt-3 text-sm sm:text-base text-[#4A3C60] leading-relaxed font-medium">
                   {model.desc}
                 </p>
               </div>
 
-              <div className="mt-4 pt-3 border-t border-purple-900/10 flex items-center justify-between text-[11px] font-mono text-[#7C3AED]">
+              <div className="mt-5 pt-3.5 border-t border-purple-900/10 flex items-center justify-between text-xs sm:text-sm font-mono text-[#7C3AED]">
                 <span>Tested in Practice</span>
-                <CheckCircle2 className="h-3.5 w-3.5 text-purple-600" />
+                <CheckCircle2 className="h-4 w-4 text-purple-600" />
               </div>
             </div>
           ))}
@@ -917,13 +969,13 @@ export default function PersonalDevelopmentView() {
       {/* 4 ARCHITECTURAL PILLARS OF HIGH-LEVERAGE LIVING */}
       <section className="relative px-4 sm:px-8 lg:px-12 max-w-7xl mx-auto py-12">
         <div className="text-center max-w-2xl mx-auto mb-10">
-          <p className="font-mono text-xs font-bold uppercase tracking-[0.2em] text-[#7C3AED]">
+          <p className="font-mono text-xs sm:text-sm font-bold uppercase tracking-[0.2em] text-[#7C3AED]">
             Long-Term Compounding
           </p>
-          <h2 className="text-2xl sm:text-4xl font-extrabold text-[#1C1628] mt-1 font-serif">
+          <h2 className="text-2xl sm:text-4xl font-extrabold text-[#1C1628] mt-1.5 font-serif">
             The 4 Systems of Purposeful Living
           </h2>
-          <p className="mt-2 text-xs sm:text-sm text-[#55476C]">
+          <p className="mt-2.5 text-sm sm:text-base text-[#55476C] font-medium">
             Systems beat willpower every single time. Build these 4 non-negotiable foundations:
           </p>
         </div>
@@ -963,28 +1015,78 @@ export default function PersonalDevelopmentView() {
               >
                 <div>
                   <div className="flex items-center justify-between mb-4">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-purple-100 text-[#5B21B6] shadow-xs group-hover:scale-110 transition-transform">
-                      <Icon className="h-5 w-5" />
+                    <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-purple-100 text-[#5B21B6] shadow-xs group-hover:scale-110 transition-transform">
+                      <Icon className="h-5.5 w-5.5" />
                     </div>
-                    <span className="font-mono text-xs font-bold text-purple-400">0{idx + 1}</span>
+                    <span className="font-mono text-sm font-bold text-purple-400">0{idx + 1}</span>
                   </div>
 
-                  <h3 className="text-base font-bold text-[#1C1628] mb-2 leading-tight">
+                  <h3 className="text-lg sm:text-xl font-bold text-[#1C1628] mb-2 leading-tight">
                     {pillar.title}
                   </h3>
 
-                  <p className="text-xs text-[#55476C] leading-relaxed mb-4">
+                  <p className="text-sm sm:text-base text-[#4A3C60] leading-relaxed mb-4 font-medium">
                     {pillar.desc}
                   </p>
                 </div>
 
-                <div className="pt-3 border-t border-purple-900/10 flex items-center justify-between text-[11px] font-mono font-bold text-[#5B21B6]">
+                <div className="pt-3.5 border-t border-purple-900/10 flex items-center justify-between text-xs sm:text-sm font-mono font-bold text-[#5B21B6]">
                   <span>{pillar.keyRule}</span>
-                  <CheckCircle2 className="h-3.5 w-3.5 text-purple-600" />
+                  <CheckCircle2 className="h-4 w-4 text-purple-600" />
                 </div>
               </div>
             );
           })}
+        </div>
+      </section>
+
+      {/* =========================================================================
+          GROWTH PATHWAYS: ALL 10 DIMENSIONS (At bottom of page)
+         ========================================================================= */}
+      <section className="relative px-4 sm:px-8 lg:px-12 max-w-7xl mx-auto py-12 sm:py-16 select-text">
+        <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between gap-4 mb-8">
+          <div>
+            <span className="font-mono text-xs font-bold uppercase tracking-[0.2em] text-[#7C3AED] block mb-1">
+              Explore All 10 Dimensions
+            </span>
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-[#1C1628] font-serif">
+              Growth Pathways
+            </h2>
+            <p className="mt-1 text-xs sm:text-sm text-[#5B4C72]">
+              Master every dimension of life with dedicated frameworks:
+            </p>
+          </div>
+          <Link
+            href="/individual#top"
+            className="inline-flex items-center gap-1.5 text-xs font-bold text-[#5B21B6] hover:underline shrink-0"
+          >
+            <span>All 10 &rarr;</span>
+          </Link>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
+          {OTHER_PATHWAYS.map((p) => (
+            <Link
+              key={p.href}
+              href={p.href}
+              className="group flex items-center justify-between rounded-2xl p-4 bg-white/80 hover:bg-white border border-purple-900/10 hover:border-purple-400/50 transition-all shadow-2xs hover:shadow-sm hover:-translate-y-0.5"
+            >
+              <div className="flex items-center gap-3 overflow-hidden">
+                <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-purple-50 font-mono text-xs font-bold text-[#7C3AED] shrink-0 group-hover:bg-[#5B21B6] group-hover:text-white transition-colors">
+                  {p.number}
+                </span>
+                <div className="overflow-hidden">
+                  <p className="text-xs sm:text-sm font-bold text-[#1C1628] truncate group-hover:text-[#5B21B6] transition-colors">
+                    {p.title}
+                  </p>
+                  <p className="text-[10px] font-mono text-[#6A5A82] uppercase tracking-wider truncate">
+                    {p.tag}
+                  </p>
+                </div>
+              </div>
+              <ArrowRight className="h-4 w-4 text-slate-400 group-hover:text-[#5B21B6] group-hover:translate-x-1 transition shrink-0 ml-2" />
+            </Link>
+          ))}
         </div>
       </section>
 
@@ -993,15 +1095,15 @@ export default function PersonalDevelopmentView() {
         {/* Editorial Divider */}
         <div className="flex items-center justify-center gap-3 mb-6">
           <span className="h-px w-20 bg-purple-900/20" />
-          <span className="h-1.5 w-1.5 rounded-full bg-[#7C3AED]" />
+          <span className="h-2 w-2 rounded-full bg-[#7C3AED]" />
           <span className="h-px w-20 bg-purple-900/20" />
         </div>
 
         {/* Famous Quote */}
-        <blockquote className="text-xl sm:text-2xl font-serif italic text-[#241E2F] max-w-2xl mx-auto leading-relaxed">
+        <blockquote className="text-2xl sm:text-3xl font-serif italic text-[#241E2F] max-w-2xl mx-auto leading-relaxed">
           &ldquo;Growth is not an accidental occurrence; it is the natural consequence of consistent curiosity and disciplined agency.&rdquo;
         </blockquote>
-        <p className="mt-2 font-mono text-xs font-bold uppercase tracking-wider text-[#7C3AED]">
+        <p className="mt-3 font-mono text-xs sm:text-sm font-bold uppercase tracking-wider text-[#7C3AED]">
           — Pranav Mahajan &bull; Dimension 02
         </p>
 
@@ -1009,25 +1111,25 @@ export default function PersonalDevelopmentView() {
         <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
           <Link
             href="/individual/health-wellbeing"
-            className="inline-flex items-center gap-2 rounded-full border border-purple-900/15 bg-white/80 px-5 py-2.5 text-xs font-bold text-[#382D4A] shadow-xs transition hover:bg-white hover:border-purple-400"
+            className="inline-flex items-center gap-2.5 rounded-full border border-purple-900/15 bg-white/80 px-6 py-3 text-sm font-bold text-[#382D4A] shadow-xs transition hover:bg-white hover:border-purple-400"
           >
-            <ArrowLeft className="h-3.5 w-3.5" />
+            <ArrowLeft className="h-4 w-4" />
             <span>Prev: Health &amp; Wellbeing</span>
           </Link>
 
           <Link
             href="/individual#top"
-            className="inline-flex items-center gap-2 rounded-full bg-[#5B21B6] px-6 py-2.5 text-xs font-bold text-white shadow-md transition hover:bg-[#4C1D95]"
+            className="inline-flex items-center gap-2.5 rounded-full bg-[#5B21B6] px-7 py-3 text-sm font-bold text-white shadow-md transition hover:bg-[#4C1D95]"
           >
             <span>Explore All 10 Dimensions</span>
           </Link>
 
           <Link
             href="/individual/love-relationships"
-            className="inline-flex items-center gap-2 rounded-full border border-purple-900/15 bg-white/80 px-5 py-2.5 text-xs font-bold text-[#382D4A] shadow-xs transition hover:bg-white hover:border-purple-400"
+            className="inline-flex items-center gap-2.5 rounded-full border border-purple-900/15 bg-white/80 px-6 py-3 text-sm font-bold text-[#382D4A] shadow-xs transition hover:bg-white hover:border-purple-400"
           >
             <span>Next: Love &amp; Family Dynamics</span>
-            <ArrowRight className="h-3.5 w-3.5" />
+            <ArrowRight className="h-4 w-4" />
           </Link>
         </div>
       </section>

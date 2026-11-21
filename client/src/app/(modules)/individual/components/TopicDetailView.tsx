@@ -9,6 +9,9 @@ import RoleCursor from '@/components/RoleCursor';
 import LoveRelationshipsView from './LoveRelationshipsView';
 import HealthWellbeingView from './HealthWellbeingView';
 import PersonalDevelopmentView from './PersonalDevelopmentView';
+import ParentingChildView from './ParentingChildView';
+import SocialRelationshipsView from './SocialRelationshipsView';
+import StudentLifeView from './StudentLifeView';
 
 const navigation = [
   { href: '/individual#top', label: 'Explore Life & Growth' },
@@ -48,6 +51,18 @@ export default function TopicDetailView({ slug }: { slug: string }) {
 
   if (topic.id === 'personal-development') {
     return <PersonalDevelopmentView />;
+  }
+
+  if (topic.id === 'parenting-child') {
+    return <ParentingChildView />;
+  }
+
+  if (topic.id === 'social-relationships') {
+    return <SocialRelationshipsView />;
+  }
+
+  if (topic.id === 'student-life') {
+    return <StudentLifeView />;
   }
 
   const currentIndex = TOPICS.findIndex((t) => t.id === topic.id);
