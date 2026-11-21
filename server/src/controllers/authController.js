@@ -116,7 +116,7 @@ export async function register(req, res) {
       }
     }
 
-    // Password validation: min 8 chars, 1 uppercase, 1 lowercase, 1 number or special char
+    // Password validation: min 8 chars, 1 uppercase, 1 lowercase, 1 number, 1 special char (!@#$%^&*)
     if (!password || password.length < 8) {
       return res.status(400).json({ success: false, error: 'Password must be at least 8 characters long.' });
     }
@@ -126,8 +126,11 @@ export async function register(req, res) {
     if (!/[a-z]/.test(password)) {
       return res.status(400).json({ success: false, error: 'Password must contain at least 1 lowercase letter (a-z).' });
     }
-    if (!/[\d\W_]/.test(password)) {
-      return res.status(400).json({ success: false, error: 'Password must contain at least 1 number or special character.' });
+    if (!/\d/.test(password)) {
+      return res.status(400).json({ success: false, error: 'Password must contain at least 1 number (0-9).' });
+    }
+    if (!/[!@#$%^&*]/.test(password)) {
+      return res.status(400).json({ success: false, error: 'Password must contain at least 1 special character (!@#$%^&*).' });
     }
     if (confirmPassword && password !== confirmPassword) {
       return res.status(400).json({ success: false, error: 'Passwords do not match.' });

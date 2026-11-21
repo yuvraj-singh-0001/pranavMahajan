@@ -68,6 +68,7 @@ export default function SignUpAPage() {
   const pwdHasUpper = /[A-Z]/.test(password);
   const pwdHasLower = /[a-z]/.test(password);
   const pwdHasDigit = /\d/.test(password);
+  const pwdHasSpecial = /[!@#$%^&*]/.test(password);
   const pwdMatch = password.length > 0 && confirmPassword.length > 0 && password === confirmPassword;
 
   // Dynamic Password Requirements list (completed items vanish from list)
@@ -76,6 +77,7 @@ export default function SignUpAPage() {
     { id: 'upper', label: '1 uppercase letter (A-Z)', done: pwdHasUpper },
     { id: 'lower', label: '1 lowercase letter (a-z)', done: pwdHasLower },
     { id: 'digit', label: '1 numeric digit (0-9)', done: pwdHasDigit },
+    { id: 'special', label: '1 special character (!@#$%^&*)', done: pwdHasSpecial },
   ];
   const remainingRules = pwdRules.filter((r) => !r.done);
 
@@ -215,6 +217,12 @@ export default function SignUpAPage() {
       }
       if (!pwdHasUpper || !pwdHasLower || !pwdHasDigit) {
         setErrorMessage('Password must include uppercase, lowercase, and a number (0-9).');
+        setSpinType('shake');
+        setTimeout(() => setSpinType('idle'), 400);
+        return;
+      }
+      if (!pwdHasSpecial) {
+        setErrorMessage('Password must include at least one special character (!@#$%^&*).');
         setSpinType('shake');
         setTimeout(() => setSpinType('idle'), 400);
         return;
@@ -476,17 +484,16 @@ export default function SignUpAPage() {
             and spins on Submit with medium cyan glow!
           */}
           <div
-            className={`diamond-card ${
-              spinType === 'next'
-                ? 'spin-next'
-                : spinType === 'back'
+            className={`diamond-card ${spinType === 'next'
+              ? 'spin-next'
+              : spinType === 'back'
                 ? 'spin-back'
                 : spinType === 'submit'
-                ? 'spin-submit'
-                : spinType === 'shake'
-                ? 'shake'
-                : ''
-            }`}
+                  ? 'spin-submit'
+                  : spinType === 'shake'
+                    ? 'shake'
+                    : ''
+              }`}
           >
             {/* The navy corner triangle at bottom-right of square (forms the bottom apex of diamond) */}
             <div className="diamond-bottom-navy-corner" />
@@ -642,14 +649,14 @@ export default function SignUpAPage() {
                                   usernameStatus === 'available'
                                     ? '#15803d'
                                     : usernameStatus === 'taken'
-                                    ? '#b91c1c'
-                                    : '#b45309',
+                                      ? '#b91c1c'
+                                      : '#b45309',
                                 backgroundColor:
                                   usernameStatus === 'available'
                                     ? '#dcfce7'
                                     : usernameStatus === 'taken'
-                                    ? '#fee2e2'
-                                    : '#fef3c7',
+                                      ? '#fee2e2'
+                                      : '#fef3c7',
                                 padding: '1px 5px',
                                 borderRadius: '4px',
                                 lineHeight: 1,
@@ -658,8 +665,8 @@ export default function SignUpAPage() {
                               {usernameStatus === 'available'
                                 ? '✓ Avail'
                                 : usernameStatus === 'taken'
-                                ? '✕ Taken'
-                                : usernameMessage || '...'}
+                                  ? '✕ Taken'
+                                  : usernameMessage || '...'}
                             </span>
                           )}
                         </div>
@@ -683,7 +690,7 @@ export default function SignUpAPage() {
                           onChange={(e) => setPassword(e.target.value)}
                           onFocus={() => setIsPasswordFocused(true)}
                           onBlur={() => setTimeout(() => setIsPasswordFocused(false), 200)}
-                          placeholder="Min 8 chars, 1 uppercase, 1 digit"
+                          placeholder=" "
                           className="diamond-input"
                           style={{ paddingRight: '24px' }}
                           required
@@ -930,10 +937,10 @@ export default function SignUpAPage() {
                 {isSubmitting
                   ? '...'
                   : mode === 'signup'
-                  ? step === 1
-                    ? 'Next →'
-                    : 'Sign up'
-                  : 'Log in'}
+                    ? step === 1
+                      ? 'Next →'
+                      : 'Sign up'
+                    : 'Log in'}
               </span>
             </button>
 
@@ -958,7 +965,8 @@ export default function SignUpAPage() {
       )}
 
       {/* Global & Responsive Styles */}
-      <style dangerouslySetInnerHTML={{ __html: `
+      <style dangerouslySetInnerHTML={{
+        __html: `
         /* 
           MATHEMATICALLY CALIBRATED DIAMOND CONTAINER:
           Guarantees 100% containment within the 45-degree diamond silhouette.
@@ -1164,8 +1172,8 @@ export default function SignUpAPage() {
         }
         .input-label {
           display: block;
-          font-size: 10.5px;
-          font-weight: 750;
+          font-size: 12px;
+          font-weight: 700;
           color: #1e293b;
           text-transform: uppercase;
           letter-spacing: 0.5px;
@@ -1194,9 +1202,10 @@ export default function SignUpAPage() {
           border-bottom-width: 2px !important;
         }
         .diamond-input::placeholder {
-          color: #64748b;
-          font-size: 13px;
-          font-weight: 450;
+          color: #94a3b8;
+          font-size: 12px;
+          font-weight: 400;
+          font-style: italic;
         }
         .diamond-input:-webkit-autofill,
         .diamond-input:-webkit-autofill:hover,
@@ -1332,8 +1341,8 @@ export default function SignUpAPage() {
             gap: 5px;
           }
           .input-label {
-            font-size: 8px;
-            font-weight: 750;
+            font-size: 10px;
+            font-weight: 700;
             color: #1e293b;
             margin-bottom: 1px;
             letter-spacing: 0.3px;
@@ -1345,8 +1354,9 @@ export default function SignUpAPage() {
             border-bottom-color: #94a3b8;
           }
           .diamond-input::placeholder {
-            font-size: 10.5px;
-            color: #64748b;
+            font-size: 10px;
+            color: #94a3b8;
+            font-style: italic;
           }
           .diamond-bottom-navy-corner {
             width: 72px;
