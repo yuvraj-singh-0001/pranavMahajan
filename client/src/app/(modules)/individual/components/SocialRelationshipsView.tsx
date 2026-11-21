@@ -236,11 +236,66 @@ const CALIBRATION_SHIFTS = [
   },
 ];
 
+// 5 Cross-Generational Social Dynamics: Challenges vs Conscious Mentorship Solutions
+const SOCIAL_CROSS_GEN_STAGES = [
+  {
+    id: 'childhood',
+    ageGroup: 'Children (Age 4–10)',
+    roleLabel: 'Young Boy & Girl Bonding',
+    challenge: 'Sharing conflicts, emotional tears, fear of rejection when left out by playmates.',
+    solution: 'Modeled cooperative play & somatic emotional naming: Connection always precedes rule enforcement.',
+    action: '2-minute empathetic emotion naming before solving the sharing dispute.',
+    accent: '#0284C7',
+    tag: 'Stage 01 • Early Trust',
+  },
+  {
+    id: 'adolescence',
+    ageGroup: 'Teens & Youth (Age 11–18)',
+    roleLabel: 'Peer Camaraderie & Belonging',
+    challenge: 'Crushing peer pressure, FOMO, social anxiety, painful clique gossip and exclusion.',
+    solution: 'Internal sovereignty: Grounded self-worth where acceptance is never bought through self-abandonment.',
+    action: 'Mastering the calm, unapologetic “No” and auditing who elevates your energy.',
+    accent: '#0D9488',
+    tag: 'Stage 02 • Self-Sovereignty',
+  },
+  {
+    id: 'young-adult',
+    ageGroup: 'Young Adults (Age 19–25)',
+    roleLabel: 'Friendship, Dating & Circles',
+    challenge: 'Performative charm, imposter syndrome, transactional networking, and social exhaustion.',
+    solution: '“Be interested, not interesting”: Deep curious listening and grounded eye contact that puts rooms at ease.',
+    action: 'Replace performative pitch with authentic curiosity: “What are you building that excites you?”',
+    accent: '#D97706',
+    tag: 'Stage 03 • Authentic Charisma',
+  },
+  {
+    id: 'professional',
+    ageGroup: 'Adults (Age 26–45)',
+    roleLabel: 'High-Stakes Rooms & Reputation',
+    challenge: 'Workplace political friction, backchannel gossip, boundary fatigue, and people-pleasing burnout.',
+    solution: 'Boundary poise & energetic audit: Warm presence with unwavering conviction; zero participation in hallway drama.',
+    action: 'Disengage from office gossip with dignified silence and redirect to shared objectives.',
+    accent: '#2563EB',
+    tag: 'Stage 04 • Unassailable Trust',
+  },
+  {
+    id: 'elder-legacy',
+    ageGroup: 'Elders & Mentors (Age 45+)',
+    roleLabel: 'Generational Bridge & Wisdom',
+    challenge: 'Generational divide, ideological clashes with younger generations, feeling isolated or unheard.',
+    solution: 'Cultural dexterity & psychological safety: Becoming the grounded elder who listens before offering counsel.',
+    action: 'Hold space with warm humility and shared laughter rather than unsolicited lectures.',
+    accent: '#7C3AED',
+    tag: 'Stage 05 • Living Legacy',
+  },
+];
+
 export default function SocialRelationshipsView() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [activeAnchor, setActiveAnchor] = useState(SOCIAL_ANCHORS[0]);
   const [activeScenarioIdx, setActiveScenarioIdx] = useState(0);
   const [activePillarIdx, setActivePillarIdx] = useState(0);
+  const [activeAgeStageIdx, setActiveAgeStageIdx] = useState(0);
   const [isPlayingAudio, setIsPlayingAudio] = useState(false);
   const [isCalibrating, setIsCalibrating] = useState(false);
   const [calibrationPhase, setCalibrationPhase] = useState<'Centering' | 'Scanning' | 'Attuning' | 'Resonating' | 'Listening'>('Centering');
@@ -332,26 +387,43 @@ export default function SocialRelationshipsView() {
       </div>
 
       {/* =========================================================================
-          OFFICIAL TRANSPARENT HEADER (Exact match to HealthWellbeingView)
-          Logo left, Pill button + Menu button right (No solid bar spanning across)
+          OFFICIAL NAVBAR (Identical to Home & Role Page)
          ========================================================================= */}
-      <header className="relative z-50 flex items-center justify-between border-b border-sky-900/10 bg-black/40 px-4 py-2.5 backdrop-blur-md sm:border-b-0 sm:bg-transparent sm:px-10 lg:px-14 2xl:px-20 sm:py-5 sm:backdrop-blur-none shrink-0">
-        <div className="flex items-center gap-2 sm:gap-3">
-          <Link href="/" aria-label="Pranav Mahajan home" className="inline-flex items-center group">
+      <header className="fixed inset-x-0 top-0 z-50 flex items-center justify-between border-b border-amber-500/15 bg-black/40 px-4 py-2.5 backdrop-blur-md sm:border-b-0 sm:bg-transparent sm:px-10 lg:px-14 2xl:px-20 sm:py-5 sm:backdrop-blur-none transition-all duration-500">
+        <div className="flex items-center">
+          <button
+            type="button"
+            onClick={() => {
+              if (typeof window !== 'undefined') {
+                if (window.history.length > 1) {
+                  window.history.back();
+                } else {
+                  window.location.assign('/');
+                }
+              }
+            }}
+            aria-label="Go back"
+            title="Back"
+            className="mr-2 flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-amber-500/40 bg-[#16120e]/90 text-amber-200 transition hover:bg-[#2e2318] hover:text-white sm:mr-3 sm:h-10 sm:w-10 shadow-md cursor-pointer"
+          >
+            <ArrowLeft className="h-4 w-4" />
+          </button>
+
+          <Link href="/" aria-label="Pranav Mahajan home" className="inline-flex items-center group cursor-pointer transition-transform hover:scale-105">
             <img
               src="/pranav_mahajan_transparent.png"
-              alt="Pranav Mahajan"
-              className="h-10 w-auto object-contain drop-shadow-[0_4px_20px_rgba(2,132,199,0.35)] transition-transform duration-300 group-hover:scale-105 sm:h-16 md:h-20"
+              alt="Pranav Mahajan Logo"
+              className="h-10 w-auto object-contain drop-shadow-[0_4px_20px_rgba(223,165,71,0.4)] sm:h-16 md:h-20"
             />
           </Link>
         </div>
 
         <div className="flex items-center gap-2 sm:gap-3">
           <Link
-            href="/signup"
-            className="inline-flex items-center justify-center rounded-full border border-sky-400/50 bg-[#0C4A6E]/90 px-3.5 py-1.5 text-xs font-bold tracking-wide text-sky-200 shadow-[0_4px_16px_rgba(2,132,199,0.25)] backdrop-blur-md transition-all duration-300 hover:scale-105 hover:border-sky-300 hover:bg-[#075985] hover:text-white sm:px-5 sm:py-2"
+            href="/#roles"
+            className="inline-flex items-center justify-center gap-1.5 py-1.5 sm:py-2 px-3.5 sm:px-5 text-xs font-bold tracking-wide rounded-full text-amber-200 border border-amber-500/50 bg-[#1e1710]/80 hover:bg-[#2e2318] hover:border-amber-400 hover:text-white transition-all shadow-[0_4px_16px_rgba(223,165,71,0.2)] hover:scale-105 active:scale-95 backdrop-blur-md cursor-pointer"
           >
-            Sign Up
+            Go to your role
           </Link>
 
           <button
@@ -359,15 +431,15 @@ export default function SocialRelationshipsView() {
             aria-label={menuOpen ? 'Close navigation menu' : 'Open navigation menu'}
             aria-expanded={menuOpen}
             onClick={() => setMenuOpen((open) => !open)}
-            className="flex h-9 w-9 flex-col items-center justify-center gap-1 rounded-xl border border-sky-400/30 bg-[#082F49]/90 text-white shadow-xs backdrop-blur-md transition-all duration-200 hover:bg-[#0C4A6E] hover:border-sky-300 active:scale-95 sm:h-10 sm:w-10 sm:rounded-2xl"
+            className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl flex flex-col items-center justify-center gap-1 cursor-pointer transition-all shadow-md bg-[#16120e]/90 hover:bg-[#221b14] border border-amber-500/30 text-white backdrop-blur-md"
           >
             {menuOpen ? (
-              <X className="h-5 w-5 text-sky-300" />
+              <X className="w-5 h-5 text-amber-300" />
             ) : (
               <>
-                <span className="h-0.5 w-4 rounded-full bg-sky-100" />
-                <span className="ml-3.5 h-0.5 w-3 self-start rounded-full bg-[#0284C7]" />
-                <span className="h-0.5 w-4 rounded-full bg-sky-100" />
+                <span className="w-4 h-0.5 rounded-full bg-slate-200" />
+                <span className="w-3 h-0.5 bg-[#dfa547] rounded-full self-start ml-3.5" />
+                <span className="w-4 h-0.5 rounded-full bg-slate-200" />
               </>
             )}
           </button>
@@ -447,33 +519,46 @@ export default function SocialRelationshipsView() {
       </aside>
 
       {/* =========================================================================
-          SCREEN 1: HERO SECTION & SIGNATURE SOCIAL RESONANCE POD
+          SCREEN 1: HERO SECTION WITH 16:9 PANORAMIC WALLPAPER
          ========================================================================= */}
-      <section className="relative z-10 min-h-[calc(100dvh-70px)] flex items-center px-4 sm:px-8 lg:px-12 2xl:px-16 py-6 sm:py-10 select-text">
-        <div className="w-full max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
-          
-          {/* LEFT COLUMN: Luxury Editorial Headline, Actions & 4 Fluency Anchors */}
-          <div className="lg:col-span-7 flex flex-col items-start">
-            
+      <section className="relative min-h-[92vh] flex flex-col justify-center overflow-hidden pt-24 sm:pt-28 md:pt-32 pb-12 sm:pb-16 px-4 sm:px-8 lg:px-12 2xl:px-18 select-text">
+        {/* Full-Bleed 16:9 Continuous Panoramic Background with Balanced Soft Mist Overlay */}
+        <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
+          <img
+            src="/social-relationships-hero.jpg"
+            alt="Social Relationships & Reputation Mentorship Sanctuary - Cross-Generational Human Connection"
+            className="w-full h-full object-cover object-center filter saturate-[1.06] brightness-[1.01]"
+          />
+          {/* Subtle Balanced Mist Vignettes (Soft left text backing, crystal clear characters on right) */}
+          <div className="absolute inset-0 bg-gradient-to-t from-[#F0F7FA] via-[#F0F7FA]/30 to-transparent pointer-events-none" />
+          <div className="absolute inset-0 bg-gradient-to-r from-[#F0F7FA]/95 via-[#F0F7FA]/60 to-transparent pointer-events-none sm:w-[72%]" />
+          <div className="absolute inset-0 bg-gradient-to-b from-[#F0F7FA]/50 via-transparent to-transparent pointer-events-none" />
+        </div>
+
+        <div className="relative z-10 max-w-7xl mx-auto w-full flex items-center my-auto">
+          {/* LEFT: Clean Minimal Headline & Controls (Right side completely open for panoramic wallpaper) */}
+          <div className="max-w-xl xl:max-w-2xl flex flex-col items-start select-text">
             {/* Dimension Badge */}
-            <div className="inline-flex items-center gap-2 rounded-full border border-sky-900/15 bg-white/90 px-4 py-1.5 backdrop-blur-md shadow-xs mb-3 transition hover:scale-105 hover:bg-white">
+            <div className="inline-flex items-center gap-2 rounded-full border border-sky-900/15 bg-white/85 px-3.5 py-1 backdrop-blur-md shadow-xs mb-3 transition hover:scale-105 hover:bg-white">
               <span className="flex h-2 w-2 rounded-full bg-[#0284C7] animate-pulse" />
               <span className="font-mono text-xs font-bold uppercase tracking-wider text-[#0369A1]">
-                Dimension 05 &bull; SocialFluency
+                Dimension 05 &bull; Social Mastery &amp; Reputation
               </span>
             </div>
 
             {/* Main Luxury Title */}
-            <h1 className="text-3xl sm:text-5xl lg:text-[56px] font-extrabold tracking-tight text-[#082F49] leading-[1.12] font-serif">
-              Social Reputation &amp; <br />
-              Fluency<span className="text-[#0284C7]">.</span>
+            <h1 className="text-3xl sm:text-5xl lg:text-[54px] font-extrabold tracking-tight text-[#082F49] leading-[1.12] font-serif">
+              Social Relationships: <br />
+              <span className="bg-gradient-to-r from-[#0284C7] via-[#0D9488] to-[#2563EB] bg-clip-text text-transparent">
+                Connection Across Every Stage.
+              </span>
             </h1>
 
-            {/* Minimal Frosted Glass Tagline */}
-            <div className="mt-3.5 inline-flex items-center gap-2 rounded-2xl border border-sky-900/10 bg-white/85 px-4 py-2 backdrop-blur-md shadow-xs">
-              <span className="text-[#0284C7] text-sm">✦</span>
+            {/* Concise Tagline */}
+            <div className="mt-3 inline-flex items-center gap-2 rounded-2xl border border-sky-900/10 bg-white/85 px-4.5 py-2 backdrop-blur-md shadow-xs max-w-xl">
+              <span className="text-[#0284C7] text-base shrink-0">✦</span>
               <p className="text-xs sm:text-sm font-medium text-[#0C4A6E] leading-relaxed">
-                Navigate high-stakes rooms with calm presence, build unshakeable credibility, and master cultural nuance.
+                From early childhood bonding to teenage belonging, professional rooms, and elder wisdom — master authentic presence, healthy boundary poise, and cross-generational trust.
               </p>
             </div>
 
@@ -528,412 +613,126 @@ export default function SocialRelationshipsView() {
               </div>
             )}
 
-            {/* 4 Interactive Social Anchors */}
-            <div className="mt-6 w-full max-w-xl">
-              <div className="flex items-center justify-between mb-2.5">
-                <span className="font-mono text-[10px] font-bold uppercase tracking-wider text-[#0369A1] flex items-center gap-1.5">
-                  <Sparkles className="h-3.5 w-3.5 text-[#0284C7]" />
-                  <span>4 Social Fluency Anchors</span>
+            {/* ── 5 INTERACTIVE CROSS-GENERATIONAL STAGES: PROBLEMS & SOLUTIONS ── */}
+            <div className="mt-5 w-full max-w-xl">
+              <div className="flex items-center justify-between mb-2">
+                <span className="font-mono text-[10.5px] font-bold uppercase tracking-wider text-[#0284C7] flex items-center gap-1.5">
+                  <Sparkles className="h-3.5 w-3.5" />
+                  <span>Cross-Generational Dynamics &amp; Solutions</span>
                 </span>
-                <span className="text-[10px] font-mono text-slate-400">
-                  Select to recalibrate pod
+                <span className="text-[10px] font-mono text-slate-500">
+                  Select age stage to explore
                 </span>
               </div>
 
-              {/* 4 Modern Interactive Luxury Cards */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3">
-                {SOCIAL_ANCHORS.map((anchor) => {
-                  const Icon = anchor.icon;
-                  const isSelected = activeAnchor.id === anchor.id;
+              {/* Stage Pill Switcher */}
+              <div className="flex flex-wrap gap-1.5 p-1 rounded-2xl bg-white/85 border border-sky-900/10 backdrop-blur-md shadow-2xs">
+                {SOCIAL_CROSS_GEN_STAGES.map((stg, idx) => {
+                  const isActive = activeAgeStageIdx === idx;
                   return (
-                    <div
-                      key={anchor.id}
-                      onClick={() => setActiveAnchor(anchor)}
-                      role="button"
-                      tabIndex={0}
-                      aria-pressed={isSelected}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter' || e.key === ' ') setActiveAnchor(anchor);
-                      }}
-                      className={`group relative flex flex-col justify-between rounded-2xl p-3 sm:p-3.5 text-left transition-all duration-300 cursor-pointer overflow-hidden border ${
-                        isSelected
-                          ? 'bg-white shadow-[0_12px_28px_-6px_rgba(2,132,199,0.24)] -translate-y-1'
-                          : 'bg-white/85 hover:bg-white border-slate-200/80 hover:border-sky-300 hover:-translate-y-0.5 hover:shadow-md'
+                    <button
+                      key={stg.id}
+                      type="button"
+                      onClick={() => setActiveAgeStageIdx(idx)}
+                      className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all duration-200 cursor-pointer ${
+                        isActive
+                          ? 'bg-[#0284C7] text-white shadow-xs scale-102'
+                          : 'text-slate-600 hover:text-[#082F49] hover:bg-white/60'
                       }`}
-                      style={{
-                        borderColor: isSelected ? anchor.accentColor : undefined,
-                        boxShadow: isSelected ? `0 12px 28px -4px ${anchor.accentColor}35` : undefined,
-                      }}
                     >
-                      {/* Top Ambient Accent Line */}
-                      <div
-                        className="absolute top-0 left-0 right-0 h-1 transition-opacity duration-300"
-                        style={{
-                          backgroundColor: anchor.accentColor,
-                          opacity: isSelected ? 1 : 0.35,
-                        }}
-                      />
-
-                      {/* Top Row: Icon + Tag */}
-                      <div className="flex items-center justify-between mb-2 mt-0.5">
-                        <div
-                          className="flex h-8 w-8 items-center justify-center rounded-xl shadow-2xs transition-transform duration-300 group-hover:scale-110"
-                          style={{
-                            backgroundColor: isSelected ? anchor.accentColor : `${anchor.accentColor}18`,
-                            color: isSelected ? '#FFFFFF' : anchor.accentColor,
-                          }}
-                        >
-                          <Icon className="h-4 w-4" />
-                        </div>
-
-                        <span
-                          className="font-mono text-[9px] font-bold uppercase tracking-wider"
-                          style={{ color: anchor.accentColor }}
-                        >
-                          {anchor.tag.split('•')[0]?.trim()}
-                        </span>
-                      </div>
-
-                      {/* Title & Category */}
-                      <div>
-                        <h4 className="text-xs sm:text-[13px] font-bold text-[#082F49] leading-tight mb-0.5 group-hover:text-[#0284C7] transition-colors">
-                          {anchor.label}
-                        </h4>
-                        <p className="text-[10px] font-mono text-slate-500 truncate">
-                          {anchor.tag.split('•')[1]?.trim() || anchor.tag}
-                        </p>
-                      </div>
-
-                      {/* Rule Footer */}
-                      <div className="mt-2 pt-1.5 border-t border-slate-100 flex items-center justify-between text-[9px] font-medium text-slate-600">
-                        <span className="truncate italic">“{anchor.rule}”</span>
-                        {isSelected && (
-                          <span
-                            className="h-1.5 w-1.5 rounded-full shrink-0 animate-ping ml-1"
-                            style={{ backgroundColor: anchor.accentColor }}
-                          />
-                        )}
-                      </div>
-                    </div>
+                      {stg.ageGroup.split('(')[0].trim()}
+                    </button>
                   );
                 })}
               </div>
 
-              {/* Dynamic Instant Tip Box */}
-              <div
-                className="mt-3 rounded-2xl bg-white/95 border p-3.5 backdrop-blur-md shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 transition-all duration-300"
-                style={{ borderColor: `${activeAnchor.accentColor}35` }}
-              >
-                <div className="flex items-start gap-3">
-                  <div
-                    className="flex h-7 w-7 items-center justify-center rounded-xl shrink-0 mt-0.5 text-white shadow-2xs"
-                    style={{ backgroundColor: activeAnchor.accentColor }}
-                  >
-                    <Check className="h-4 w-4" />
-                  </div>
-                  <div>
-                    <p className="text-xs sm:text-[13px] text-[#0C2D3A] font-medium leading-relaxed">
-                      <strong style={{ color: activeAnchor.accentColor }}>{activeAnchor.label}:</strong> {activeAnchor.tip}
-                    </p>
-                  </div>
-                </div>
-
-                <span
-                  className="font-mono text-[10px] px-2.5 py-1 rounded-full shrink-0 font-bold border self-end sm:self-center shadow-2xs whitespace-nowrap"
-                  style={{
-                    backgroundColor: `${activeAnchor.accentColor}12`,
-                    color: activeAnchor.accentColor,
-                    borderColor: `${activeAnchor.accentColor}30`,
-                  }}
-                >
-                  Rule: {activeAnchor.rule}
-                </span>
-              </div>
-            </div>
-
-          </div>
-
-          {/* RIGHT COLUMN: Interactive Social Resonance Pod (Signature Animated Visualizer) */}
-          <div className="lg:col-span-5 flex justify-center lg:justify-end">
-            <style>{`
-              @keyframes radarSweep {
-                0% { transform: rotate(0deg); }
-                100% { transform: rotate(360deg); }
-              }
-              @keyframes radarPulseWave {
-                0% { transform: scale(0.65); opacity: 0.85; }
-                50% { opacity: 0.35; }
-                100% { transform: scale(1.35); opacity: 0; }
-              }
-              @keyframes eqBar1 { 0%, 100% { height: 4px; } 50% { height: 16px; } }
-              @keyframes eqBar2 { 0%, 100% { height: 14px; } 50% { height: 6px; } }
-              @keyframes eqBar3 { 0%, 100% { height: 8px; } 50% { height: 18px; } }
-              @keyframes eqBar4 { 0%, 100% { height: 16px; } 50% { height: 7px; } }
-            `}</style>
-
-            <div className="relative w-full max-w-[430px] rounded-3xl border border-white/95 bg-gradient-to-b from-white/95 via-white/90 to-sky-50/60 p-6 sm:p-7 backdrop-blur-2xl shadow-[0_24px_60px_-15px_rgba(2,132,199,0.18)] flex flex-col justify-between overflow-hidden">
-              
-              {/* Dynamic Ambient Background Glow */}
-              <div
-                className="absolute -top-20 -right-20 h-48 w-48 rounded-full blur-[80px] pointer-events-none transition-colors duration-700"
-                style={{ backgroundColor: `${activeAnchor.accentColor}25` }}
-              />
-
-              {/* Pod Header */}
-              <div className="flex items-center justify-between border-b border-sky-900/10 pb-3 mb-3 relative z-10">
-                <div className="flex items-center gap-2.5">
-                  <div
-                    className="flex h-8 w-8 items-center justify-center rounded-xl text-white shadow-xs transition-colors duration-300"
-                    style={{ backgroundColor: activeAnchor.accentColor }}
-                  >
-                    <Radio className="h-4 w-4 animate-pulse" />
-                  </div>
-                  <div>
-                    <span className="font-mono text-[10px] font-bold uppercase tracking-wider text-[#0284C7] block">
-                      Social Resonance Pod
-                    </span>
-                    <h3 className="text-xs sm:text-sm font-bold text-[#082F49]">
-                      Presence &amp; Poise Radar
-                    </h3>
-                  </div>
-                </div>
-
-                {/* Live Status Chip */}
-                <div
-                  className="inline-flex items-center gap-1.5 text-[10px] font-mono px-2.5 py-1 rounded-full font-bold shadow-2xs border transition-colors duration-300"
-                  style={{
-                    backgroundColor: `${activeAnchor.accentColor}14`,
-                    color: activeAnchor.accentColor,
-                    borderColor: `${activeAnchor.accentColor}30`,
-                  }}
-                >
-                  <span
-                    className={`h-1.5 w-1.5 rounded-full ${
-                      isCalibrating ? 'bg-amber-500 animate-ping' : 'bg-emerald-500'
-                    }`}
-                  />
-                  <span>
-                    {isCalibrating
-                      ? `${calibrationPhase} • ${calibratingHz}`
-                      : activeAnchor.radarLabel}
-                  </span>
-                </div>
-              </div>
-
-              {/* Center Radar Waves Visualizer (Animated Radar Grid + Sweep + Blips) */}
-              <div className="relative py-2 flex flex-col items-center justify-center text-center z-10">
-                
-                {/* Radar Circular Stage */}
-                <div
-                  className="relative w-56 h-56 sm:w-64 sm:h-64 flex items-center justify-center rounded-full border border-sky-300/40 shadow-inner overflow-hidden"
-                  style={{
-                    background:
-                      'radial-gradient(circle at center, rgba(2, 132, 199, 0.08) 0%, rgba(12, 74, 110, 0.04) 65%, transparent 100%)',
-                  }}
-                >
-                  {/* Concentric Range Rings */}
-                  <div className="absolute w-48 h-48 sm:w-56 sm:h-56 rounded-full border border-sky-400/20 pointer-events-none" />
-                  <div className="absolute w-36 h-36 sm:w-42 sm:h-42 rounded-full border border-dashed border-sky-300/30 pointer-events-none" />
-                  <div className="absolute w-24 h-24 sm:w-28 sm:h-28 rounded-full border border-sky-400/25 pointer-events-none" />
-
-                  {/* Coordinate Axes Crosshairs */}
-                  <div className="absolute h-[1px] w-full bg-gradient-to-r from-transparent via-sky-300/35 to-transparent pointer-events-none" />
-                  <div className="absolute w-[1px] h-full bg-gradient-to-b from-transparent via-sky-300/35 to-transparent pointer-events-none" />
-
-                  {/* Degree Markers */}
-                  <span className="absolute top-1 text-[7.5px] font-mono text-sky-400/60 pointer-events-none">0° N</span>
-                  <span className="absolute right-1 text-[7.5px] font-mono text-sky-400/60 pointer-events-none">90° E</span>
-                  <span className="absolute bottom-1 text-[7.5px] font-mono text-sky-400/60 pointer-events-none">180° S</span>
-                  <span className="absolute left-1 text-[7.5px] font-mono text-sky-400/60 pointer-events-none">270° W</span>
-
-                  {/* Continuous Radar Sweep Overlay */}
-                  <div
-                    className="absolute inset-0 rounded-full pointer-events-none"
-                    style={{
-                      background: `conic-gradient(from 0deg, transparent 0deg, transparent 270deg, ${activeAnchor.accentColor}06 310deg, ${activeAnchor.accentColor}40 360deg)`,
-                      animation: isCalibrating ? 'radarSweep 1.8s linear infinite' : 'radarSweep 4.2s linear infinite',
-                      transformOrigin: 'center center',
-                    }}
-                  />
-
-                  {/* Expanding Pulsing Beacon Waves */}
-                  <div
-                    className="absolute inset-0 rounded-full border pointer-events-none"
-                    style={{
-                      borderColor: activeAnchor.accentColor,
-                      animation: 'radarPulseWave 2.8s cubic-bezier(0.2, 0.8, 0.2, 1) infinite',
-                    }}
-                  />
-                  <div
-                    className="absolute inset-0 rounded-full border pointer-events-none"
-                    style={{
-                      borderColor: activeAnchor.accentColor,
-                      animation: 'radarPulseWave 2.8s cubic-bezier(0.2, 0.8, 0.2, 1) infinite',
-                      animationDelay: '1.4s',
-                    }}
-                  />
-
-                  {/* 4 Dynamic Floating Telemetry Blips */}
-                  <div className="absolute top-5 right-7 flex items-center gap-1 z-20 pointer-events-none">
-                    <span className="h-2 w-2 rounded-full bg-emerald-500 animate-ping" />
-                    <span className="text-[7.5px] font-mono font-bold text-slate-700 bg-white/90 px-1 py-0.2 rounded shadow-2xs">
-                      Cadence 99%
-                    </span>
-                  </div>
-
-                  <div className="absolute bottom-6 right-7 flex items-center gap-1 z-20 pointer-events-none">
-                    <span className="h-1.5 w-1.5 rounded-full bg-sky-500 animate-pulse" />
-                    <span className="text-[7.5px] font-mono font-bold text-slate-700 bg-white/90 px-1 py-0.2 rounded shadow-2xs">
-                      Stillness 96%
-                    </span>
-                  </div>
-
-                  <div className="absolute bottom-7 left-6 flex items-center gap-1 z-20 pointer-events-none">
-                    <span className="h-1.5 w-1.5 rounded-full bg-amber-500 animate-pulse" />
-                    <span className="text-[7.5px] font-mono font-bold text-slate-700 bg-white/90 px-1 py-0.2 rounded shadow-2xs">
-                      Attunement 98%
-                    </span>
-                  </div>
-
-                  <div className="absolute top-6 left-6 flex items-center gap-1 z-20 pointer-events-none">
-                    <span className="h-1.5 w-1.5 rounded-full bg-teal-500 animate-pulse" />
-                    <span className="text-[7.5px] font-mono font-bold text-slate-700 bg-white/90 px-1 py-0.2 rounded shadow-2xs">
-                      Sovereignty 94%
-                    </span>
-                  </div>
-
-                  {/* Center Resonance Core Disc */}
-                  <div
-                    className="relative z-20 flex h-20 w-20 sm:h-22 sm:w-22 flex-col items-center justify-center rounded-full text-white shadow-lg transition-all duration-300"
-                    style={{
-                      background: `linear-gradient(135deg, ${activeAnchor.accentColor}, #0C4A6E)`,
-                      boxShadow: `0 10px 28px ${activeAnchor.accentColor}55`,
-                    }}
-                  >
-                    {/* Animated EQ Bars inside Core */}
-                    <div className="flex items-end gap-1 h-3 mb-1">
-                      <span className="w-1 bg-white/90 rounded-full" style={{ animation: 'eqBar1 0.8s ease-in-out infinite' }} />
-                      <span className="w-1 bg-white/90 rounded-full" style={{ animation: 'eqBar2 0.7s ease-in-out infinite' }} />
-                      <span className="w-1 bg-white/90 rounded-full" style={{ animation: 'eqBar3 0.9s ease-in-out infinite' }} />
-                      <span className="w-1 bg-white/90 rounded-full" style={{ animation: 'eqBar4 0.6s ease-in-out infinite' }} />
+              {/* Active Stage Detail Card: Problem vs Solution */}
+              {(() => {
+                const currentStage = SOCIAL_CROSS_GEN_STAGES[activeAgeStageIdx];
+                return (
+                  <div className="mt-2.5 rounded-2xl bg-white/95 border border-sky-200/90 p-4 shadow-sm backdrop-blur-md transition-all duration-300">
+                    <div className="flex items-center justify-between border-b border-slate-100 pb-2 mb-2.5">
+                      <div className="flex items-center gap-2">
+                        <span className="font-mono text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-sky-100 text-[#0284C7]">
+                          {currentStage.tag}
+                        </span>
+                        <h4 className="text-xs sm:text-sm font-bold text-[#082F49]">
+                          {currentStage.ageGroup} &bull; {currentStage.roleLabel}
+                        </h4>
+                      </div>
                     </div>
 
-                    <span className="text-[8px] font-mono font-bold uppercase tracking-wider text-sky-100">
-                      {isCalibrating ? calibrationPhase : 'Core'}
-                    </span>
-                    <span className="text-sm sm:text-base font-black tracking-tight leading-none mt-0.5">
-                      {isCalibrating ? liveScore : 'Grounded'}
-                    </span>
+                    <div className="space-y-2 text-xs">
+                      {/* Problem / Bottleneck */}
+                      <div className="flex items-start gap-2 bg-rose-50/70 border border-rose-200/60 rounded-xl p-2.5">
+                        <span className="font-bold text-rose-700 shrink-0 text-[11px] bg-rose-100 px-1.5 py-0.5 rounded">
+                          Challenge
+                        </span>
+                        <p className="text-rose-900 leading-relaxed text-[11.5px]">
+                          {currentStage.challenge}
+                        </p>
+                      </div>
+
+                      {/* Mentorship Solution */}
+                      <div className="flex items-start gap-2 bg-emerald-50/70 border border-emerald-200/60 rounded-xl p-2.5">
+                        <span className="font-bold text-emerald-700 shrink-0 text-[11px] bg-emerald-100 px-1.5 py-0.5 rounded">
+                          Conscious Solution
+                        </span>
+                        <p className="text-emerald-950 leading-relaxed text-[11.5px] font-medium">
+                          {currentStage.solution}
+                        </p>
+                      </div>
+
+                      {/* Key Action */}
+                      <div className="flex items-center gap-2 pt-1 text-[11px] text-[#0C4A6E]">
+                        <span className="font-bold text-[#0284C7] shrink-0 font-mono text-[10px]">
+                          PRACTICAL ACTION &rarr;
+                        </span>
+                        <p className="italic truncate font-medium">
+                          {currentStage.action}
+                        </p>
+                      </div>
+                    </div>
                   </div>
+                );
+              })()}
 
-                </div>
-
-                {/* Practical Active Rule Display (Somatic Social Protocol) */}
-                <div
-                  className="mt-3.5 p-3 sm:p-3.5 rounded-2xl bg-white/90 border-l-4 border shadow-xs text-left w-full transition-all duration-300"
-                  style={{
-                    borderLeftColor: activeAnchor.accentColor,
-                    borderColor: `${activeAnchor.accentColor}25`,
-                  }}
-                >
-                  <div className="flex items-center justify-between mb-1">
-                    <span
-                      className="font-mono text-[9px] font-bold uppercase tracking-wider flex items-center gap-1.5"
-                      style={{ color: activeAnchor.accentColor }}
+              {/* 4 Quick Social Fluency Anchors */}
+              <div className="mt-3.5 grid grid-cols-2 sm:grid-cols-4 gap-2">
+                {SOCIAL_ANCHORS.map((anchor) => {
+                  const Icon = anchor.icon;
+                  const isSelected = activeAnchor.id === anchor.id;
+                  return (
+                    <button
+                      key={anchor.id}
+                      type="button"
+                      onClick={() => setActiveAnchor(anchor)}
+                      className={`flex items-center gap-2 p-2 rounded-xl text-left border transition-all duration-200 cursor-pointer ${
+                        isSelected
+                          ? 'bg-white border-[#0284C7] shadow-xs'
+                          : 'bg-white/70 border-slate-200/70 hover:bg-white'
+                      }`}
                     >
-                      <Zap className="h-3 w-3" />
-                      <span>Somatic Social Protocol:</span>
-                    </span>
-                    <span className="text-[8px] font-mono font-bold px-1.5 py-0.2 rounded bg-sky-100 text-[#0369A1]">
-                      ATTUNED
-                    </span>
-                  </div>
-                  <p className="text-xs font-serif italic text-[#082F49] leading-relaxed">
-                    {activeAnchor.activePhrase}
-                  </p>
-                </div>
-              </div>
-
-              {/* Scenario Quick Selector & Real-World Script Card */}
-              <div className="pt-3 border-t border-sky-900/10 relative z-10">
-                <div className="flex items-center justify-between text-[11px] mb-2 font-medium">
-                  <span className="text-[#507280] font-semibold text-[10.5px]">Real-Life Scenario:</span>
-                  <div className="flex gap-1">
-                    {SOCIAL_SCENARIOS.map((sc, i) => (
-                      <button
-                        key={sc.id}
-                        type="button"
-                        onClick={() => setActiveScenarioIdx(i)}
-                        className={`text-[9.5px] sm:text-[10px] font-bold px-2 py-0.5 rounded-lg transition-all duration-200 flex items-center gap-1 ${
-                          activeScenarioIdx === i
-                            ? 'bg-[#0284C7] text-white shadow-2xs scale-105'
-                            : 'bg-slate-100 text-[#0C2D3A] hover:bg-slate-200'
-                        }`}
+                      <div
+                        className="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg text-white"
+                        style={{ backgroundColor: anchor.accentColor }}
                       >
-                        <span>{sc.name}</span>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Scenario Context & Word-for-Word Script Card */}
-                <div className="p-3 rounded-xl bg-white border border-slate-100 shadow-2xs mb-3 text-left transition-all duration-300">
-                  <div className="flex items-center justify-between mb-1">
-                    <p className="text-[11px] font-bold text-[#082F49] leading-tight">
-                      {activeScenario.scenario}
-                    </p>
-                    <span className="font-mono text-[8.5px] text-slate-400 shrink-0 ml-1">
-                      0{activeScenarioIdx + 1}
-                    </span>
-                  </div>
-
-                  <div className="mt-1.5 p-2 rounded-lg bg-sky-50/70 border border-sky-100">
-                    <p className="text-[11px] sm:text-[11.5px] font-serif italic text-[#0369A1] leading-relaxed">
-                      {activeScenario.script}
-                    </p>
-                  </div>
-                  <p className="text-[9.5px] font-sans text-slate-500 mt-1.5 font-medium">
-                    💡 <strong className="text-slate-700">Conscious Shift:</strong> {activeScenario.shift}
-                  </p>
-                </div>
-
-                {/* Action Buttons Row */}
-                <div className="flex items-center justify-between">
-                  <Link
-                    href="/signup"
-                    className="text-[10.5px] sm:text-[11px] font-bold text-[#0284C7] hover:underline flex items-center gap-1 group"
-                  >
-                    <span>Practice in 1-on-1 Mentorship</span>
-                    <ArrowRight className="h-3 w-3 transition-transform group-hover:translate-x-0.5" />
-                  </Link>
-
-                  <button
-                    type="button"
-                    onClick={() => setIsCalibrating(!isCalibrating)}
-                    className={`inline-flex items-center gap-1.5 rounded-full px-3.5 sm:px-4 py-1.5 text-xs font-bold transition-all duration-300 shadow-xs ${
-                      isCalibrating
-                        ? 'bg-amber-100 text-amber-900 ring-2 ring-amber-400 hover:bg-amber-200 animate-pulse'
-                        : 'bg-gradient-to-r from-[#0C4A6E] to-[#0284C7] text-white hover:scale-105 active:scale-95 shadow-md'
-                    }`}
-                  >
-                    {isCalibrating ? (
-                      <>
-                        <Pause className="h-3 w-3" />
-                        <span>Attuning...</span>
-                      </>
-                    ) : (
-                      <>
-                        <Play className="h-3 w-3 fill-current" />
-                        <span>Live Calibrate</span>
-                      </>
-                    )}
-                  </button>
-                </div>
+                        <Icon className="h-3 w-3" />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-[11px] font-bold text-[#082F49] truncate leading-tight">
+                          {anchor.label}
+                        </p>
+                        <p className="text-[9px] font-mono text-slate-500 truncate">
+                          {anchor.rule}
+                        </p>
+                      </div>
+                    </button>
+                  );
+                })}
               </div>
-
             </div>
           </div>
-
         </div>
       </section>
 
@@ -1287,6 +1086,285 @@ export default function SocialRelationshipsView() {
               </div>
             </div>
           ))}
+        </div>
+      </section>
+
+      {/* =========================================================================
+          LIVE SOCIAL RESONANCE POD & REAL-LIFE SCENARIOS (At Bottom of Page)
+         ========================================================================= */}
+      <section id="resonance-radar" className="relative z-10 px-4 sm:px-8 lg:px-12 max-w-7xl mx-auto py-12 select-text">
+        <div className="flex flex-col lg:flex-row items-center justify-between gap-8 bg-white/95 rounded-3xl p-6 sm:p-10 border border-sky-200/80 shadow-md backdrop-blur-xl">
+          <div className="w-full lg:max-w-md">
+            <div className="inline-flex items-center gap-2 rounded-full border border-sky-900/10 bg-sky-50 px-3.5 py-1 text-xs font-bold text-[#0284C7] mb-2.5 font-mono">
+              ✦ Telemetry &amp; Resonance Pod
+            </div>
+            <h3 className="text-2xl sm:text-3xl font-bold text-[#082F49] font-serif mb-2.5">
+              Presence &amp; Poise Radar Lab
+            </h3>
+            <p className="text-xs sm:text-sm text-slate-600 leading-relaxed mb-4">
+              Calibrate your authentic presence and explore real-life word-for-word scripts across high-stakes social and professional rooms.
+            </p>
+          </div>
+          <div className="w-full flex justify-center lg:justify-end">
+            <div className="relative w-full max-w-[430px] rounded-3xl border border-white/95 bg-gradient-to-b from-white/95 via-white/90 to-sky-50/60 p-6 sm:p-7 backdrop-blur-2xl shadow-[0_24px_60px_-15px_rgba(2,132,199,0.18)] flex flex-col justify-between overflow-hidden">
+              {/* Dynamic Ambient Background Glow */}
+              <div
+                className="absolute -top-20 -right-20 h-48 w-48 rounded-full blur-[80px] pointer-events-none transition-colors duration-700"
+                style={{ backgroundColor: `${activeAnchor.accentColor}25` }}
+              />
+
+              {/* Pod Header */}
+              <div className="flex items-center justify-between border-b border-sky-900/10 pb-3 mb-3 relative z-10">
+                <div className="flex items-center gap-2.5">
+                  <div
+                    className="flex h-8 w-8 items-center justify-center rounded-xl text-white shadow-xs transition-colors duration-300"
+                    style={{ backgroundColor: activeAnchor.accentColor }}
+                  >
+                    <Radio className="h-4 w-4 animate-pulse" />
+                  </div>
+                  <div>
+                    <span className="font-mono text-[10px] font-bold uppercase tracking-wider text-[#0284C7] block">
+                      Social Resonance Pod
+                    </span>
+                    <h3 className="text-xs sm:text-sm font-bold text-[#082F49]">
+                      Presence &amp; Poise Radar
+                    </h3>
+                  </div>
+                </div>
+
+                {/* Live Status Chip */}
+                <div
+                  className="inline-flex items-center gap-1.5 text-[10px] font-mono px-2.5 py-1 rounded-full font-bold shadow-2xs border transition-colors duration-300"
+                  style={{
+                    backgroundColor: `${activeAnchor.accentColor}14`,
+                    color: activeAnchor.accentColor,
+                    borderColor: `${activeAnchor.accentColor}30`,
+                  }}
+                >
+                  <span
+                    className={`h-1.5 w-1.5 rounded-full ${
+                      isCalibrating ? 'bg-amber-500 animate-ping' : 'bg-emerald-500'
+                    }`}
+                  />
+                  <span>
+                    {isCalibrating
+                      ? `${calibrationPhase} • ${calibratingHz}`
+                      : activeAnchor.radarLabel}
+                  </span>
+                </div>
+              </div>
+
+              {/* Center Radar Waves Visualizer (Animated Radar Grid + Sweep + Blips) */}
+              <div className="relative py-2 flex flex-col items-center justify-center text-center z-10">
+                {/* Radar Circular Stage */}
+                <div
+                  className="relative w-56 h-56 sm:w-64 sm:h-64 flex items-center justify-center rounded-full border border-sky-300/40 shadow-inner overflow-hidden"
+                  style={{
+                    background:
+                      'radial-gradient(circle at center, rgba(2, 132, 199, 0.08) 0%, rgba(12, 74, 110, 0.04) 65%, transparent 100%)',
+                  }}
+                >
+                  {/* Concentric Range Rings */}
+                  <div className="absolute w-48 h-48 sm:w-56 sm:h-56 rounded-full border border-sky-400/20 pointer-events-none" />
+                  <div className="absolute w-36 h-36 sm:w-42 sm:h-42 rounded-full border border-dashed border-sky-300/30 pointer-events-none" />
+                  <div className="absolute w-24 h-24 sm:w-28 sm:h-28 rounded-full border border-sky-400/25 pointer-events-none" />
+
+                  {/* Coordinate Axes Crosshairs */}
+                  <div className="absolute h-[1px] w-full bg-gradient-to-r from-transparent via-sky-300/35 to-transparent pointer-events-none" />
+                  <div className="absolute w-[1px] h-full bg-gradient-to-b from-transparent via-sky-300/35 to-transparent pointer-events-none" />
+
+                  {/* Degree Markers */}
+                  <span className="absolute top-1 text-[7.5px] font-mono text-sky-400/60 pointer-events-none">0° N</span>
+                  <span className="absolute right-1 text-[7.5px] font-mono text-sky-400/60 pointer-events-none">90° E</span>
+                  <span className="absolute bottom-1 text-[7.5px] font-mono text-sky-400/60 pointer-events-none">180° S</span>
+                  <span className="absolute left-1 text-[7.5px] font-mono text-sky-400/60 pointer-events-none">270° W</span>
+
+                  {/* Continuous Radar Sweep Overlay */}
+                  <div
+                    className="absolute inset-0 rounded-full pointer-events-none"
+                    style={{
+                      background: `conic-gradient(from 0deg, transparent 0deg, transparent 270deg, ${activeAnchor.accentColor}06 310deg, ${activeAnchor.accentColor}40 360deg)`,
+                      animation: isCalibrating ? 'radarSweep 1.8s linear infinite' : 'radarSweep 4.2s linear infinite',
+                      transformOrigin: 'center center',
+                    }}
+                  />
+
+                  {/* Expanding Pulsing Beacon Waves */}
+                  <div
+                    className="absolute inset-0 rounded-full border pointer-events-none"
+                    style={{
+                      borderColor: activeAnchor.accentColor,
+                      animation: 'radarPulseWave 2.8s cubic-bezier(0.2, 0.8, 0.2, 1) infinite',
+                    }}
+                  />
+                  <div
+                    className="absolute inset-0 rounded-full border pointer-events-none"
+                    style={{
+                      borderColor: activeAnchor.accentColor,
+                      animation: 'radarPulseWave 2.8s cubic-bezier(0.2, 0.8, 0.2, 1) infinite',
+                      animationDelay: '1.4s',
+                    }}
+                  />
+
+                  {/* 4 Dynamic Floating Telemetry Blips */}
+                  <div className="absolute top-5 right-7 flex items-center gap-1 z-20 pointer-events-none">
+                    <span className="h-2 w-2 rounded-full bg-emerald-500 animate-ping" />
+                    <span className="text-[7.5px] font-mono font-bold text-slate-700 bg-white/90 px-1 py-0.2 rounded shadow-2xs">
+                      Cadence 99%
+                    </span>
+                  </div>
+
+                  <div className="absolute bottom-6 right-7 flex items-center gap-1 z-20 pointer-events-none">
+                    <span className="h-1.5 w-1.5 rounded-full bg-sky-500 animate-pulse" />
+                    <span className="text-[7.5px] font-mono font-bold text-slate-700 bg-white/90 px-1 py-0.2 rounded shadow-2xs">
+                      Stillness 96%
+                    </span>
+                  </div>
+
+                  <div className="absolute bottom-7 left-6 flex items-center gap-1 z-20 pointer-events-none">
+                    <span className="h-1.5 w-1.5 rounded-full bg-amber-500 animate-pulse" />
+                    <span className="text-[7.5px] font-mono font-bold text-slate-700 bg-white/90 px-1 py-0.2 rounded shadow-2xs">
+                      Attunement 98%
+                    </span>
+                  </div>
+
+                  <div className="absolute top-6 left-6 flex items-center gap-1 z-20 pointer-events-none">
+                    <span className="h-1.5 w-1.5 rounded-full bg-teal-500 animate-pulse" />
+                    <span className="text-[7.5px] font-mono font-bold text-slate-700 bg-white/90 px-1 py-0.2 rounded shadow-2xs">
+                      Sovereignty 94%
+                    </span>
+                  </div>
+
+                  {/* Center Resonance Core Disc */}
+                  <div
+                    className="relative z-20 flex h-20 w-20 sm:h-22 sm:w-22 flex-col items-center justify-center rounded-full text-white shadow-lg transition-all duration-300"
+                    style={{
+                      background: `linear-gradient(135deg, ${activeAnchor.accentColor}, #0C4A6E)`,
+                      boxShadow: `0 10px 28px ${activeAnchor.accentColor}55`,
+                    }}
+                  >
+                    {/* Animated EQ Bars inside Core */}
+                    <div className="flex items-end gap-1 h-3 mb-1">
+                      <span className="w-1 bg-white/90 rounded-full" style={{ animation: 'eqBar1 0.8s ease-in-out infinite' }} />
+                      <span className="w-1 bg-white/90 rounded-full" style={{ animation: 'eqBar2 0.7s ease-in-out infinite' }} />
+                      <span className="w-1 bg-white/90 rounded-full" style={{ animation: 'eqBar3 0.9s ease-in-out infinite' }} />
+                      <span className="w-1 bg-white/90 rounded-full" style={{ animation: 'eqBar4 0.6s ease-in-out infinite' }} />
+                    </div>
+
+                    <span className="text-[8px] font-mono font-bold uppercase tracking-wider text-sky-100">
+                      {isCalibrating ? calibrationPhase : 'Core'}
+                    </span>
+                    <span className="text-sm sm:text-base font-black tracking-tight leading-none mt-0.5">
+                      {isCalibrating ? liveScore : 'Grounded'}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Practical Active Rule Display (Somatic Social Protocol) */}
+                <div
+                  className="mt-3.5 p-3 sm:p-3.5 rounded-2xl bg-white/90 border-l-4 border shadow-xs text-left w-full transition-all duration-300"
+                  style={{
+                    borderLeftColor: activeAnchor.accentColor,
+                    borderColor: `${activeAnchor.accentColor}25`,
+                  }}
+                >
+                  <div className="flex items-center justify-between mb-1">
+                    <span
+                      className="font-mono text-[9px] font-bold uppercase tracking-wider flex items-center gap-1.5"
+                      style={{ color: activeAnchor.accentColor }}
+                    >
+                      <Zap className="h-3 w-3" />
+                      <span>Somatic Social Protocol:</span>
+                    </span>
+                    <span className="text-[8px] font-mono font-bold px-1.5 py-0.2 rounded bg-sky-100 text-[#0369A1]">
+                      ATTUNED
+                    </span>
+                  </div>
+
+                  <p className="text-xs font-serif italic text-[#082F49] leading-relaxed">
+                    {activeAnchor.activePhrase}
+                  </p>
+                </div>
+              </div>
+
+              {/* Scenario Quick Selector & Real-World Script Card */}
+              <div className="pt-3 border-t border-sky-900/10 relative z-10">
+                <div className="flex items-center justify-between text-[11px] mb-2 font-medium">
+                  <span className="text-[#507280] font-semibold text-[10.5px]">Real-Life Scenario:</span>
+                  <div className="flex gap-1">
+                    {SOCIAL_SCENARIOS.map((sc, i) => (
+                      <button
+                        key={sc.id}
+                        type="button"
+                        onClick={() => setActiveScenarioIdx(i)}
+                        className={`text-[9.5px] sm:text-[10px] font-bold px-2 py-0.5 rounded-lg transition-all duration-200 flex items-center gap-1 ${
+                          activeScenarioIdx === i
+                            ? 'bg-[#0284C7] text-white shadow-2xs scale-105'
+                            : 'bg-slate-100 text-[#0C2D3A] hover:bg-slate-200'
+                        }`}
+                      >
+                        <span>{sc.name}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Scenario Context & Word-for-Word Script Card */}
+                <div className="p-3 rounded-xl bg-white border border-slate-100 shadow-2xs mb-3 text-left transition-all duration-300">
+                  <div className="flex items-center justify-between mb-1">
+                    <p className="text-[11px] font-bold text-[#082F49] leading-tight">
+                      {activeScenario.scenario}
+                    </p>
+                    <span className="font-mono text-[8.5px] text-slate-400 shrink-0 ml-1">
+                      0{activeScenarioIdx + 1}
+                    </span>
+                  </div>
+
+                  <div className="mt-1.5 p-2 rounded-lg bg-sky-50/70 border border-sky-100">
+                    <p className="text-[11px] sm:text-[11.5px] font-serif italic text-[#0369A1] leading-relaxed">
+                      {activeScenario.script}
+                    </p>
+                  </div>
+                  <p className="text-[9.5px] font-sans text-slate-500 mt-1.5 font-medium">
+                    💡 <strong className="text-slate-700">Conscious Shift:</strong> {activeScenario.shift}
+                  </p>
+                </div>
+
+                {/* Action Buttons Row */}
+                <div className="flex items-center justify-between">
+                  <Link
+                    href="/signup"
+                    className="text-[10.5px] sm:text-[11px] font-bold text-[#0284C7] hover:underline flex items-center gap-1 group"
+                  >
+                    <span>Practice in 1-on-1 Mentorship</span>
+                    <ArrowRight className="h-3 w-3 transition-transform group-hover:translate-x-0.5" />
+                  </Link>
+
+                  <button
+                    type="button"
+                    onClick={() => setIsCalibrating(!isCalibrating)}
+                    className={`inline-flex items-center gap-1.5 rounded-full px-3.5 sm:px-4 py-1.5 text-xs font-bold transition-all duration-300 shadow-xs ${
+                      isCalibrating
+                        ? 'bg-amber-100 text-amber-900 ring-2 ring-amber-400 hover:bg-amber-200 animate-pulse'
+                        : 'bg-gradient-to-r from-[#0C4A6E] to-[#0284C7] text-white hover:scale-105 active:scale-95 shadow-md'
+                    }`}
+                  >
+                    {isCalibrating ? (
+                      <>
+                        <Pause className="h-3 w-3" />
+                        <span>Attuning...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Play className="h-3 w-3 fill-current" />
+                        <span>Live Calibrate</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 

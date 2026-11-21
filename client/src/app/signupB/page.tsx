@@ -2,12 +2,11 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
-import { Eye, EyeOff, Check, ArrowLeft, X } from 'lucide-react';
+import { Eye, EyeOff, Check, ArrowLeft } from 'lucide-react';
 
 export default function SignUpBPage() {
   const [mode, setMode] = useState<'signup' | 'signin'>('signup');
   const [step, setStep] = useState<1 | 2>(1);
-  const [menuOpen, setMenuOpen] = useState(false);
 
   // Step 1 Fields
   const [fullName, setFullName] = useState('');
@@ -41,7 +40,7 @@ export default function SignUpBPage() {
 
   const checkTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Clean URL
+  // Clean URL query params if any
   useEffect(() => {
     if (typeof window !== 'undefined' && window.location.search) {
       window.history.replaceState(null, '', window.location.pathname);
@@ -154,79 +153,17 @@ export default function SignUpBPage() {
     setStep(1);
   };
 
-  const handleFinalSubmit = async (e?: React.FormEvent) => {
-    if (e) e.preventDefault();
+  // Sign Up / Sign In Submission
+  const handleFinalSubmit = async () => {
     setErrorMessage('');
 
-    if (mode === 'signup') {
-      if (step === 1) {
-        handleNext();
+    if (mode === 'signin') {
+      if (!signInIdentifier.trim()) {
+        setErrorMessage('Please enter your username, email or phone number.');
         return;
       }
-
-      if (!username.trim() || username.length < 4 || !/\d/.test(username)) {
-        setErrorMessage('Username must have at least 4 characters and 1 digit.');
-        return;
-      }
-      if (usernameStatus === 'taken') {
-        setErrorMessage('This username is already taken. Please choose another.');
-        return;
-      }
-      if (!pwdHasMinLen) {
-        setErrorMessage('Password must be at least 8 characters long.');
-        return;
-      }
-      if (!pwdHasUpper || !pwdHasLower || !pwdHasDigit) {
-        setErrorMessage('Password must include uppercase, lowercase, and a number (0-9).');
-        return;
-      }
-      if (!pwdHasSpecial) {
-        setErrorMessage('Password must include at least one special character (!@#$%^&*).');
-        return;
-      }
-      if (password !== confirmPassword) {
-        setErrorMessage('Passwords do not match.');
-        return;
-      }
-
-      setIsSubmitting(true);
-      try {
-        const res = await fetch('/api/auth/signup', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            username,
-            fullName,
-            email,
-            password,
-            confirmPassword,
-            mobile,
-            dob: dobDay && dobMonth && dobYear ? `${dobDay}/${dobMonth}/${dobYear}` : '',
-            location,
-            accountType,
-          }),
-        });
-        const data = await res.json();
-        setIsSubmitting(false);
-
-        if (!data.success) {
-          setErrorMessage(data.error || 'Failed to create account.');
-          return;
-        }
-
-        setActiveUser(data.user || { username, fullName, email });
-        setUnlocked(true);
-      } catch {
-        setIsSubmitting(false);
-        setActiveUser({ username, fullName, email });
-        setUnlocked(true);
-      }
-    } else {
-      // Signin mode
-      const identifier = signInIdentifier.trim();
-      const pwd = signInPassword;
-      if (!identifier || !pwd) {
-        setErrorMessage('Please enter your username/email and password.');
+      if (!signInPassword) {
+        setErrorMessage('Please enter your password.');
         return;
       }
 
@@ -235,23 +172,88 @@ export default function SignUpBPage() {
         const res = await fetch('/api/auth/signin', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ identifier, password: pwd }),
+          body: JSON.stringify({
+            identifier: signInIdentifier.trim(),
+            password: signInPassword,
+          }),
         });
         const data = await res.json();
-        setIsSubmitting(false);
 
-        if (!data.success) {
-          setErrorMessage(data.error || 'Invalid credentials.');
-          return;
+        if (res.ok && data.success) {
+          setActiveUser(data.user);
+          setUnlocked(true);
+        } else {
+          setErrorMessage(data.error || 'Invalid credentials. Please try again.');
         }
-
-        setActiveUser(data.user || { username: identifier, email: identifier });
-        setUnlocked(true);
       } catch {
-        setIsSubmitting(false);
-        setActiveUser({ username: identifier, email: identifier });
+        setActiveUser({
+          username: signInIdentifier.trim().replace('@', ''),
+          fullName: signInIdentifier.trim(),
+        });
         setUnlocked(true);
+      } finally {
+        setIsSubmitting(false);
       }
+      return;
+    }
+
+    // Sign Up Mode Validation
+    if (!username.trim()) {
+      setErrorMessage('Please create a username.');
+      return;
+    }
+    if (usernameStatus === 'taken' || usernameStatus === 'invalid') {
+      setErrorMessage(usernameMessage || 'Please choose an available username.');
+      return;
+    }
+    if (remainingRules.length > 0) {
+      setErrorMessage('Please meet all password security requirements.');
+      return;
+    }
+    if (!pwdMatch) {
+      setErrorMessage('Passwords do not match.');
+      return;
+    }
+
+    let dob = '';
+    if (dobDay || dobMonth || dobYear) {
+      if (!dobDay || !dobMonth || !dobYear || dobYear.length !== 4) {
+        setErrorMessage('Please enter a valid complete Date of Birth (DD/MM/YYYY).');
+        return;
+      }
+      dob = `${dobYear}-${dobMonth.padStart(2, '0')}-${dobDay.padStart(2, '0')}`;
+    }
+
+    setIsSubmitting(true);
+    try {
+      const res = await fetch('/api/auth/signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          fullName: fullName.trim(),
+          email: email.trim().toLowerCase(),
+          mobile: mobile.trim() || undefined,
+          accountType,
+          username: username.trim(),
+          password,
+          location: location.trim() || undefined,
+          dob: dob || undefined,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (res.ok && data.success) {
+        setActiveUser(data.user || { username, fullName, email });
+        setUnlocked(true);
+      } else {
+        setErrorMessage(data.error || 'Failed to create account. Please try again.');
+      }
+    } catch {
+      setActiveUser({ username, fullName, email });
+      setUnlocked(true);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -259,19 +261,18 @@ export default function SignUpBPage() {
     setUnlocked(false);
     setActiveUser(null);
     setFullName('');
+    setEmail('');
+    setMobile('');
     setUsername('');
     setUsernameStatus('idle');
-    setUsernameMessage('');
-    setEmail('');
-    setSignInIdentifier('');
-    setSignInPassword('');
-    setMobile('');
     setLocation('');
     setDobDay('');
     setDobMonth('');
     setDobYear('');
     setPassword('');
     setConfirmPassword('');
+    setSignInIdentifier('');
+    setSignInPassword('');
     setErrorMessage('');
     setStep(1);
   };
@@ -286,78 +287,153 @@ export default function SignUpBPage() {
           -webkit-tap-highlight-color: transparent;
         }
 
-        /* ── Fullscreen Wallpaper Layout ── */
-        .tropical-page {
-          width: 100vw;
+        /* ── Fullscreen Page Background with Centered Card (Matches Image 2) ── */
+        .tropical-page-wrapper {
           min-height: 100vh;
+          width: 100vw;
           position: relative;
           overflow-x: hidden;
           font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-          background-color: #f7faf8;
+          background: #ebf1ec;
+          background: radial-gradient(circle at 18% 22%, #dce9e0 0%, #edf4ee 45%, #e1ebe3 100%);
           display: flex;
           align-items: center;
+          justify-content: center;
+          padding: 88px 16px 40px;
+          box-sizing: border-box;
         }
 
-        /* ── Full HD Background: Leaves on right, White on left ── */
-        .tropical-bg-img {
+        /* Ambient soft blurred light spots behind the card */
+        .tropical-ambient-glow-1 {
           position: fixed;
+          top: -100px;
+          left: -100px;
+          width: 500px;
+          height: 500px;
+          border-radius: 50%;
+          background: rgba(180, 215, 190, 0.45);
+          filter: blur(90px);
+          pointer-events: none;
+          z-index: 1;
+        }
+
+        .tropical-ambient-glow-2 {
+          position: fixed;
+          bottom: -80px;
+          right: -80px;
+          width: 480px;
+          height: 480px;
+          border-radius: 50%;
+          background: rgba(140, 185, 155, 0.35);
+          filter: blur(100px);
+          pointer-events: none;
+          z-index: 1;
+        }
+
+        /* ── THE CENTERED CARD CONTAINER (Exact match with reference Image 2) ── */
+        .tropical-card {
+          position: relative;
+          z-index: 10;
+          width: 100%;
+          max-width: 960px;
+          min-height: 590px;
+          background: #ffffff;
+          border-radius: 36px;
+          overflow: hidden;
+          box-shadow:
+            0 24px 65px -12px rgba(25, 45, 30, 0.22),
+            0 8px 24px -4px rgba(25, 45, 30, 0.08),
+            0 0 0 1px rgba(255, 255, 255, 0.9) inset;
+          display: flex;
+          align-items: stretch;
+          animation: cardFadeIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+        }
+
+        @keyframes cardFadeIn {
+          from {
+            opacity: 0;
+            transform: scale(0.98) translateY(12px);
+          }
+          to {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+          }
+        }
+
+        /* ── Tropical Leaves Background Inside the Card (Right side) ── */
+        .tropical-card-bg-img {
+          position: absolute;
           top: 0;
-          left: 0;
-          width: 100vw;
-          height: 100vh;
+          right: 0;
+          width: 100%;
+          height: 100%;
           object-fit: cover;
           object-position: right center;
           pointer-events: none;
           user-select: none;
-          z-index: 1;
+          z-index: 2;
         }
 
-        /* Subtle responsive fade on mobile so text is always 100% crisp */
-        .tropical-bg-gradient {
-          position: fixed;
+        /* Smooth gradient mask to keep the left side 100% pure crisp white */
+        .tropical-card-fade {
+          position: absolute;
           inset: 0;
-          z-index: 2;
+          z-index: 3;
           pointer-events: none;
           background: linear-gradient(
             to right,
-            rgba(255, 255, 255, 0.95) 0%,
-            rgba(255, 255, 255, 0.85) 35%,
-            rgba(255, 255, 255, 0.25) 55%,
-            rgba(255, 255, 255, 0.0) 70%
+            rgba(255, 255, 255, 1) 0%,
+            rgba(255, 255, 255, 1) 45%,
+            rgba(255, 255, 255, 0.7) 53%,
+            rgba(255, 255, 255, 0) 64%
           );
         }
 
-        @media (max-width: 820px) {
-          .tropical-bg-gradient {
-            background: rgba(255, 255, 255, 0.92);
-          }
-        }
-
-        /* ── Form Container: NO CARD BOX, spans comfortably toward green cut ── */
+        /* ── Form Section Inside the Card: Sits directly on white, stretches to green cut ── */
         .tropical-form-area {
           position: relative;
           z-index: 10;
           width: 100%;
-          max-width: 480px;
-          margin-left: clamp(24px, 9vw, 130px);
-          padding: 110px 16px 50px;
+          max-width: 440px;
+          padding: 44px 34px 44px 48px;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
           box-sizing: border-box;
         }
 
+        /* Mobile Responsive Adjustments */
         @media (max-width: 820px) {
+          .tropical-page-wrapper {
+            padding: 80px 12px 24px;
+            align-items: flex-start;
+          }
+          .tropical-card {
+            flex-direction: column;
+            min-height: auto;
+            border-radius: 28px;
+            max-width: 480px;
+          }
+          .tropical-card-bg-img {
+            position: relative;
+            height: 140px;
+            width: 100%;
+            object-position: right center;
+          }
+          .tropical-card-fade {
+            display: none;
+          }
           .tropical-form-area {
-            margin-left: auto;
-            margin-right: auto;
-            max-width: 440px;
-            padding: 100px 20px 40px;
+            max-width: 100%;
+            padding: 24px 22px 34px;
           }
         }
 
-        /* ── Title Typography (Exact match with reference image 2) ── */
+        /* ── Title Typography (Exact match with reference Image 2) ── */
         .tropical-heading {
-          font-size: clamp(28px, 3.5vw, 36px);
+          font-size: 30px;
           font-weight: 800;
-          color: #27362d;
+          color: #24352a;
           margin: 0 0 6px;
           letter-spacing: -0.6px;
           line-height: 1.15;
@@ -366,7 +442,7 @@ export default function SignUpBPage() {
         .tropical-subheading {
           font-size: 13.5px;
           color: #6c8074;
-          margin: 0 0 24px;
+          margin: 0 0 22px;
           font-weight: 500;
         }
         .tropical-subheading button {
@@ -380,7 +456,7 @@ export default function SignUpBPage() {
           text-decoration: underline;
         }
 
-        /* Step indicator */
+        /* Step indicator in signup mode */
         .tropical-step-tag {
           display: inline-flex;
           align-items: center;
@@ -393,6 +469,7 @@ export default function SignUpBPage() {
           border-radius: 9999px;
           margin-bottom: 14px;
           letter-spacing: 0.3px;
+          align-self: flex-start;
         }
 
         /* Error alert */
@@ -414,12 +491,12 @@ export default function SignUpBPage() {
           display: flex;
           flex-direction: column;
           gap: 5px;
-          margin-bottom: 14px;
+          margin-bottom: 13px;
           position: relative;
         }
 
         .tropical-label {
-          font-size: 12px;
+          font-size: 11.5px;
           font-weight: 600;
           color: #5c7265;
           letter-spacing: 0.2px;
@@ -435,30 +512,29 @@ export default function SignUpBPage() {
 
         .tropical-input {
           width: 100%;
-          height: 48px;
+          height: 46px;
           border: 1.5px solid #c7d5cd;
           border-radius: 9999px;
-          background: rgba(255, 255, 255, 0.95);
+          background: #ffffff;
           color: #1a2a20;
-          font-size: 14.5px;
+          font-size: 14px;
           font-weight: 500;
           padding: 0 20px;
           outline: none;
           transition: all 0.2s ease;
-          box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
+          box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
           font-family: inherit;
         }
 
         .tropical-input:focus {
           border-color: #2e4738;
-          background: #ffffff;
-          box-shadow: 0 0 0 3px rgba(46, 71, 56, 0.15), 0 4px 12px rgba(46, 71, 56, 0.08);
+          box-shadow: 0 0 0 3px rgba(46, 71, 56, 0.14);
         }
 
         .tropical-input::placeholder {
           color: #9cb0a4;
           font-weight: 400;
-          font-size: 13.5px;
+          font-size: 13px;
         }
 
         .tropical-input:-webkit-autofill,
@@ -514,12 +590,12 @@ export default function SignUpBPage() {
           align-items: center;
         }
         .tropical-dob-input {
-          height: 48px;
+          height: 46px;
           border: 1.5px solid #c7d5cd;
           border-radius: 9999px;
-          background: rgba(255, 255, 255, 0.95);
+          background: #ffffff;
           color: #1a2a20;
-          font-size: 14.5px;
+          font-size: 14px;
           font-weight: 600;
           text-align: center;
           outline: none;
@@ -529,19 +605,18 @@ export default function SignUpBPage() {
         }
         .tropical-dob-input:focus {
           border-color: #2e4738;
-          background: #ffffff;
-          box-shadow: 0 0 0 3px rgba(46, 71, 56, 0.15);
+          box-shadow: 0 0 0 3px rgba(46, 71, 56, 0.14);
         }
 
         /* ── Dark Forest Green Pill Button (Exact match with Image 2) ── */
         .tropical-btn {
           width: 100%;
-          height: 50px;
+          height: 48px;
           background: #32493a;
           color: #ffffff;
           border: none;
           border-radius: 9999px;
-          font-size: 15.5px;
+          font-size: 15px;
           font-weight: 700;
           cursor: pointer;
           margin-top: 8px;
@@ -569,7 +644,7 @@ export default function SignUpBPage() {
           display: flex;
           align-items: center;
           gap: 12px;
-          margin: 22px 0 16px;
+          margin: 18px 0 14px;
         }
         .tropical-divider-line {
           flex: 1;
@@ -577,7 +652,7 @@ export default function SignUpBPage() {
           background: #d4e0d9;
         }
         .tropical-divider-text {
-          font-size: 12px;
+          font-size: 11.5px;
           color: #799082;
           font-weight: 500;
           white-space: nowrap;
@@ -588,11 +663,11 @@ export default function SignUpBPage() {
           display: flex;
           justify-content: center;
           gap: 14px;
-          margin-bottom: 12px;
+          margin-bottom: 10px;
         }
         .tropical-social-icon-btn {
-          width: 48px;
-          height: 48px;
+          width: 46px;
+          height: 46px;
           border-radius: 14px;
           border: 1.5px solid #d4e0d9;
           background: #ffffff;
@@ -611,8 +686,8 @@ export default function SignUpBPage() {
 
         .tropical-forgot {
           text-align: center;
-          margin-top: 14px;
-          font-size: 13px;
+          margin-top: 10px;
+          font-size: 12.5px;
         }
         .tropical-forgot a {
           color: #557262;
@@ -636,7 +711,7 @@ export default function SignUpBPage() {
           font-weight: 700;
           cursor: pointer;
           padding: 0;
-          margin-bottom: 6px;
+          margin-bottom: 8px;
           font-family: inherit;
         }
         .tropical-back-btn:hover {
@@ -647,7 +722,7 @@ export default function SignUpBPage() {
         .tropical-success-box {
           background: rgba(255, 255, 255, 0.98);
           border-radius: 28px;
-          padding: 36px 30px;
+          padding: 36px 24px;
           text-align: center;
           box-shadow: 0 16px 40px rgba(46, 71, 56, 0.15);
           border: 1.5px solid #c7d5cd;
@@ -690,640 +765,561 @@ export default function SignUpBPage() {
         }
       `}</style>
 
-      {/* ── TOP HEADER NAVBAR (Same as Home Page) ── */}
+      {/* ── TOP HEADER NAVBAR (Independent to signupB) ── */}
       <header
-        data-chrome="true"
-        className="fixed top-0 left-0 right-0 z-50 px-4 sm:px-12 py-2.5 sm:py-5 flex items-center justify-between pointer-events-auto bg-black/30 sm:bg-transparent backdrop-blur-md sm:backdrop-blur-none border-b border-amber-500/15 sm:border-b-0 transition-all duration-500"
+        style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          padding: '14px 20px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          zIndex: 50,
+        }}
       >
-        <div className="flex items-center">
-          <Link
-            href="/"
-            aria-label="Go back to Home"
-            title="Back to Home"
-            className="mr-2 flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-amber-500/40 bg-[#16120e]/90 text-amber-200 transition hover:bg-[#2e2318] hover:text-white sm:mr-3 sm:h-10 sm:w-10 shadow-md"
-          >
-            <ArrowLeft className="h-4 w-4" />
-          </Link>
-          <Link
-            href="/"
-            className="flex items-center gap-2 text-left group cursor-pointer transition-transform hover:scale-105"
-          >
-            <img
-              src="/pranav_mahajan_transparent.png"
-              alt="Pranav Mahajan Logo"
-              className="h-10 sm:h-16 md:h-20 w-auto object-contain drop-shadow-[0_4px_20px_rgba(223,165,71,0.4)]"
-            />
-          </Link>
-        </div>
+        <Link
+          href="/"
+          className="flex items-center gap-2 group cursor-pointer"
+        >
+          <img
+            src="/pranav_mahajan_transparent.png"
+            alt="Pranav Mahajan Logo"
+            className="h-10 sm:h-14 w-auto object-contain drop-shadow-[0_4px_16px_rgba(46,71,56,0.25)] transition-transform group-hover:scale-105"
+          />
+        </Link>
 
-        <div className="flex items-center gap-2 sm:gap-3">
-          <button
-            onClick={() => setMenuOpen(!menuOpen)}
-            className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl flex flex-col items-center justify-center gap-1 cursor-pointer transition-all shadow-md bg-[#16120e]/90 hover:bg-[#221b14] border border-amber-500/30 text-white backdrop-blur-md"
-            aria-label="Toggle Navigation Menu"
-          >
-            {menuOpen ? (
-              <X className="w-5 h-5 text-amber-300" />
-            ) : (
-              <>
-                <span className="w-4 h-0.5 rounded-full bg-slate-200" />
-                <span className="w-3 h-0.5 bg-[#dfa547] rounded-full self-start ml-3.5" />
-                <span className="w-4 h-0.5 rounded-full bg-slate-200" />
-              </>
-            )}
-          </button>
-        </div>
+        <Link
+          href="/#roles"
+          className="inline-flex items-center justify-center gap-1.5 py-1.5 sm:py-2 px-3.5 sm:px-5 text-xs font-bold tracking-wide rounded-full text-emerald-900 border border-emerald-800/30 bg-white/85 hover:bg-white hover:border-emerald-700 hover:text-emerald-950 transition-all shadow-sm hover:scale-105 active:scale-95 backdrop-blur-md"
+        >
+          Go to your role
+        </Link>
       </header>
 
-      {/* ── FULLSCREEN OVERLAY MENU (Identical to Home Page) ── */}
-      {menuOpen && (
-        <div
-          data-chrome="true"
-          className="fixed inset-0 z-50 bg-[#090807]/98 backdrop-blur-2xl flex flex-col justify-between p-8 sm:p-14 animate-in fade-in duration-200 text-white"
-        >
-          <div className="flex items-center justify-between">
-            <img
-              src="/pranav_mahajan_transparent.png"
-              alt="Pranav Mahajan"
-              className="h-14 sm:h-18 w-auto object-contain drop-shadow-[0_4px_20px_rgba(223,165,71,0.4)]"
-            />
-            <button
-              onClick={() => setMenuOpen(false)}
-              className="p-2.5 rounded-xl bg-[#18130f] border border-amber-500/40 shadow-xs cursor-pointer text-amber-300 hover:text-white"
-            >
-              <X className="w-6 h-6" />
-            </button>
-          </div>
+      {/* ── FULLSCREEN WRAPPER WITH CENTERED CARD ── */}
+      <div className="tropical-page-wrapper">
+        {/* Soft background ambient blurs */}
+        <div className="tropical-ambient-glow-1" />
+        <div className="tropical-ambient-glow-2" />
 
-          <div className="max-w-md mx-auto w-full space-y-4 text-center my-auto">
-            <span className="text-xs font-mono font-bold uppercase tracking-widest text-amber-300 block mb-2">
-              Directory // Experience
-            </span>
-            <Link
-              href="/"
-              onClick={() => setMenuOpen(false)}
-              className="block w-full py-3 text-2xl sm:text-3xl font-serif-luxury font-bold text-slate-200 hover:text-[#dfa547] transition-colors"
-            >
-              01 • Welcome (Home)
-            </Link>
-            <Link
-              href="/#roles"
-              onClick={() => setMenuOpen(false)}
-              className="block w-full py-3 text-2xl sm:text-3xl font-serif-luxury font-bold text-slate-200 hover:text-[#dfa547] transition-colors"
-            >
-              02 • Choose Role
-            </Link>
-            <Link
-              href="/#contact"
-              onClick={() => setMenuOpen(false)}
-              className="block w-full py-3 text-2xl sm:text-3xl font-serif-luxury font-bold text-slate-200 hover:text-[#dfa547] transition-colors"
-            >
-              03 • Executive Desk (Contact)
-            </Link>
-            <Link
-              href="/signup"
-              onClick={() => setMenuOpen(false)}
-              className="block w-full py-2.5 text-lg font-bold text-amber-300 hover:text-amber-100 transition-colors"
-            >
-              ✦ Book Edition Sign Up
-            </Link>
-            <Link
-              href="/signupA"
-              onClick={() => setMenuOpen(false)}
-              className="block w-full py-2.5 text-lg font-bold text-amber-300 hover:text-amber-100 transition-colors"
-            >
-              ✦ Diamond Edition Sign Up
-            </Link>
-            <Link
-              href="/signupB"
-              onClick={() => setMenuOpen(false)}
-              className="block w-full py-2.5 text-lg font-bold text-emerald-400 hover:text-emerald-200 transition-colors"
-            >
-              ✦ Tropical Leaves Edition (Current)
-            </Link>
-          </div>
+        {/* ── CENTERED CARD (Exact Match with Reference Image 2) ── */}
+        <div className="tropical-card">
+          {/* TROPICAL LEAVES BACKGROUND INSIDE THE CARD */}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/tropical-bg.jpg"
+            alt="Tropical Leaves"
+            className="tropical-card-bg-img"
+          />
 
-          <div className="text-center text-xs text-slate-500 font-mono">
-            PRANAV MAHAJAN &bull; MINDFUL ARCHITECTURE
-          </div>
-        </div>
-      )}
+          {/* Dynamic White Fade Mask on Left Side */}
+          <div className="tropical-card-fade" />
 
-      {/* ── MAIN FULLSCREEN CONTAINER ── */}
-      <div className="tropical-page">
-        {/* FULL HD TROPICAL BACKGROUND IMAGE */}
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src="/tropical-bg.jpg"
-          alt="Tropical Leaves"
-          className="tropical-bg-img"
-        />
-
-        {/* Dynamic Gradient to ensure perfect legibility */}
-        <div className="tropical-bg-gradient" />
-
-        {/* ── FORM CONTENT: Sits directly on the white background, NO card box! ── */}
-        <div className="tropical-form-area">
-          {unlocked ? (
-            /* ═══ SUCCESS STATE ═══ */
-            <div className="tropical-success-box">
-              <div
-                style={{
-                  width: '68px',
-                  height: '68px',
-                  borderRadius: '50%',
-                  background: '#32493a',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  margin: '0 auto 18px',
-                  color: '#ffffff',
-                  boxShadow: '0 8px 24px rgba(50, 73, 58, 0.35)',
-                }}
-              >
-                <Check size={36} strokeWidth={2.8} />
+          {/* ── FORM CONTENT: Sits directly on the white background, NO nested card! ── */}
+          <div className="tropical-form-area">
+            {unlocked ? (
+              /* ═══ SUCCESS STATE ═══ */
+              <div className="tropical-success-box">
+                <div
+                  style={{
+                    width: '64px',
+                    height: '64px',
+                    borderRadius: '50%',
+                    background: '#32493a',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    margin: '0 auto 16px',
+                    color: '#ffffff',
+                    boxShadow: '0 8px 24px rgba(50, 73, 58, 0.35)',
+                  }}
+                >
+                  <Check size={34} strokeWidth={2.8} />
+                </div>
+                <h2 style={{ color: '#27362d', fontSize: '22px', fontWeight: 800, margin: '0 0 10px' }}>
+                  {mode === 'signup' ? 'Account Created Successfully!' : 'Welcome Back!'}
+                </h2>
+                <p style={{ color: '#557262', fontSize: '14px', lineHeight: 1.6, margin: '0 0 24px' }}>
+                  {mode === 'signup'
+                    ? `Welcome ${activeUser?.fullName || activeUser?.username || 'member'}! Your journey into intentional mastery has begun.`
+                    : `Logged in as @${activeUser?.username || activeUser?.email}.`}
+                </p>
+                <Link
+                  href="/"
+                  className="tropical-btn"
+                  style={{ textDecoration: 'none' }}
+                >
+                  Enter Sanctuary Home &rarr;
+                </Link>
+                <button
+                  type="button"
+                  onClick={handleReset}
+                  style={{
+                    background: 'transparent',
+                    border: 'none',
+                    color: '#799082',
+                    fontSize: '13px',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    padding: '12px 8px 0',
+                  }}
+                >
+                  Switch Account
+                </button>
               </div>
-              <h2 style={{ color: '#27362d', fontSize: '24px', fontWeight: 800, margin: '0 0 10px' }}>
-                {mode === 'signup' ? 'Account Created Successfully!' : 'Welcome Back!'}
-              </h2>
-              <p style={{ color: '#557262', fontSize: '14.5px', lineHeight: 1.6, margin: '0 0 26px' }}>
-                {mode === 'signup'
-                  ? `Welcome ${activeUser?.fullName || activeUser?.username || 'member'}! Your journey into intentional mastery has begun.`
-                  : `Logged in as @${activeUser?.username || activeUser?.email}.`}
-              </p>
-              <Link
-                href="/"
-                className="tropical-btn"
-                style={{ textDecoration: 'none' }}
-              >
-                Enter Sanctuary Home &rarr;
-              </Link>
-              <button
-                type="button"
-                onClick={handleReset}
-                style={{
-                  background: 'transparent',
-                  border: 'none',
-                  color: '#799082',
-                  fontSize: '13px',
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                  padding: '12px 8px 0',
-                }}
-              >
-                Switch Account
-              </button>
-            </div>
-          ) : (
-            <>
-              {/* Heading */}
-              <h1 className="tropical-heading">
-                {mode === 'signup'
-                  ? (step === 1 ? 'Create Account' : 'Complete Profile')
-                  : 'Log in'}
-              </h1>
+            ) : (
+              <>
+                {/* Heading */}
+                <h1 className="tropical-heading">
+                  {mode === 'signup'
+                    ? (step === 1 ? 'Create Account' : 'Complete Profile')
+                    : 'Log in'}
+                </h1>
 
-              {/* Subtitle / Mode Toggle */}
-              <p className="tropical-subheading">
-                {mode === 'signup' ? (
-                  <>
-                    Already have an account?{' '}
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setMode('signin');
-                        setErrorMessage('');
-                        setStep(1);
-                      }}
-                    >
-                      Log in
-                    </button>
-                  </>
-                ) : (
-                  <>
-                    Don&apos;t have an account?{' '}
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setMode('signup');
-                        setErrorMessage('');
-                        setStep(1);
-                      }}
-                    >
-                      Sign up
-                    </button>
-                  </>
-                )}
-              </p>
-
-              {/* Step indicator in signup mode */}
-              {mode === 'signup' && (
-                <div className="tropical-step-tag">
-                  <span
-                    style={{
-                      width: 6,
-                      height: 6,
-                      borderRadius: '50%',
-                      background: step === 1 ? '#32493a' : '#c7d5cd',
-                      display: 'inline-block',
-                    }}
-                  />
-                  <span
-                    style={{
-                      width: 6,
-                      height: 6,
-                      borderRadius: '50%',
-                      background: step === 2 ? '#32493a' : '#c7d5cd',
-                      display: 'inline-block',
-                    }}
-                  />
-                  <span>Step {step} of 2</span>
-                </div>
-              )}
-
-              {/* Error banner */}
-              {errorMessage && (
-                <div className="tropical-error">
-                  ⚠ {errorMessage}
-                </div>
-              )}
-
-              {/* ── FORM ── */}
-              <form
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  handleFinalSubmit();
-                }}
-              >
-                {mode === 'signup' ? (
-                  <>
-                    {/* ── STEP 1: Name, Email, Mobile, Role ── */}
-                    {step === 1 ? (
-                      <div>
-                        {/* Full Name */}
-                        <div className="tropical-field">
-                          <label className="tropical-label">Full Name</label>
-                          <input
-                            type="text"
-                            value={fullName}
-                            onChange={(e) => handleFullNameChange(e.target.value)}
-                            placeholder="e.g. Yuvraj Singh"
-                            className="tropical-input"
-                            required
-                            autoFocus
-                          />
-                        </div>
-
-                        {/* Email Address */}
-                        <div className="tropical-field">
-                          <label className="tropical-label">Email Address</label>
-                          <input
-                            type="email"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            placeholder="name@gmail.com"
-                            className="tropical-input"
-                            required
-                          />
-                        </div>
-
-                        {/* Mobile Number */}
-                        <div className="tropical-field">
-                          <label className="tropical-label">Mobile Number (10 Digits)</label>
-                          <input
-                            type="tel"
-                            value={mobile}
-                            onChange={(e) => handleMobileChange(e.target.value)}
-                            placeholder="10-digit number"
-                            maxLength={10}
-                            className="tropical-input"
-                          />
-                        </div>
-
-                        {/* Select Role */}
-                        <div className="tropical-field">
-                          <label className="tropical-label">Select Role</label>
-                          <select
-                            value={accountType}
-                            onChange={(e) => setAccountType(e.target.value)}
-                            className="tropical-input tropical-select"
-                          >
-                            <option value="Individual">Individual (Seeker)</option>
-                            <option value="Student">Student (Academic)</option>
-                            <option value="Parent">Parent (Conscious Parenting)</option>
-                            <option value="Educational Institution">Educational Institution</option>
-                            <option value="Corporate">Corporate / Business</option>
-                            <option value="Government & NGO">Government / NGO</option>
-                          </select>
-                        </div>
-
-                        {/* Continue Button */}
-                        <button
-                          type="button"
-                          onClick={handleNext}
-                          className="tropical-btn"
-                        >
-                          Continue &rarr;
-                        </button>
-                      </div>
-                    ) : (
-                      /* ── STEP 2: Username, Password, Confirm, City, DOB ── */
-                      <div>
-                        <button
-                          type="button"
-                          onClick={handleBack}
-                          className="tropical-back-btn"
-                        >
-                          <ArrowLeft size={13} strokeWidth={2.6} /> Back to Step 1
-                        </button>
-
-                        {/* Username */}
-                        <div className="tropical-field">
-                          <div className="tropical-label-row">
-                            <label className="tropical-label">Username (@handle)</label>
-                            {usernameStatus !== 'idle' && (
-                              <span
-                                style={{
-                                  fontSize: '11px',
-                                  fontWeight: 700,
-                                  color:
-                                    usernameStatus === 'available'
-                                      ? '#15803d'
-                                      : usernameStatus === 'taken'
-                                        ? '#b91c1c'
-                                        : '#b45309',
-                                  backgroundColor:
-                                    usernameStatus === 'available'
-                                      ? '#dcfce7'
-                                      : usernameStatus === 'taken'
-                                        ? '#fee2e2'
-                                        : '#fef3c7',
-                                  padding: '1px 7px',
-                                  borderRadius: '6px',
-                                  lineHeight: 1.3,
-                                }}
-                              >
-                                {usernameStatus === 'available'
-                                  ? '✓ Available'
-                                  : usernameStatus === 'taken'
-                                    ? '✕ Taken'
-                                    : usernameStatus === 'checking'
-                                      ? '...'
-                                      : usernameMessage}
-                              </span>
-                            )}
-                          </div>
-                          <input
-                            type="text"
-                            value={username}
-                            onChange={(e) => handleUsernameChange(e.target.value)}
-                            placeholder="e.g. pranav8302"
-                            className="tropical-input"
-                            required
-                            autoFocus
-                          />
-                        </div>
-
-                        {/* Create Password */}
-                        <div className="tropical-field">
-                          <label className="tropical-label">Create Password</label>
-                          <div className="tropical-input-wrapper">
-                            <input
-                              type={showPassword ? 'text' : 'password'}
-                              value={password}
-                              onChange={(e) => setPassword(e.target.value)}
-                              onFocus={() => setIsPasswordFocused(true)}
-                              onBlur={() => setTimeout(() => setIsPasswordFocused(false), 200)}
-                              placeholder="Min 8 chars with A-Z, 0-9, !@#"
-                              className="tropical-input"
-                              required
-                            />
-                            <button
-                              type="button"
-                              className="tropical-eye-btn"
-                              onClick={() => setShowPassword(!showPassword)}
-                              title={showPassword ? 'Hide password' : 'Show password'}
-                            >
-                              {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                            </button>
-                          </div>
-
-                          {/* Password Requirements Popover */}
-                          {isPasswordFocused && remainingRules.length > 0 && (
-                            <div className="tropical-pwd-popover">
-                              <div className="tropical-pwd-popover-title">
-                                <span>🔒</span> Password Requirements:
-                              </div>
-                              <ul>
-                                {remainingRules.map((r) => (
-                                  <li key={r.id}>{r.label}</li>
-                                ))}
-                              </ul>
-                            </div>
-                          )}
-                        </div>
-
-                        {/* Confirm Password */}
-                        <div className="tropical-field">
-                          <div className="tropical-label-row">
-                            <label className="tropical-label">Confirm Password</label>
-                            {confirmPassword && (
-                              <span
-                                style={{
-                                  fontSize: '11px',
-                                  fontWeight: 700,
-                                  color: pwdMatch ? '#15803d' : '#b91c1c',
-                                }}
-                              >
-                                {pwdMatch ? '✓ Matches' : '✕ No match'}
-                              </span>
-                            )}
-                          </div>
-                          <div className="tropical-input-wrapper">
-                            <input
-                              type={showConfirmPassword ? 'text' : 'password'}
-                              value={confirmPassword}
-                              onChange={(e) => setConfirmPassword(e.target.value)}
-                              placeholder="Re-enter password"
-                              className="tropical-input"
-                              required
-                            />
-                            <button
-                              type="button"
-                              className="tropical-eye-btn"
-                              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                              title={showConfirmPassword ? 'Hide password' : 'Show password'}
-                            >
-                              {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                            </button>
-                          </div>
-                        </div>
-
-                        {/* City & DOB */}
-                        <div style={{ display: 'flex', gap: '10px' }}>
-                          <div className="tropical-field" style={{ flex: '1.2' }}>
-                            <label className="tropical-label">City</label>
-                            <input
-                              type="text"
-                              value={location}
-                              onChange={(e) => setLocation(e.target.value)}
-                              placeholder="e.g. New Delhi"
-                              className="tropical-input"
-                            />
-                          </div>
-
-                          <div className="tropical-field" style={{ flex: '1.4' }}>
-                            <label className="tropical-label">Date of Birth</label>
-                            <div className="tropical-dob-row">
-                              <input
-                                type="text"
-                                value={dobDay}
-                                onChange={(e) => setDobDay(e.target.value.replace(/\D/g, '').slice(0, 2))}
-                                placeholder="DD"
-                                maxLength={2}
-                                className="tropical-dob-input"
-                                style={{ flex: 1 }}
-                              />
-                              <span style={{ color: '#9cb0a4', fontWeight: 600 }}>/</span>
-                              <input
-                                type="text"
-                                value={dobMonth}
-                                onChange={(e) => setDobMonth(e.target.value.replace(/\D/g, '').slice(0, 2))}
-                                placeholder="MM"
-                                maxLength={2}
-                                className="tropical-dob-input"
-                                style={{ flex: 1 }}
-                              />
-                              <span style={{ color: '#9cb0a4', fontWeight: 600 }}>/</span>
-                              <input
-                                type="text"
-                                value={dobYear}
-                                onChange={(e) => setDobYear(e.target.value.replace(/\D/g, '').slice(0, 4))}
-                                placeholder="YYYY"
-                                maxLength={4}
-                                className="tropical-dob-input"
-                                style={{ flex: 1.5 }}
-                              />
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Create Account Submit Button */}
-                        <button
-                          type="submit"
-                          disabled={isSubmitting}
-                          className="tropical-btn"
-                        >
-                          {isSubmitting ? 'Creating Account...' : 'Create Account →'}
-                        </button>
-                      </div>
-                    )}
-                  </>
-                ) : (
-                  /* ── SIGN IN MODE (Exact visual match with Image 2) ── */
-                  <div>
-                    {/* Identifier */}
-                    <div className="tropical-field">
-                      <label className="tropical-label">login, email or phone number</label>
-                      <input
-                        type="text"
-                        value={signInIdentifier}
-                        onChange={(e) => setSignInIdentifier(e.target.value)}
-                        placeholder="Login, email or phone"
-                        className="tropical-input"
-                        required
-                        autoFocus
-                      />
-                    </div>
-
-                    {/* Password */}
-                    <div className="tropical-field">
-                      <label className="tropical-label">Password</label>
-                      <div className="tropical-input-wrapper">
-                        <input
-                          type={showSignInPassword ? 'text' : 'password'}
-                          value={signInPassword}
-                          onChange={(e) => setSignInPassword(e.target.value)}
-                          placeholder="Password"
-                          className="tropical-input"
-                          required
-                        />
-                        <button
-                          type="button"
-                          className="tropical-eye-btn"
-                          onClick={() => setShowSignInPassword(!showSignInPassword)}
-                          title={showSignInPassword ? 'Hide password' : 'Show password'}
-                        >
-                          {showSignInPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                        </button>
-                      </div>
-                    </div>
-
-                    {/* Log In Button (Forest Green Pill) */}
-                    <button
-                      type="submit"
-                      disabled={isSubmitting}
-                      className="tropical-btn"
-                    >
-                      {isSubmitting ? 'Logging in...' : 'Log in'}
-                    </button>
-
-                    {/* Divider: or log in with */}
-                    <div className="tropical-divider">
-                      <div className="tropical-divider-line" />
-                      <span className="tropical-divider-text">or log in with</span>
-                      <div className="tropical-divider-line" />
-                    </div>
-
-                    {/* Social Logins: Google & Microsoft Icons */}
-                    <div className="tropical-social-row">
+                {/* Subtitle / Mode Toggle */}
+                <p className="tropical-subheading">
+                  {mode === 'signup' ? (
+                    <>
+                      Already have an account?{' '}
                       <button
                         type="button"
-                        className="tropical-social-icon-btn"
-                        title="Log in with Google"
+                        onClick={() => {
+                          setMode('signin');
+                          setErrorMessage('');
+                          setStep(1);
+                        }}
                       >
-                        <svg width="22" height="22" viewBox="0 0 48 48">
-                          <path
-                            fill="#EA4335"
-                            d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"
-                          />
-                          <path
-                            fill="#4285F4"
-                            d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"
-                          />
-                          <path
-                            fill="#FBBC05"
-                            d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"
-                          />
-                          <path
-                            fill="#34A853"
-                            d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"
-                          />
-                        </svg>
+                        Log in
                       </button>
+                    </>
+                  ) : (
+                    <>
+                      Don&apos;t have an account?{' '}
                       <button
                         type="button"
-                        className="tropical-social-icon-btn"
-                        title="Log in with Microsoft"
+                        onClick={() => {
+                          setMode('signup');
+                          setErrorMessage('');
+                          setStep(1);
+                        }}
                       >
-                        <svg width="20" height="20" viewBox="0 0 23 23">
-                          <rect x="1" y="1" width="10" height="10" fill="#f25022" />
-                          <rect x="12" y="1" width="10" height="10" fill="#7fba00" />
-                          <rect x="1" y="12" width="10" height="10" fill="#00a4ef" />
-                          <rect x="12" y="12" width="10" height="10" fill="#ffb900" />
-                        </svg>
+                        Sign up
                       </button>
-                    </div>
+                    </>
+                  )}
+                </p>
 
-                    {/* Forgot password */}
-                    <div className="tropical-forgot">
-                      <Link href="#">Forgot login or password?</Link>
-                    </div>
+                {/* Step indicator in signup mode */}
+                {mode === 'signup' && (
+                  <div className="tropical-step-tag">
+                    <span
+                      style={{
+                        width: 6,
+                        height: 6,
+                        borderRadius: '50%',
+                        background: step === 1 ? '#32493a' : '#c7d5cd',
+                        display: 'inline-block',
+                      }}
+                    />
+                    <span
+                      style={{
+                        width: 6,
+                        height: 6,
+                        borderRadius: '50%',
+                        background: step === 2 ? '#32493a' : '#c7d5cd',
+                        display: 'inline-block',
+                      }}
+                    />
+                    <span>Step {step} of 2</span>
                   </div>
                 )}
-              </form>
-            </>
-          )}
+
+                {/* Error banner */}
+                {errorMessage && (
+                  <div className="tropical-error">
+                    ⚠ {errorMessage}
+                  </div>
+                )}
+
+                {/* ── FORM ── */}
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    handleFinalSubmit();
+                  }}
+                >
+                  {mode === 'signup' ? (
+                    <>
+                      {/* ── STEP 1: Name, Email, Mobile, Role ── */}
+                      {step === 1 ? (
+                        <div>
+                          {/* Full Name */}
+                          <div className="tropical-field">
+                            <label className="tropical-label">Full Name</label>
+                            <input
+                              type="text"
+                              value={fullName}
+                              onChange={(e) => handleFullNameChange(e.target.value)}
+                              placeholder="e.g. Yuvraj Singh"
+                              className="tropical-input"
+                              required
+                              autoFocus
+                            />
+                          </div>
+
+                          {/* Email Address */}
+                          <div className="tropical-field">
+                            <label className="tropical-label">Email Address</label>
+                            <input
+                              type="email"
+                              value={email}
+                              onChange={(e) => setEmail(e.target.value)}
+                              placeholder="name@gmail.com"
+                              className="tropical-input"
+                              required
+                            />
+                          </div>
+
+                          {/* Mobile Number */}
+                          <div className="tropical-field">
+                            <label className="tropical-label">Mobile Number (10 Digits)</label>
+                            <input
+                              type="tel"
+                              value={mobile}
+                              onChange={(e) => handleMobileChange(e.target.value)}
+                              placeholder="10-digit number"
+                              maxLength={10}
+                              className="tropical-input"
+                            />
+                          </div>
+
+                          {/* Select Role */}
+                          <div className="tropical-field">
+                            <label className="tropical-label">Select Role</label>
+                            <select
+                              value={accountType}
+                              onChange={(e) => setAccountType(e.target.value)}
+                              className="tropical-input tropical-select"
+                            >
+                              <option value="Individual">Individual (Seeker)</option>
+                              <option value="Student">Student (Academic)</option>
+                              <option value="Parent">Parent (Conscious Parenting)</option>
+                              <option value="Educational Institution">Educational Institution</option>
+                              <option value="Corporate">Corporate / Business</option>
+                              <option value="Government & NGO">Government / NGO</option>
+                            </select>
+                          </div>
+
+                          {/* Continue Button */}
+                          <button
+                            type="button"
+                            onClick={handleNext}
+                            className="tropical-btn"
+                          >
+                            Continue &rarr;
+                          </button>
+                        </div>
+                      ) : (
+                        /* ── STEP 2: Username, Password, Confirm, City, DOB ── */
+                        <div>
+                          <button
+                            type="button"
+                            onClick={handleBack}
+                            className="tropical-back-btn"
+                          >
+                            <ArrowLeft size={13} strokeWidth={2.6} /> Back to Step 1
+                          </button>
+
+                          {/* Username */}
+                          <div className="tropical-field">
+                            <div className="tropical-label-row">
+                              <label className="tropical-label">Username (@handle)</label>
+                              {usernameStatus !== 'idle' && (
+                                <span
+                                  style={{
+                                    fontSize: '11px',
+                                    fontWeight: 700,
+                                    color:
+                                      usernameStatus === 'available'
+                                        ? '#15803d'
+                                        : usernameStatus === 'taken'
+                                          ? '#b91c1c'
+                                          : '#b45309',
+                                    backgroundColor:
+                                      usernameStatus === 'available'
+                                        ? '#dcfce7'
+                                        : usernameStatus === 'taken'
+                                          ? '#fee2e2'
+                                          : '#fef3c7',
+                                    padding: '1px 7px',
+                                    borderRadius: '6px',
+                                    lineHeight: 1.3,
+                                  }}
+                                >
+                                  {usernameStatus === 'available'
+                                    ? '✓ Available'
+                                    : usernameStatus === 'taken'
+                                      ? '✕ Taken'
+                                      : usernameStatus === 'checking'
+                                        ? '...'
+                                        : usernameMessage}
+                                </span>
+                              )}
+                            </div>
+                            <input
+                              type="text"
+                              value={username}
+                              onChange={(e) => handleUsernameChange(e.target.value)}
+                              placeholder="e.g. pranav8302"
+                              className="tropical-input"
+                              required
+                              autoFocus
+                            />
+                          </div>
+
+                          {/* Create Password */}
+                          <div className="tropical-field">
+                            <label className="tropical-label">Create Password</label>
+                            <div className="tropical-input-wrapper">
+                              <input
+                                type={showPassword ? 'text' : 'password'}
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                onFocus={() => setIsPasswordFocused(true)}
+                                onBlur={() => setTimeout(() => setIsPasswordFocused(false), 200)}
+                                placeholder="Min 8 chars with A-Z, 0-9, !@#"
+                                className="tropical-input"
+                                required
+                              />
+                              <button
+                                type="button"
+                                className="tropical-eye-btn"
+                                onClick={() => setShowPassword(!showPassword)}
+                                title={showPassword ? 'Hide password' : 'Show password'}
+                              >
+                                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                              </button>
+                            </div>
+
+                            {/* Password Requirements Popover */}
+                            {isPasswordFocused && remainingRules.length > 0 && (
+                              <div className="tropical-pwd-popover">
+                                <div className="tropical-pwd-popover-title">
+                                  <span>🔒</span> Password Requirements:
+                                </div>
+                                <ul>
+                                  {remainingRules.map((r) => (
+                                    <li key={r.id}>{r.label}</li>
+                                  ))}
+                                </ul>
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Confirm Password */}
+                          <div className="tropical-field">
+                            <div className="tropical-label-row">
+                              <label className="tropical-label">Confirm Password</label>
+                              {confirmPassword && (
+                                <span
+                                  style={{
+                                    fontSize: '11px',
+                                    fontWeight: 700,
+                                    color: pwdMatch ? '#15803d' : '#b91c1c',
+                                  }}
+                                >
+                                  {pwdMatch ? '✓ Matches' : '✕ No match'}
+                                </span>
+                              )}
+                            </div>
+                            <div className="tropical-input-wrapper">
+                              <input
+                                type={showConfirmPassword ? 'text' : 'password'}
+                                value={confirmPassword}
+                                onChange={(e) => setConfirmPassword(e.target.value)}
+                                placeholder="Re-enter password"
+                                className="tropical-input"
+                                required
+                              />
+                              <button
+                                type="button"
+                                className="tropical-eye-btn"
+                                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                title={showConfirmPassword ? 'Hide password' : 'Show password'}
+                              >
+                                {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                              </button>
+                            </div>
+                          </div>
+
+                          {/* City & DOB */}
+                          <div style={{ display: 'flex', gap: '10px' }}>
+                            <div className="tropical-field" style={{ flex: '1.2' }}>
+                              <label className="tropical-label">City</label>
+                              <input
+                                type="text"
+                                value={location}
+                                onChange={(e) => setLocation(e.target.value)}
+                                placeholder="e.g. New Delhi"
+                                className="tropical-input"
+                              />
+                            </div>
+
+                            <div className="tropical-field" style={{ flex: '1.4' }}>
+                              <label className="tropical-label">Date of Birth</label>
+                              <div className="tropical-dob-row">
+                                <input
+                                  type="text"
+                                  value={dobDay}
+                                  onChange={(e) => setDobDay(e.target.value.replace(/\D/g, '').slice(0, 2))}
+                                  placeholder="DD"
+                                  maxLength={2}
+                                  className="tropical-dob-input"
+                                  style={{ flex: 1 }}
+                                />
+                                <span style={{ color: '#9cb0a4', fontWeight: 600 }}>/</span>
+                                <input
+                                  type="text"
+                                  value={dobMonth}
+                                  onChange={(e) => setDobMonth(e.target.value.replace(/\D/g, '').slice(0, 2))}
+                                  placeholder="MM"
+                                  maxLength={2}
+                                  className="tropical-dob-input"
+                                  style={{ flex: 1 }}
+                                />
+                                <span style={{ color: '#9cb0a4', fontWeight: 600 }}>/</span>
+                                <input
+                                  type="text"
+                                  value={dobYear}
+                                  onChange={(e) => setDobYear(e.target.value.replace(/\D/g, '').slice(0, 4))}
+                                  placeholder="YYYY"
+                                  maxLength={4}
+                                  className="tropical-dob-input"
+                                  style={{ flex: 1.5 }}
+                                />
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Create Account Submit Button */}
+                          <button
+                            type="submit"
+                            disabled={isSubmitting}
+                            className="tropical-btn"
+                          >
+                            {isSubmitting ? 'Creating Account...' : 'Create Account →'}
+                          </button>
+                        </div>
+                      )}
+                    </>
+                  ) : (
+                    /* ── SIGN IN MODE (Exact visual match with Image 2) ── */
+                    <div>
+                      {/* Identifier */}
+                      <div className="tropical-field">
+                        <label className="tropical-label">login, email or phone number</label>
+                        <input
+                          type="text"
+                          value={signInIdentifier}
+                          onChange={(e) => setSignInIdentifier(e.target.value)}
+                          placeholder="Login, email or phone"
+                          className="tropical-input"
+                          required
+                          autoFocus
+                        />
+                      </div>
+
+                      {/* Password */}
+                      <div className="tropical-field">
+                        <label className="tropical-label">Password</label>
+                        <div className="tropical-input-wrapper">
+                          <input
+                            type={showSignInPassword ? 'text' : 'password'}
+                            value={signInPassword}
+                            onChange={(e) => setSignInPassword(e.target.value)}
+                            placeholder="Password"
+                            className="tropical-input"
+                            required
+                          />
+                          <button
+                            type="button"
+                            className="tropical-eye-btn"
+                            onClick={() => setShowSignInPassword(!showSignInPassword)}
+                            title={showSignInPassword ? 'Hide password' : 'Show password'}
+                          >
+                            {showSignInPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Log In Button (Forest Green Pill) */}
+                      <button
+                        type="submit"
+                        disabled={isSubmitting}
+                        className="tropical-btn"
+                      >
+                        {isSubmitting ? 'Logging in...' : 'Log in'}
+                      </button>
+
+                      {/* Divider: or log in with */}
+                      <div className="tropical-divider">
+                        <div className="tropical-divider-line" />
+                        <span className="tropical-divider-text">or log in with</span>
+                        <div className="tropical-divider-line" />
+                      </div>
+
+                      {/* Social Logins: Google & Microsoft Icons */}
+                      <div className="tropical-social-row">
+                        <button
+                          type="button"
+                          className="tropical-social-icon-btn"
+                          title="Log in with Google"
+                        >
+                          <svg width="22" height="22" viewBox="0 0 48 48">
+                            <path
+                              fill="#EA4335"
+                              d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"
+                            />
+                            <path
+                              fill="#4285F4"
+                              d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"
+                            />
+                            <path
+                              fill="#FBBC05"
+                              d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"
+                            />
+                            <path
+                              fill="#34A853"
+                              d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"
+                            />
+                          </svg>
+                        </button>
+                        <button
+                          type="button"
+                          className="tropical-social-icon-btn"
+                          title="Log in with Microsoft"
+                        >
+                          <svg width="20" height="20" viewBox="0 0 23 23">
+                            <rect x="1" y="1" width="10" height="10" fill="#f25022" />
+                            <rect x="12" y="1" width="10" height="10" fill="#7fba00" />
+                            <rect x="1" y="12" width="10" height="10" fill="#00a4ef" />
+                            <rect x="12" y="12" width="10" height="10" fill="#ffb900" />
+                          </svg>
+                        </button>
+                      </div>
+
+                      {/* Forgot password */}
+                      <div className="tropical-forgot">
+                        <Link href="#">Forgot login or password?</Link>
+                      </div>
+                    </div>
+                  )}
+                </form>
+              </>
+            )}
+          </div>
         </div>
       </div>
     </>

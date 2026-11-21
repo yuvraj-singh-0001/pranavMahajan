@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import TopicDetailView from '../components/TopicDetailView';
+import ParentingChildView from '../components/ParentingChildView';
 import { getTopicById } from '@/data/topicsData';
 
 const SLUG = 'parenting-child';
@@ -7,11 +7,11 @@ const SLUG = 'parenting-child';
 export function generateMetadata(): Metadata {
   const topic = getTopicById(SLUG);
   return {
-    title: `${topic?.title ?? 'Parenting and Child Development'} | Pranav Mahajan`,
-    description: topic?.tagline,
+    title: `Parenting and Child Development | Pranav Mahajan`,
+    description: topic?.tagline ?? 'Transform daily friction into lifelong self-trust through connection over control.',
   };
 }
 
 export default function Page() {
-  return <TopicDetailView slug={SLUG} />;
+  return <ParentingChildView />;
 }

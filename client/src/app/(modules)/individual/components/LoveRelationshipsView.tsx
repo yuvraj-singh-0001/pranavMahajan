@@ -305,7 +305,6 @@ export default function LoveRelationshipsView() {
         <div className="flex items-center gap-2 sm:gap-3">
           <Link
             href="/signup?role=individual&topic=Love%20Relationships%2C%20Marriage%20and%20Family%20Dynamics"
-            href="/signup"
             className="inline-flex items-center justify-center rounded-full border border-rose-500/50 bg-[#250810]/90 px-3.5 py-1.5 text-xs font-bold tracking-wide text-rose-200 shadow-[0_4px_16px_rgba(180,40,70,0.25)] backdrop-blur-md transition-all duration-300 hover:scale-105 hover:border-rose-400 hover:bg-[#3D0F1B] hover:text-white sm:px-5 sm:py-2"
           >
             Sign Up
@@ -391,7 +390,6 @@ export default function LoveRelationshipsView() {
           </p>
           <Link
             href="/signup?role=individual&topic=Love%20Relationships%2C%20Marriage%20and%20Family%20Dynamics"
-            href="/signup"
             onClick={() => setMenuOpen(false)}
             className="mt-4 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-full bg-[#581523] px-5 text-sm font-semibold text-white shadow-md transition hover:bg-[#721B2E]"
           >
@@ -484,7 +482,6 @@ export default function LoveRelationshipsView() {
                 {/* Primary CTA Button */}
                 <Link
                   href="/signup?role=individual&topic=Love%20Relationships%2C%20Marriage%20and%20Family%20Dynamics"
-                  href="/signup"
                   className="group inline-flex items-center gap-2.5 rounded-full bg-gradient-to-r from-[#6B1828] via-[#851E32] to-[#551320] px-6 py-2.5 text-xs sm:text-sm font-bold text-white shadow-[0_8px_25px_rgba(107,24,40,0.35)] transition-all duration-300 hover:scale-105 hover:shadow-[0_12px_32px_rgba(107,24,40,0.45)] hover:from-[#7B1B2E] hover:to-[#601524] active:scale-95"
                 >
                   <span>Start Your Journey</span>
@@ -664,7 +661,6 @@ export default function LoveRelationshipsView() {
               </button>
               <Link
                 href="/signup?role=individual&topic=Love%20Relationships%2C%20Marriage%20and%20Family%20Dynamics"
-                href="/signup"
                 onClick={() => setStepModalOpen(false)}
                 className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-[#6B1828] text-white text-xs font-bold shadow-md hover:bg-[#851E32] transition"
               >
@@ -792,7 +788,6 @@ export default function LoveRelationshipsView() {
             <div className="mt-5">
               <Link
                 href={`/signup?role=individual&topic=${encodeURIComponent('Love Relationships, Marriage and Family Dynamics')}`}
-                href="/signup"
                 className="w-full inline-flex items-center justify-center gap-2 rounded-full border border-rose-900/20 bg-white py-2.5 text-xs font-bold text-[#6B1828] transition hover:bg-rose-50"
               >
                 <span>Cultivate These 4 Pillars</span>
@@ -882,7 +877,6 @@ export default function LoveRelationshipsView() {
             <div className="mt-5">
               <Link
                 href={`/signup?role=individual&topic=${encodeURIComponent(`Love Relationships (${activeScenario.category} Focus)`)}`}
-                href="/signup"
                 className="w-full inline-flex items-center justify-center gap-2 rounded-full bg-[#6B1828] py-3 text-xs font-bold text-white shadow-md transition hover:bg-[#851E32]"
               >
                 <span>Discuss {activeScenario.category} with Pranav</span>
@@ -964,7 +958,6 @@ export default function LoveRelationshipsView() {
 
                   <Link
                     href={`/signup?role=individual&topic=${encodeURIComponent(`Love Relationships (${quizResult} Focus)`)}`}
-                    href="/signup"
                     onClick={() => setQuizOpen(false)}
                     className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-[#6B1828] text-white text-xs font-bold shadow-md hover:bg-[#851E32]"
                   >

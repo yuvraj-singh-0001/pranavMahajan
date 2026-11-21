@@ -192,11 +192,86 @@ const CRISIS_SCENARIOS = [
   },
 ];
 
+// 7 Stages of Raising a Flourishing, Successful Child (Requested by user)
+export const CHILD_SUCCESS_STAGES = [
+  {
+    id: 'soothing',
+    step: '01',
+    stage: 'Ages 0–3',
+    title: 'Somatic Safety & Co-Regulation',
+    actionText: 'Bachhe ko Samajhna (Warmth)',
+    description: 'When a toddler has a meltdown, drop to eye level with an audible calm breath. Attuning before advising builds foundational nervous system safety.',
+    pillColor: 'bg-rose-50 text-rose-700 border-rose-200',
+    accentColor: '#E11D48',
+  },
+  {
+    id: 'listening',
+    step: '02',
+    stage: 'Ages 4–6',
+    title: 'Active Empathy & Emotion Naming',
+    actionText: 'Feelings Sunna & Validate Karna',
+    description: 'Listening without interrupting, dismissing, or minimizing. Helping the child name their emotions builds lifelong emotional intelligence and trust.',
+    pillColor: 'bg-amber-50 text-amber-700 border-amber-200',
+    accentColor: '#D97706',
+  },
+  {
+    id: 'reading',
+    step: '03',
+    stage: 'Ages 7–9',
+    title: 'Curious Study & Reading Together',
+    actionText: 'Bachhe ko Padhana (Love of Study)',
+    description: 'Sitting side-by-side with an open book. Praising mechanical effort over raw marks installs a growth mindset and replaces homework dread with genuine wonder.',
+    pillColor: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+    accentColor: '#059669',
+  },
+  {
+    id: 'directing',
+    step: '04',
+    stage: 'Ages 10–12',
+    title: 'Ethical Direction & Disciplined Guidance',
+    actionText: 'Direction & Ethics Dena (Boundaries)',
+    description: 'Directing the child through sports, science, accountability, and digital hygiene. Setting firm boundaries wrapped in unwavering warmth.',
+    pillColor: 'bg-blue-50 text-blue-700 border-blue-200',
+    accentColor: '#2563EB',
+  },
+  {
+    id: 'advising',
+    step: '05',
+    stage: 'Ages 13–15',
+    title: 'Senior Advisory & Respectful Autonomy',
+    actionText: 'Teenager ko Space & Trust Dena',
+    description: 'Transitioning from micromanaging boss to trusted senior counselor. Honoring teen identity so they never feel the need to rebel in secret.',
+    pillColor: 'bg-purple-50 text-purple-700 border-purple-200',
+    accentColor: '#7C3AED',
+  },
+  {
+    id: 'mentoring',
+    step: '06',
+    stage: 'Ages 16–18',
+    title: 'Real-World Resilience & Life Vision',
+    actionText: 'Life Skills & Confidence Build Karna',
+    description: 'Preparing the child for life’s rejections and triumphs. Coaching financial discipline, independent judgment, and unwavering self-belief.',
+    pillColor: 'bg-teal-50 text-teal-700 border-teal-200',
+    accentColor: '#0D9488',
+  },
+  {
+    id: 'flourishing',
+    step: '07',
+    stage: 'Ages 18+',
+    title: 'The Flourishing, Grounded Leader',
+    actionText: 'Kamyab & Successful Human Being',
+    description: 'A confident, compassionate, highly accomplished young adult stepping into the world with inner peace, emotional strength, and true self-trust.',
+    pillColor: 'bg-amber-100 text-amber-900 border-amber-300',
+    accentColor: '#B45309',
+  },
+];
+
 export default function ParentingChildView() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [activeProblemIndex, setActiveProblemIndex] = useState(0);
   const [isPlayingAudio, setIsPlayingAudio] = useState(false);
   const [activeCrisisId, setActiveCrisisId] = useState(CRISIS_SCENARIOS[0].id);
+  const [activeStageId, setActiveStageId] = useState(CHILD_SUCCESS_STAGES[0].id);
   const [showScrollTop, setShowScrollTop] = useState(false);
 
   const scrollRootRef = useRef<HTMLDivElement>(null);
@@ -204,6 +279,10 @@ export default function ParentingChildView() {
   const activeCrisis = useMemo(
     () => CRISIS_SCENARIOS.find((c) => c.id === activeCrisisId) || CRISIS_SCENARIOS[0],
     [activeCrisisId]
+  );
+  const activeStage = useMemo(
+    () => CHILD_SUCCESS_STAGES.find((s) => s.id === activeStageId) || CHILD_SUCCESS_STAGES[0],
+    [activeStageId]
   );
 
   // Scroll to top on mount
@@ -370,83 +449,150 @@ export default function ParentingChildView() {
       </aside>
 
       {/* =========================================================================
-          SCREEN 1: HERO SECTION (First screen with clean intro, audio button, CTA)
+          SCREEN 1: HERO SECTION WITH 16:9 PANORAMIC WALLPAPER
          ========================================================================= */}
-      <section className="relative overflow-hidden pt-24 sm:pt-28 md:pt-32 pb-12 sm:pb-16 px-4 sm:px-8 lg:px-12 2xl:px-16 text-center">
-        <div className="pointer-events-none absolute -top-32 left-1/2 -translate-x-1/2 h-[450px] w-[750px] rounded-full bg-gradient-to-b from-emerald-200/35 via-amber-100/25 to-transparent blur-[120px]" />
+      <section className="relative min-h-[92vh] flex flex-col justify-center overflow-hidden pt-24 sm:pt-28 md:pt-32 pb-12 sm:pb-16 px-4 sm:px-8 lg:px-12 2xl:px-18">
+        {/* Full-Bleed 16:9 Continuous Panoramic Background with Balanced Soft Mist Overlay */}
+        <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
+          <img
+            src="/parenting-child-hero.jpg"
+            alt="Parenting & Child Development Mentorship Sanctuary - 7 Stages of Raising a Flourishing Human"
+            className="w-full h-full object-cover object-center filter saturate-[1.06] brightness-[1.01]"
+          />
+          {/* Subtle Balanced Vignettes (Soft left text backing, crystal clear characters) */}
+          <div className="absolute inset-0 bg-gradient-to-t from-[#FAF8F5] via-[#FAF8F5]/30 to-transparent pointer-events-none" />
+          <div className="absolute inset-0 bg-gradient-to-r from-[#FAF8F5]/95 via-[#FAF8F5]/55 to-transparent pointer-events-none sm:w-[72%]" />
+          <div className="absolute inset-0 bg-gradient-to-b from-[#FAF8F5]/50 via-transparent to-transparent pointer-events-none" />
+        </div>
 
-        <div className="relative z-10 max-w-4xl mx-auto">
-          {/* Dimension Badge */}
-          <div className="inline-flex items-center gap-2 rounded-full border border-emerald-900/15 bg-white/90 px-4 py-1.5 backdrop-blur-md shadow-xs mb-3">
-            <span className="flex h-2.5 w-2.5 rounded-full bg-emerald-600 animate-pulse" />
-            <span className="font-mono text-xs font-bold uppercase tracking-wider text-[#065F46]">
-              Dimension 04 &bull; Conscious Parenting Architecture
-            </span>
-          </div>
-
-          {/* Headline */}
-          <h1 className="text-3xl sm:text-5xl lg:text-[54px] font-extrabold tracking-tight leading-[1.14] font-serif text-[#122B1E]">
-            Parenting &amp; Child Development: <br />
-            <span className="bg-gradient-to-r from-[#EA384D] via-[#F97316] to-[#7C3AED] bg-clip-text text-transparent">
-              Connection Over Control.
-            </span>
-          </h1>
-
-          {/* Concise Tagline */}
-          <div className="mt-3.5 inline-flex items-center gap-2 rounded-2xl border border-emerald-900/10 bg-white/90 px-5 py-2 backdrop-blur-md shadow-xs max-w-2xl">
-            <span className="text-[#059669] text-base">✦</span>
-            <p className="text-xs sm:text-sm md:text-base font-medium text-[#254234] leading-relaxed">
-              Children do not learn from what we preach; they absorb who we are in moments of quiet pressure. Transform daily friction into lifelong self-trust.
-            </p>
-          </div>
-
-          {/* Action CTAs */}
-          <div className="mt-6 flex flex-wrap items-center justify-center gap-3.5">
-            <button
-              type="button"
-              onClick={() => setIsPlayingAudio(!isPlayingAudio)}
-              aria-label={isPlayingAudio ? 'Pause reflection' : 'Listen intro'}
-              className={`group flex items-center gap-2.5 rounded-full border border-emerald-900/15 bg-white/90 px-5 py-2.5 shadow-sm backdrop-blur-md transition-all duration-300 hover:scale-105 hover:bg-white hover:border-emerald-400 ${
-                isPlayingAudio ? 'ring-2 ring-emerald-400 bg-emerald-50' : ''
-              }`}
-            >
-              <div className="flex h-6 w-6 items-center justify-center rounded-full bg-gradient-to-tr from-[#059669] to-[#10B981] text-white shadow-xs">
-                {isPlayingAudio ? (
-                  <Pause className="h-3 w-3 animate-pulse" />
-                ) : (
-                  <Play className="h-3 w-3 fill-current ml-0.5" />
-                )}
-              </div>
-              <span className="text-xs sm:text-sm font-bold text-[#122B1E]">
-                {isPlayingAudio ? 'Playing Reflection...' : 'Listen Intro (1-Min)'}
+        <div className="relative z-10 max-w-7xl mx-auto w-full flex items-center my-auto">
+          {/* LEFT: Clean Minimal Headline & Controls (Right side completely open for panoramic wallpaper) */}
+          <div className="max-w-xl xl:max-w-2xl flex flex-col items-start select-text">
+            {/* Dimension Badge */}
+            <div className="inline-flex items-center gap-2 rounded-full border border-emerald-900/10 bg-white/85 px-3.5 py-1 backdrop-blur-md shadow-xs mb-3">
+              <span className="h-2 w-2 rounded-full bg-[#059669] animate-pulse" />
+              <span className="font-mono text-xs font-bold uppercase tracking-wider text-[#065F46]">
+                Dimension 04 &bull; Conscious Parenting Architecture
               </span>
-              <div className="flex items-center gap-0.5 ml-1">
-                <span className={`h-2.5 w-0.5 rounded-full bg-[#059669] ${isPlayingAudio ? 'animate-pulse' : 'opacity-40'}`} />
-                <span className={`h-3.5 w-0.5 rounded-full bg-[#059669] ${isPlayingAudio ? 'animate-bounce' : 'opacity-40'}`} />
-                <span className={`h-2 w-0.5 rounded-full bg-[#059669] ${isPlayingAudio ? 'animate-pulse' : 'opacity-40'}`} />
+            </div>
+
+            {/* Headline */}
+            <h1 className="text-3xl sm:text-5xl lg:text-[54px] font-extrabold tracking-tight leading-[1.12] font-serif text-[#122B1E]">
+              Parenting &amp; Child Dev: <br />
+              <span className="bg-gradient-to-r from-[#EA384D] via-[#F97316] to-[#7C3AED] bg-clip-text text-transparent">
+                Raising a Grounded, Successful Human.
+              </span>
+            </h1>
+
+            {/* Concise Tagline */}
+            <div className="mt-3 inline-flex items-center gap-2 rounded-2xl border border-emerald-900/10 bg-white/85 px-4.5 py-2 backdrop-blur-md shadow-xs max-w-xl">
+              <span className="text-[#059669] text-base shrink-0">✦</span>
+              <p className="text-xs sm:text-sm font-medium text-[#254234] leading-relaxed">
+                Children do not learn from what we preach; they absorb who we are in moments of quiet friction. Samajhna, Padhana, aur Direction dena — connection always precedes correction.
+              </p>
+            </div>
+
+            {/* Action CTAs */}
+            <div className="mt-5 flex flex-wrap items-center gap-3">
+              <button
+                type="button"
+                onClick={() => setIsPlayingAudio(!isPlayingAudio)}
+                aria-label={isPlayingAudio ? 'Pause reflection' : 'Listen intro'}
+                className={`group flex items-center gap-2.5 rounded-full border border-emerald-900/15 bg-white/90 px-4 py-2 shadow-xs backdrop-blur-md transition-all duration-300 hover:scale-105 hover:bg-white hover:border-emerald-400 ${
+                  isPlayingAudio ? 'ring-2 ring-emerald-400 bg-emerald-50' : ''
+                }`}
+              >
+                <div className="flex h-6 w-6 items-center justify-center rounded-full bg-gradient-to-tr from-[#059669] to-[#10B981] text-white shadow-xs">
+                  {isPlayingAudio ? (
+                    <Pause className="h-3 w-3 animate-pulse" />
+                  ) : (
+                    <Play className="h-3 w-3 fill-current ml-0.5" />
+                  )}
+                </div>
+                <span className="text-xs font-bold text-[#122B1E]">
+                  {isPlayingAudio ? 'Playing Reflection...' : 'Listen Intro (1-Min)'}
+                </span>
+                <div className="flex items-center gap-0.5 ml-1">
+                  <span className={`h-2.5 w-0.5 rounded-full bg-[#059669] ${isPlayingAudio ? 'animate-pulse' : 'opacity-40'}`} />
+                  <span className={`h-3.5 w-0.5 rounded-full bg-[#059669] ${isPlayingAudio ? 'animate-bounce' : 'opacity-40'}`} />
+                  <span className={`h-2 w-0.5 rounded-full bg-[#059669] ${isPlayingAudio ? 'animate-pulse' : 'opacity-40'}`} />
+                </div>
+              </button>
+
+              <a
+                href="#infographic-challenges"
+                className="group inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-[#0F382B] via-[#059669] to-[#0D9488] px-5 py-2 text-xs sm:text-sm font-bold text-white shadow-md transition-all duration-300 hover:scale-105 active:scale-95"
+              >
+                <span>Diagnostic Console</span>
+                <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
+              </a>
+            </div>
+
+            {isPlayingAudio && (
+              <div className="mt-3.5 flex items-center gap-3 rounded-2xl border border-emerald-400/40 bg-white/95 p-3 shadow-md backdrop-blur-md max-w-lg animate-in fade-in slide-in-from-top-2 text-left">
+                <Volume2 className="h-5 w-5 text-[#059669] animate-pulse shrink-0" />
+                <div className="text-xs">
+                  <p className="font-bold text-[#122B1E]">The Conscious Parent&apos;s Pause &bull; Pranav Mahajan</p>
+                  <p className="text-[#3F594D] italic text-[11px] mt-0.5">
+                    &ldquo;When your child screams, do not match the volume. Be the calm lake into which their stormy pebble falls.&rdquo;
+                  </p>
+                </div>
               </div>
-            </button>
+            )}
 
-            <a
-              href="#infographic-challenges"
-              className="group inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-[#0F382B] via-[#059669] to-[#0D9488] px-6 py-2.5 text-xs sm:text-sm font-bold text-white shadow-md transition-all duration-300 hover:scale-105 active:scale-95"
-            >
-              <span>Explore Common Challenges</span>
-              <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
-            </a>
-          </div>
+            {/* ── 7 CHARACTERS & STAGES OF RAISING A FLOURISHING CHILD ── */}
+            <div className="mt-6 w-full max-w-xl">
+              <div className="flex items-center justify-between mb-2">
+                <span className="font-mono text-[10px] font-bold uppercase tracking-wider text-[#059669]">
+                  7 Developmental Milestones &bull; Character Journey
+                </span>
+                <span className="text-[11px] font-semibold text-[#5c776a]">
+                  Step {activeStage.step} of 07
+                </span>
+              </div>
 
-          {isPlayingAudio && (
-            <div className="mt-4 mx-auto flex items-center gap-3 rounded-2xl border border-emerald-400/40 bg-white/95 p-3 shadow-md backdrop-blur-md max-w-lg animate-in fade-in slide-in-from-top-2 text-left">
-              <Volume2 className="h-5 w-5 text-[#059669] animate-pulse shrink-0" />
-              <div className="text-xs">
-                <p className="font-bold text-[#122B1E]">The Conscious Parent&apos;s Pause &bull; Pranav Mahajan</p>
-                <p className="text-[#3F594D] italic text-[11px] mt-0.5">
-                  &ldquo;When your child screams, do not match the volume. Be the calm lake into which their stormy pebble falls.&rdquo;
+              {/* Horizontal 7 Pill Tabs */}
+              <div className="flex gap-1.5 overflow-x-auto pb-1 scrollbar-none">
+                {CHILD_SUCCESS_STAGES.map((stg) => {
+                  const isCur = stg.id === activeStageId;
+                  return (
+                    <button
+                      key={stg.id}
+                      type="button"
+                      onClick={() => setActiveStageId(stg.id)}
+                      className={`px-2.5 py-1 rounded-full text-[11px] font-bold whitespace-nowrap transition-all duration-200 border cursor-pointer ${
+                        isCur
+                          ? 'bg-[#10382B] text-white border-[#10382B] shadow-xs scale-105'
+                          : 'bg-white/80 text-[#2c473a] border-emerald-900/10 hover:bg-white hover:border-emerald-600/30'
+                      }`}
+                    >
+                      {stg.step} &bull; {stg.stage}
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Active Stage Card */}
+              <div className="mt-2.5 rounded-2xl border border-emerald-900/10 bg-white/90 p-4 shadow-sm backdrop-blur-md text-left transition-all duration-300">
+                <div className="flex items-center justify-between gap-2 mb-1.5">
+                  <div className="flex items-center gap-2">
+                    <span className="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-100 text-[#059669] font-bold text-[10px]">
+                      {activeStage.step}
+                    </span>
+                    <h3 className="font-bold text-sm text-[#122B1E]">
+                      {activeStage.title}
+                    </h3>
+                  </div>
+                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${activeStage.pillColor}`}>
+                    {activeStage.actionText}
+                  </span>
+                </div>
+                <p className="text-xs text-[#3d594b] leading-relaxed">
+                  {activeStage.description}
                 </p>
               </div>
             </div>
-          )}
+          </div>
         </div>
       </section>
 

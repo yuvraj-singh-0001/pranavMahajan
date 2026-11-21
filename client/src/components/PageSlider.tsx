@@ -670,12 +670,17 @@ export default function PageSlider({ initialPersona, initialSection }: PageSlide
         </div>
 
         <div className="pointer-events-auto flex items-center gap-2 sm:gap-3">
-          <Link
-            href="/signup"
-            className="inline-flex items-center justify-center gap-1.5 py-1.5 sm:py-2 px-3.5 sm:px-5 text-xs font-bold tracking-wide rounded-full text-amber-200 border border-amber-500/50 bg-[#1e1710]/80 hover:bg-[#2e2318] hover:border-amber-400 hover:text-white transition-all shadow-[0_4px_16px_rgba(223,165,71,0.2)] hover:scale-105 active:scale-95 backdrop-blur-md"
+          <button
+            type="button"
+            onClick={() => {
+              if (current !== 1) {
+                goToSlide(1, 'forward');
+              }
+            }}
+            className="inline-flex items-center justify-center gap-1.5 py-1.5 sm:py-2 px-3.5 sm:px-5 text-xs font-bold tracking-wide rounded-full text-amber-200 border border-amber-500/50 bg-[#1e1710]/80 hover:bg-[#2e2318] hover:border-amber-400 hover:text-white transition-all shadow-[0_4px_16px_rgba(223,165,71,0.2)] hover:scale-105 active:scale-95 backdrop-blur-md cursor-pointer"
           >
-            Sign Up
-          </Link>
+            Go to your role
+          </button>
 
           <button
             onClick={() => setMenuOpen(!menuOpen)}
