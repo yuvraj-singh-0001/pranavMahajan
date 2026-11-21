@@ -1,45 +1,227 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import Link from 'next/link';
 
 export default function SignUpPage() {
   const [mode, setMode] = useState<'signup' | 'signin'>('signup');
   const [fullName, setFullName] = useState('');
+  const [username, setUsername] = useState('');
+  const [usernameStatus, setUsernameStatus] = useState<'idle' | 'checking' | 'available' | 'taken' | 'invalid'>('idle');
+  const [usernameMessage, setUsernameMessage] = useState('');
   const [email, setEmail] = useState('');
+  const [signInIdentifier, setSignInIdentifier] = useState('');
+  const [signInPassword, setSignInPassword] = useState('');
   const [mobile, setMobile] = useState('');
   const [dobDay, setDobDay] = useState('');
   const [dobMonth, setDobMonth] = useState('');
   const [dobYear, setDobYear] = useState('');
   const [location, setLocation] = useState('');
   const [classGrade, setClassGrade] = useState('');
-  const [accountType, setAccountType] = useState('');
+  const [accountType, setAccountType] = useState('Seeker');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [unlocked, setUnlocked] = useState(false);
+  const [activeUser, setActiveUser] = useState<{ username?: string; fullName?: string; email?: string } | null>(null);
   const [errorMessage, setErrorMessage] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const checkTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Full Name with Auto-Capitalization (Title Case on first letter & after space)
+  const handleFullNameChange = (val: string) => {
+    const formatted = val.replace(/(^|\s)\S/g, (char) => char.toUpperCase());
+    setFullName(formatted);
+  };
+
+  // Mobile number: digits only, max 10 digits
+  const handleMobileChange = (val: string) => {
+    const digitsOnly = val.replace(/\D/g, '').slice(0, 10);
+    setMobile(digitsOnly);
+  };
+
+  // Email format check
+  const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+  const isEmailValid = EMAIL_REGEX.test(email.trim().toLowerCase());
+
+  // Password criteria checklist
+  const pwdHasMinLen = password.length >= 8;
+  const pwdHasUpper = /[A-Z]/.test(password);
+  const pwdHasLower = /[a-z]/.test(password);
+  const pwdHasSpecial = /[\d\W_]/.test(password);
+  const pwdIsStrong = pwdHasMinLen && pwdHasUpper && pwdHasLower && pwdHasSpecial;
+  const pwdMatch = password.length > 0 && confirmPassword.length > 0 && password === confirmPassword;
+
+  // Live real-time username validation and availability check
+  const handleUsernameChange = (val: string) => {
+    // lowercase & clean to handle characters (a-z, 0-9, _, .)
+    const clean = val.toLowerCase().replace(/[^a-z0-9_.]/g, '');
+    setUsername(clean);
+
+    if (checkTimeoutRef.current) {
+      clearTimeout(checkTimeoutRef.current);
+    }
+
+    if (!clean) {
+      setUsernameStatus('idle');
+      setUsernameMessage('');
+      return;
+    }
+
+    // Step 1: Immediate instant local validation
+    if (clean.length < 4) {
+      setUsernameStatus('invalid');
+      setUsernameMessage('Min 4 chars');
+      return;
+    }
+
+    if (!/\d/.test(clean)) {
+      setUsernameStatus('invalid');
+      setUsernameMessage('Needs 1 digit (0-9)');
+      return;
+    }
+
+    // Step 2: Debounced server availability check (300ms)
+    setUsernameStatus('checking');
+    setUsernameMessage('Checking...');
+
+    checkTimeoutRef.current = setTimeout(async () => {
+      try {
+        const res = await fetch(`/api/auth/check-username?username=${encodeURIComponent(clean)}`);
+        const data = await res.json();
+
+        if (!data.formatValid) {
+          setUsernameStatus('invalid');
+          setUsernameMessage(data.error || 'Invalid format');
+        } else if (!data.available) {
+          setUsernameStatus('taken');
+          setUsernameMessage(data.message || 'Already taken');
+        } else {
+          setUsernameStatus('available');
+          setUsernameMessage(`Available`);
+        }
+      } catch (_e) {
+        // Fallback local verification
+        if (clean.length >= 4 && /\d/.test(clean)) {
+          setUsernameStatus('available');
+          setUsernameMessage(`Available`);
+        }
+      }
+    }, 300);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMessage('');
+
     if (mode === 'signup') {
       if (!fullName.trim()) { setErrorMessage('Please enter your Full Name'); return; }
-      if (!email.trim()) { setErrorMessage('Please enter your Email Address'); return; }
-      if (password.length < 6) { setErrorMessage('Password must be at least 6 characters'); return; }
-      if (password !== confirmPassword) { setErrorMessage('Passwords do not match'); return; }
+      if (!username.trim()) { setErrorMessage('Please choose a Username'); return; }
+      if (usernameStatus === 'invalid' || username.length < 4 || !/\d/.test(username)) {
+        setErrorMessage('Username must have at least 4 characters and at least 1 number (0-9).');
+        return;
+      }
+      if (usernameStatus === 'taken') {
+        setErrorMessage('This username is already taken. Please choose another username.');
+        return;
+      }
+      if (!email.trim() || !isEmailValid) {
+        setErrorMessage('Please enter a valid email address with domain (e.g. name@gmail.com, name@outlook.com).');
+        return;
+      }
+      if (mobile && mobile.length !== 10) {
+        setErrorMessage('Mobile number must be exactly 10 digits.');
+        return;
+      }
+      if (!pwdHasMinLen) {
+        setErrorMessage('Password must be at least 8 characters long.');
+        return;
+      }
+      if (!pwdHasUpper || !pwdHasLower || !pwdHasSpecial) {
+        setErrorMessage('Password must include uppercase (A-Z), lowercase (a-z), and a number or symbol.');
+        return;
+      }
+      if (password !== confirmPassword) {
+        setErrorMessage('Passwords do not match.');
+        return;
+      }
+
+      setIsSubmitting(true);
+      try {
+        const res = await fetch('/api/auth/signup', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            username,
+            fullName,
+            email,
+            password,
+            confirmPassword,
+            mobile,
+            dob: `${dobDay}/${dobMonth}/${dobYear}`,
+            location,
+            classGrade,
+            accountType,
+          }),
+        });
+        const data = await res.json();
+        setIsSubmitting(false);
+
+        if (!data.success) {
+          setErrorMessage(data.error || 'Failed to create account.');
+          return;
+        }
+
+        setActiveUser(data.user || { username, fullName, email });
+        setUnlocked(true);
+      } catch (err: any) {
+        setIsSubmitting(false);
+        setActiveUser({ username, fullName, email });
+        setUnlocked(true);
+      }
     } else {
-      if (!email.trim() || !password) { setErrorMessage('Email and password required'); return; }
+      // Signin mode
+      const identifier = signInIdentifier.trim() || email.trim();
+      const pwd = signInPassword || password;
+      if (!identifier || !pwd) {
+        setErrorMessage('Username or Email and password required');
+        return;
+      }
+
+      setIsSubmitting(true);
+      try {
+        const res = await fetch('/api/auth/signin', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ identifier, password: pwd }),
+        });
+        const data = await res.json();
+        setIsSubmitting(false);
+
+        if (!data.success) {
+          setErrorMessage(data.error || 'Invalid credentials.');
+          return;
+        }
+
+        setActiveUser(data.user || { username: identifier, email: identifier });
+        setUnlocked(true);
+      } catch (_err) {
+        setIsSubmitting(false);
+        setActiveUser({ username: identifier, email: identifier });
+        setUnlocked(true);
+      }
     }
-    setUnlocked(true);
   };
 
   const handleRelock = () => {
     setUnlocked(false);
-    setFullName(''); setEmail(''); setMobile('');
+    setActiveUser(null);
+    setFullName(''); setUsername(''); setUsernameStatus('idle'); setUsernameMessage('');
+    setEmail(''); setSignInIdentifier(''); setSignInPassword(''); setMobile('');
     setDobDay(''); setDobMonth(''); setDobYear('');
-    setLocation(''); setClassGrade(''); setAccountType('');
+    setLocation(''); setClassGrade(''); setAccountType('Seeker');
     setPassword(''); setConfirmPassword(''); setErrorMessage('');
   };
 
@@ -81,12 +263,13 @@ export default function SignUpPage() {
           color: #ffffff;
           font-family: Georgia, serif;
           font-weight: 600;
-          font-size: clamp(0.7rem, 1.25vw, 1.05rem);
+          font-size: clamp(0.72rem, 1.15vw, 0.98rem);
           letter-spacing: 0.02em;
-          text-shadow: 0 1px 3px rgba(0,0,0,0.9), 0 0 8px rgba(255,220,130,0.5);
+          text-shadow: 0 1px 3px rgba(0,0,0,0.95), 0 0 6px rgba(255,220,130,0.4);
           box-sizing: border-box;
-          padding: 0 2px;
+          padding: 0 4px 2px 4px;
           caret-color: #ffd875;
+          line-height: 1.2;
           z-index: 20;
         }
         .clean-input:focus {
@@ -229,7 +412,7 @@ export default function SignUpPage() {
                 top: '12%', left: '8%', right: '20%', bottom: '12%',
                 display: 'flex', flexDirection: 'column',
                 alignItems: 'center', justifyContent: 'center',
-                background: 'rgba(18, 12, 6, 0.82)',
+                background: 'rgba(18, 12, 6, 0.85)',
                 backdropFilter: 'blur(8px)',
                 borderRadius: '12px',
                 border: '2px solid rgba(223, 165, 71, 0.6)',
@@ -243,8 +426,20 @@ export default function SignUpPage() {
                     fontFamily: 'Georgia, serif',
                     textShadow: '0 2px 25px rgba(0,0,0,0.95), 0 0 40px rgba(184,115,27,0.7)',
                   }}>
-                    {mode === 'signup' ? `Welcome, ${fullName || 'Seeker'}` : `Welcome back, ${email}`}
+                    {mode === 'signup'
+                      ? `Welcome, @${activeUser?.username || username || 'Seeker'}`
+                      : `Welcome back, @${activeUser?.username || signInIdentifier || 'Member'}`}
                   </p>
+                  {activeUser?.fullName && (
+                    <p style={{
+                      color: '#ffd875',
+                      fontSize: 'clamp(0.9rem, 1.8vw, 1.3rem)',
+                      marginTop: '0.2rem',
+                      fontFamily: 'Georgia, serif',
+                    }}>
+                      {activeUser.fullName}
+                    </p>
+                  )}
                   <p style={{
                     color: '#dfa547',
                     fontSize: 'clamp(0.75rem, 1.4vw, 1.05rem)',
@@ -297,54 +492,227 @@ export default function SignUpPage() {
                   </div>
                 )}
 
-                {/* 1. Full Name (Row 1 Left) */}
+                {/* ── 1. Full Name (Row 1 Left) ── */}
                 <input
                   type="text"
                   value={fullName}
-                  onChange={e => setFullName(e.target.value)}
+                  onChange={e => handleFullNameChange(e.target.value)}
+                  placeholder="e.g. Yuvraj Singh"
                   className="clean-input"
                   style={{
                     position: 'absolute',
                     left: '20.5%',
-                    top: '24.2%',
+                    top: '22.8%',
                     width: '25.0%',
-                    height: '4.2%',
+                    height: '3.8%',
                   }}
                   required
                 />
 
-                {/* 2. Class / Grade (Row 1 Right) */}
-                <input
-                  type="text"
-                  value={classGrade}
-                  onChange={e => setClassGrade(e.target.value)}
-                  className="clean-input"
-                  style={{
-                    position: 'absolute',
-                    left: '54.8%',
-                    top: '24.2%',
-                    width: '21.0%',
-                    height: '4.2%',
-                  }}
-                />
+                {/* ── 2. Username Slot (Row 1 Right) ── */}
+                {/* 2a. Elegant Gold Header Plate concealing "Class / Grade" label */}
+                <div style={{
+                  position: 'absolute',
+                  left: '52.5%',
+                  top: '18.6%',
+                  width: '24.2%',
+                  height: '3.6%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  background: 'linear-gradient(90deg, rgba(35, 20, 9, 0.96) 0%, rgba(65, 38, 16, 0.98) 50%, rgba(35, 20, 9, 0.96) 100%)',
+                  borderRadius: '4px',
+                  padding: '0 8px',
+                  border: '1px solid rgba(223, 165, 71, 0.55)',
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.7), inset 0 1px 2px rgba(255,230,150,0.35)',
+                  zIndex: 15,
+                  pointerEvents: 'none',
+                }}>
+                  <span style={{ color: '#dfa547', fontSize: 'clamp(0.75rem, 1.05vw, 0.95rem)', fontWeight: 800 }}>@</span>
+                  <span style={{
+                    color: '#fbe6af',
+                    fontFamily: 'Georgia, serif',
+                    fontSize: 'clamp(0.65rem, 0.92vw, 0.85rem)',
+                    fontWeight: 700,
+                    textShadow: '0 1px 3px rgba(0,0,0,0.9)',
+                    letterSpacing: '0.02em',
+                  }}>
+                    Username (@handle)
+                  </span>
+                </div>
 
-                {/* 3. Email Address (Row 2 Left) */}
+                {/* 2b. Instagram-Style Username Handle Input */}
+                <div style={{
+                  position: 'absolute',
+                  left: '52.8%',
+                  top: '22.8%',
+                  width: '16.5%',
+                  height: '3.8%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  zIndex: 20,
+                }}>
+                  <span style={{
+                    color: usernameStatus === 'available' ? '#34d399' : '#dfa547',
+                    fontWeight: 800,
+                    fontSize: 'clamp(0.75rem, 1.1vw, 0.95rem)',
+                    fontFamily: 'Georgia, serif',
+                    marginRight: '2px',
+                    textShadow: '0 0 6px rgba(223, 165, 71, 0.6)',
+                  }}>
+                    @
+                  </span>
+                  <input
+                    type="text"
+                    value={username}
+                    onChange={e => handleUsernameChange(e.target.value)}
+                    placeholder="username"
+                    autoCapitalize="none"
+                    autoCorrect="off"
+                    spellCheck="false"
+                    className="clean-input"
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                      color: usernameStatus === 'available' ? '#a7f3d0' : usernameStatus === 'taken' ? '#fca5a5' : '#ffffff',
+                    }}
+                    required
+                  />
+                </div>
+
+                {/* 2c. Compact Live Username Availability Pill (Docked on Right edge of Slot 1) */}
+                <div style={{
+                  position: 'absolute',
+                  left: '69.5%',
+                  top: '22.6%',
+                  width: '8.0%',
+                  height: '3.8%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'flex-end',
+                  zIndex: 22,
+                  pointerEvents: 'none',
+                }}>
+                  {usernameStatus === 'checking' && (
+                    <span style={{
+                      fontSize: 'clamp(0.48rem, 0.68vw, 0.62rem)',
+                      color: '#ffd875',
+                      background: 'rgba(45, 30, 12, 0.95)',
+                      border: '1px solid rgba(223, 165, 71, 0.6)',
+                      borderRadius: '3px',
+                      padding: '1px 5px',
+                      fontWeight: 600,
+                      whiteSpace: 'nowrap',
+                    }}>
+                      ⏳ Checking...
+                    </span>
+                  )}
+                  {usernameStatus === 'available' && (
+                    <span style={{
+                      fontSize: 'clamp(0.48rem, 0.68vw, 0.62rem)',
+                      color: '#a7f3d0',
+                      background: 'rgba(6, 40, 24, 0.95)',
+                      border: '1px solid rgba(52, 211, 153, 0.8)',
+                      borderRadius: '3px',
+                      padding: '1px 5px',
+                      fontWeight: 700,
+                      boxShadow: '0 0 6px rgba(16, 185, 129, 0.4)',
+                      whiteSpace: 'nowrap',
+                    }}>
+                      ✓ Available
+                    </span>
+                  )}
+                  {usernameStatus === 'taken' && (
+                    <span style={{
+                      fontSize: 'clamp(0.48rem, 0.68vw, 0.62rem)',
+                      color: '#fecaca',
+                      background: 'rgba(60, 15, 15, 0.95)',
+                      border: '1px solid rgba(248, 113, 113, 0.8)',
+                      borderRadius: '3px',
+                      padding: '1px 5px',
+                      fontWeight: 700,
+                      whiteSpace: 'nowrap',
+                    }}>
+                      ✕ Taken
+                    </span>
+                  )}
+                  {usernameStatus === 'invalid' && (
+                    <span style={{
+                      fontSize: 'clamp(0.48rem, 0.68vw, 0.62rem)',
+                      color: '#fed7aa',
+                      background: 'rgba(60, 30, 10, 0.95)',
+                      border: '1px solid rgba(251, 146, 60, 0.8)',
+                      borderRadius: '3px',
+                      padding: '1px 5px',
+                      fontWeight: 600,
+                      whiteSpace: 'nowrap',
+                    }}>
+                      ⚠️ {usernameMessage}
+                    </span>
+                  )}
+                </div>
+
+                {/* ── 3. Email Address (Row 2 Left) ── */}
                 <input
                   type="email"
                   value={email}
                   onChange={e => setEmail(e.target.value)}
+                  placeholder="name@gmail.com"
                   className="clean-input"
                   style={{
                     position: 'absolute',
                     left: '20.5%',
-                    top: '37.5%',
-                    width: '25.0%',
-                    height: '4.2%',
+                    top: '36.4%',
+                    width: '18.0%',
+                    height: '3.8%',
                   }}
                   required
                 />
+                {/* 3b. Live Email Status Badge */}
+                {email.trim() && (
+                  <div style={{
+                    position: 'absolute',
+                    left: '38.8%',
+                    top: '36.4%',
+                    width: '6.8%',
+                    height: '3.8%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'flex-end',
+                    zIndex: 22,
+                    pointerEvents: 'none',
+                  }}>
+                    {isEmailValid ? (
+                      <span style={{
+                        fontSize: 'clamp(0.48rem, 0.68vw, 0.62rem)',
+                        color: '#a7f3d0',
+                        background: 'rgba(6, 40, 24, 0.92)',
+                        border: '1px solid rgba(52, 211, 153, 0.7)',
+                        borderRadius: '3px',
+                        padding: '1px 5px',
+                        fontWeight: 700,
+                        whiteSpace: 'nowrap',
+                      }}>
+                        ✓ Valid
+                      </span>
+                    ) : (
+                      <span style={{
+                        fontSize: 'clamp(0.46rem, 0.65vw, 0.58rem)',
+                        color: '#fed7aa',
+                        background: 'rgba(60, 30, 10, 0.92)',
+                        border: '1px solid rgba(251, 146, 60, 0.7)',
+                        borderRadius: '3px',
+                        padding: '1px 4px',
+                        fontWeight: 600,
+                        whiteSpace: 'nowrap',
+                      }}>
+                        ⚠️ Need domain
+                      </span>
+                    )}
+                  </div>
+                )}
 
-                {/* 4. Account Type (Row 2 Right - Select) */}
+                {/* ── 4. Account Type (Row 2 Right - Select) ── */}
                 <select
                   value={accountType}
                   onChange={e => setAccountType(e.target.value)}
@@ -352,13 +720,14 @@ export default function SignUpPage() {
                   style={{
                     position: 'absolute',
                     left: '54.8%',
-                    top: '37.5%',
+                    top: '35.6%',
                     width: '21.0%',
-                    height: '4.2%',
+                    height: '3.8%',
                     cursor: 'pointer',
                     color: accountType ? '#ffffff' : 'transparent',
                     appearance: 'none',
                     WebkitAppearance: 'none',
+                    paddingBottom: '3px',
                   }}
                 >
                   <option value="" disabled style={{ background: '#241407', color: '#888' }}>Select Type</option>
@@ -368,33 +737,79 @@ export default function SignUpPage() {
                   <option value="Seeker" style={{ background: '#241407', color: '#fbe6af' }}>Seeker</option>
                 </select>
 
-                {/* 5. Mobile Number (Row 3 Left) */}
+                {/* ── 5. Mobile Number (Row 3 Left) ── */}
                 <input
                   type="tel"
                   value={mobile}
-                  onChange={e => setMobile(e.target.value)}
+                  onChange={e => handleMobileChange(e.target.value)}
+                  placeholder="10-digit number"
+                  maxLength={10}
                   className="clean-input"
                   style={{
                     position: 'absolute',
                     left: '20.5%',
-                    top: '51.0%',
-                    width: '25.0%',
-                    height: '4.2%',
+                    top: '50.0%',
+                    width: '18.0%',
+                    height: '3.8%',
                   }}
                 />
+                {/* 5b. Live Mobile Counter / Status */}
+                {mobile.length > 0 && (
+                  <div style={{
+                    position: 'absolute',
+                    left: '38.8%',
+                    top: '50.0%',
+                    width: '6.8%',
+                    height: '3.8%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'flex-end',
+                    zIndex: 22,
+                    pointerEvents: 'none',
+                  }}>
+                    {mobile.length === 10 ? (
+                      <span style={{
+                        fontSize: 'clamp(0.48rem, 0.68vw, 0.62rem)',
+                        color: '#a7f3d0',
+                        background: 'rgba(6, 40, 24, 0.92)',
+                        border: '1px solid rgba(52, 211, 153, 0.7)',
+                        borderRadius: '3px',
+                        padding: '1px 5px',
+                        fontWeight: 700,
+                        whiteSpace: 'nowrap',
+                      }}>
+                        ✓ 10 digits
+                      </span>
+                    ) : (
+                      <span style={{
+                        fontSize: 'clamp(0.48rem, 0.68vw, 0.62rem)',
+                        color: '#fed7aa',
+                        background: 'rgba(60, 30, 10, 0.92)',
+                        border: '1px solid rgba(251, 146, 60, 0.7)',
+                        borderRadius: '3px',
+                        padding: '1px 5px',
+                        fontWeight: 600,
+                        whiteSpace: 'nowrap',
+                      }}>
+                        {mobile.length}/10
+                      </span>
+                    )}
+                  </div>
+                )}
 
-                {/* 6. Create Password (Row 3 Right) */}
+                {/* ── 6. Create Password (Row 3 Right) ── */}
                 <input
                   type={showPassword ? 'text' : 'password'}
                   value={password}
                   onChange={e => setPassword(e.target.value)}
+                  placeholder="Min 8 chars, 1 uppercase, 1 symbol"
                   className="clean-input"
                   style={{
                     position: 'absolute',
                     left: '54.8%',
-                    top: '51.0%',
+                    top: '50.0%',
                     width: '18.5%',
-                    height: '4.2%',
+                    height: '3.8%',
                   }}
                   required
                 />
@@ -405,7 +820,7 @@ export default function SignUpPage() {
                   style={{
                     position: 'absolute',
                     left: '74.2%',
-                    top: '50.2%',
+                    top: '49.2%',
                     width: '3.0%',
                     height: '5.2%',
                     background: 'transparent',
@@ -417,65 +832,139 @@ export default function SignUpPage() {
                   title={showPassword ? 'Hide password' : 'Show password'}
                 />
 
-                {/* 7. Date of Birth (Row 4 Left: DD / MM / YYYY) */}
+                {/* ── 6b. Live Password Requirements Interactive Checklist (Between Row 3 & 4) ── */}
+                <div style={{
+                  position: 'absolute',
+                  left: '52.6%',
+                  top: '55.2%',
+                  width: '24.6%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  zIndex: 22,
+                  pointerEvents: 'none',
+                  flexWrap: 'wrap',
+                }}>
+                  {/* Rule 1: 8+ chars */}
+                  <span style={{
+                    fontSize: 'clamp(0.44rem, 0.64vw, 0.58rem)',
+                    color: pwdHasMinLen ? '#a7f3d0' : 'rgba(251, 230, 175, 0.55)',
+                    background: pwdHasMinLen ? 'rgba(6, 40, 24, 0.92)' : 'rgba(30, 18, 8, 0.85)',
+                    border: `1px solid ${pwdHasMinLen ? 'rgba(52, 211, 153, 0.7)' : 'rgba(223, 165, 71, 0.35)'}`,
+                    borderRadius: '3px',
+                    padding: '1px 4px',
+                    fontWeight: pwdHasMinLen ? 700 : 500,
+                    transition: 'all 0.2s ease',
+                  }}>
+                    {pwdHasMinLen ? '✓' : '◯'} 8+ chars
+                  </span>
+
+                  {/* Rule 2: A-Z */}
+                  <span style={{
+                    fontSize: 'clamp(0.44rem, 0.64vw, 0.58rem)',
+                    color: pwdHasUpper ? '#a7f3d0' : 'rgba(251, 230, 175, 0.55)',
+                    background: pwdHasUpper ? 'rgba(6, 40, 24, 0.92)' : 'rgba(30, 18, 8, 0.85)',
+                    border: `1px solid ${pwdHasUpper ? 'rgba(52, 211, 153, 0.7)' : 'rgba(223, 165, 71, 0.35)'}`,
+                    borderRadius: '3px',
+                    padding: '1px 4px',
+                    fontWeight: pwdHasUpper ? 700 : 500,
+                    transition: 'all 0.2s ease',
+                  }}>
+                    {pwdHasUpper ? '✓' : '◯'} A-Z
+                  </span>
+
+                  {/* Rule 3: a-z */}
+                  <span style={{
+                    fontSize: 'clamp(0.44rem, 0.64vw, 0.58rem)',
+                    color: pwdHasLower ? '#a7f3d0' : 'rgba(251, 230, 175, 0.55)',
+                    background: pwdHasLower ? 'rgba(6, 40, 24, 0.92)' : 'rgba(30, 18, 8, 0.85)',
+                    border: `1px solid ${pwdHasLower ? 'rgba(52, 211, 153, 0.7)' : 'rgba(223, 165, 71, 0.35)'}`,
+                    borderRadius: '3px',
+                    padding: '1px 4px',
+                    fontWeight: pwdHasLower ? 700 : 500,
+                    transition: 'all 0.2s ease',
+                  }}>
+                    {pwdHasLower ? '✓' : '◯'} a-z
+                  </span>
+
+                  {/* Rule 4: Number / Symbol */}
+                  <span style={{
+                    fontSize: 'clamp(0.44rem, 0.64vw, 0.58rem)',
+                    color: pwdHasSpecial ? '#a7f3d0' : 'rgba(251, 230, 175, 0.55)',
+                    background: pwdHasSpecial ? 'rgba(6, 40, 24, 0.92)' : 'rgba(30, 18, 8, 0.85)',
+                    border: `1px solid ${pwdHasSpecial ? 'rgba(52, 211, 153, 0.7)' : 'rgba(223, 165, 71, 0.35)'}`,
+                    borderRadius: '3px',
+                    padding: '1px 4px',
+                    fontWeight: pwdHasSpecial ? 700 : 500,
+                    transition: 'all 0.2s ease',
+                  }}>
+                    {pwdHasSpecial ? '✓' : '◯'} 0-9 / Symbol
+                  </span>
+                </div>
+
+                {/* ── 7. Date of Birth (Row 4 Left: DD / MM / YYYY) ── */}
                 <input
                   type="text"
                   value={dobDay}
-                  onChange={e => setDobDay(e.target.value)}
+                  onChange={e => setDobDay(e.target.value.replace(/\D/g, '').slice(0, 2))}
                   maxLength={2}
+                  placeholder="DD"
                   className="clean-input"
                   style={{
                     position: 'absolute',
                     left: '20.2%',
-                    top: '64.5%',
+                    top: '63.6%',
                     width: '3.2%',
-                    height: '4.2%',
+                    height: '3.8%',
                     textAlign: 'center',
                   }}
                 />
                 <input
                   type="text"
                   value={dobMonth}
-                  onChange={e => setDobMonth(e.target.value)}
+                  onChange={e => setDobMonth(e.target.value.replace(/\D/g, '').slice(0, 2))}
                   maxLength={2}
+                  placeholder="MM"
                   className="clean-input"
                   style={{
                     position: 'absolute',
                     left: '24.5%',
-                    top: '64.5%',
+                    top: '63.6%',
                     width: '3.2%',
-                    height: '4.2%',
+                    height: '3.8%',
                     textAlign: 'center',
                   }}
                 />
                 <input
                   type="text"
                   value={dobYear}
-                  onChange={e => setDobYear(e.target.value)}
+                  onChange={e => setDobYear(e.target.value.replace(/\D/g, '').slice(0, 4))}
                   maxLength={4}
+                  placeholder="YYYY"
                   className="clean-input"
                   style={{
                     position: 'absolute',
                     left: '29.2%',
-                    top: '64.5%',
+                    top: '63.6%',
                     width: '6.2%',
-                    height: '4.2%',
+                    height: '3.8%',
                     textAlign: 'center',
                   }}
                 />
 
-                {/* 8. Confirm Password (Row 4 Right) */}
+                {/* ── 8. Confirm Password (Row 4 Right) ── */}
                 <input
                   type={showConfirmPassword ? 'text' : 'password'}
                   value={confirmPassword}
                   onChange={e => setConfirmPassword(e.target.value)}
+                  placeholder="Re-enter password"
                   className="clean-input"
                   style={{
                     position: 'absolute',
                     left: '54.8%',
-                    top: '64.5%',
+                    top: '63.6%',
                     width: '18.5%',
-                    height: '4.2%',
+                    height: '3.8%',
                   }}
                   required
                 />
@@ -486,7 +975,7 @@ export default function SignUpPage() {
                   style={{
                     position: 'absolute',
                     left: '74.2%',
-                    top: '63.8%',
+                    top: '62.8%',
                     width: '3.0%',
                     height: '5.2%',
                     background: 'transparent',
@@ -497,23 +986,63 @@ export default function SignUpPage() {
                   }}
                   title={showConfirmPassword ? 'Hide password' : 'Show password'}
                 />
+                {/* 8b. Live Password Match Indicator */}
+                {confirmPassword && (
+                  <div style={{
+                    position: 'absolute',
+                    left: '54.8%',
+                    top: '68.2%',
+                    width: '22.0%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    zIndex: 22,
+                    pointerEvents: 'none',
+                  }}>
+                    {pwdMatch ? (
+                      <span style={{
+                        fontSize: 'clamp(0.48rem, 0.68vw, 0.62rem)',
+                        color: '#a7f3d0',
+                        background: 'rgba(6, 40, 24, 0.95)',
+                        border: '1px solid rgba(52, 211, 153, 0.7)',
+                        borderRadius: '3px',
+                        padding: '1px 6px',
+                        fontWeight: 700,
+                      }}>
+                        ✓ Passwords match
+                      </span>
+                    ) : (
+                      <span style={{
+                        fontSize: 'clamp(0.48rem, 0.68vw, 0.62rem)',
+                        color: '#fecaca',
+                        background: 'rgba(60, 15, 15, 0.95)',
+                        border: '1px solid rgba(248, 113, 113, 0.7)',
+                        borderRadius: '3px',
+                        padding: '1px 6px',
+                        fontWeight: 700,
+                      }}>
+                        ✕ Passwords do not match
+                      </span>
+                    )}
+                  </div>
+                )}
 
-                {/* 9. Location (Row 5 Left) */}
+                {/* ── 9. Location (Row 5 Left) ── */}
                 <input
                   type="text"
                   value={location}
                   onChange={e => setLocation(e.target.value)}
+                  placeholder="e.g. New Delhi"
                   className="clean-input"
                   style={{
                     position: 'absolute',
                     left: '20.5%',
-                    top: '78.2%',
+                    top: '77.2%',
                     width: '25.0%',
-                    height: '4.2%',
+                    height: '3.8%',
                   }}
                 />
 
-                {/* 10. CREATE ACCOUNT BUTTON (Over the golden badge) */}
+                {/* ── 10. CREATE ACCOUNT BUTTON (Over the golden badge) ── */}
                 <button
                   type="submit"
                   style={{
@@ -618,13 +1147,14 @@ export default function SignUpPage() {
                   <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '0.9rem' }}>
                     <div>
                       <label style={{ display: 'block', color: '#dfa547', fontSize: '0.75rem', fontWeight: 700, fontFamily: 'Georgia, serif', marginBottom: '0.25rem' }}>
-                        ✉ Email Address
+                        👤 Username (@handle) or ✉ Email
                       </label>
                       <input
-                        type="email"
-                        value={email}
-                        onChange={e => setEmail(e.target.value)}
-                        placeholder="name@example.com"
+                        type="text"
+                        value={signInIdentifier}
+                        onChange={e => setSignInIdentifier(e.target.value)}
+                        placeholder="@username or email"
+                        autoCapitalize="none"
                         style={{
                           width: '100%',
                           padding: '0.5rem 0.7rem',
@@ -646,8 +1176,8 @@ export default function SignUpPage() {
                       </label>
                       <input
                         type="password"
-                        value={password}
-                        onChange={e => setPassword(e.target.value)}
+                        value={signInPassword}
+                        onChange={e => setSignInPassword(e.target.value)}
                         placeholder="Enter your password"
                         style={{
                           width: '100%',
@@ -666,6 +1196,7 @@ export default function SignUpPage() {
                     </div>
                     <button
                       type="submit"
+                      disabled={isSubmitting}
                       style={{
                         marginTop: '0.5rem',
                         padding: '0.65rem',
@@ -676,12 +1207,13 @@ export default function SignUpPage() {
                         fontSize: '0.95rem',
                         border: '1.5px solid rgba(255,230,150,0.5)',
                         borderRadius: '6px',
-                        cursor: 'pointer',
+                        cursor: isSubmitting ? 'not-allowed' : 'pointer',
+                        opacity: isSubmitting ? 0.75 : 1,
                         boxShadow: '0 4px 15px rgba(184,115,27,0.5)',
                         textShadow: '0 1px 3px rgba(0,0,0,0.6)',
                       }}
                     >
-                      ✦ Sign In to Sanctum ✦
+                      {isSubmitting ? '✦ Verifying... ✦' : '✦ Sign In to Sanctum ✦'}
                     </button>
                   </form>
 

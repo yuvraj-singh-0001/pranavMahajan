@@ -158,9 +158,7 @@ export default function CelestialRocketTransition({
         onEnded={handleEnded}
         onError={handleVideoError}
         className="absolute inset-0 w-full h-full object-cover object-center pointer-events-none brightness-110 contrast-115"
-      >
-        <source src="/animetion%20video%20(2)%20(online-video-cutter.com).mp4" type="video/mp4" />
-      </video>
+      />
 
       {/* 2. SUBTLE LUXURY VIGNETTE */}
       <div

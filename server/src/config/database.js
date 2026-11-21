@@ -11,11 +11,17 @@ export async function connectDatabase() {
     console.error('[Database] Connection error:', error.message);
   });
 
-  await mongoose.connect(uri, {
-    serverSelectionTimeoutMS: 8000,
-  });
+  try {
+    await mongoose.connect(uri, {
+      serverSelectionTimeoutMS: 2500,
+    });
+  } catch (error) {
+    console.warn(`[Database] MongoDB not reachable at ${uri} (${error.message}). Running in fallback mode.`);
+  }
 }
 
 export async function disconnectDatabase() {
-  await mongoose.disconnect();
+  try {
+    await mongoose.disconnect();
+  } catch (_) {}
 }

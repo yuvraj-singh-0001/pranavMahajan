@@ -8,6 +8,7 @@ import { submitNgoInquiry } from '../controllers/NGO/inquiryController.js';
 import { submitParentInquiry } from '../controllers/parents/inquiryController.js';
 import { getPortfolio } from '../controllers/portfolioController.js';
 import { INQUIRY_ROLES } from '../models/Inquiry.js';
+import authRoutes from './authRoutes.js';
 
 const router = Router();
 
@@ -18,9 +19,15 @@ router.get('/', (_req, res) => {
     endpoints: {
       roles: 'GET /api/roles',
       inquiry: 'POST /api/inquiries/:role',
+      checkUsername: 'GET /api/auth/check-username?username=...',
+      signup: 'POST /api/auth/signup',
+      signin: 'POST /api/auth/signin',
     },
   });
 });
+
+// Authentication & Username Verification Endpoints
+router.use('/auth', authRoutes);
 
 router.get('/roles', (_req, res) => {
   res.json({ success: true, data: INQUIRY_ROLES });
