@@ -247,7 +247,7 @@ export default function StudentLifeView() {
 
         <div className="flex items-center gap-2 sm:gap-3">
           <Link
-            href="/signup?role=individual&topic=Student%20Life%20and%20Youth%20Development"
+            href="/signup"
             className="inline-flex items-center justify-center rounded-full border border-indigo-400/50 bg-[#312E81]/90 px-3.5 py-1.5 text-xs font-bold tracking-wide text-indigo-200 shadow-[0_4px_16px_rgba(79,70,229,0.25)] backdrop-blur-md transition-all duration-300 hover:scale-105 hover:border-indigo-300 hover:bg-[#3730A3] hover:text-white sm:px-5 sm:py-2"
           >
             Sign Up
@@ -337,7 +337,7 @@ export default function StudentLifeView() {
             Ready to conquer academic panic, unlock deep cognitive flow, and build an unfair career advantage?
           </p>
           <Link
-            href="/signup?role=individual&topic=Student%20Life%20and%20Youth%20Development"
+            href="/signup"
             onClick={() => setMenuOpen(false)}
             className="mt-4 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-full bg-[#4F46E5] px-5 text-sm font-semibold text-white shadow-md transition hover:bg-[#4338CA]"
           >
@@ -434,7 +434,7 @@ export default function StudentLifeView() {
             {/* CTA Buttons */}
             <div className="flex flex-wrap items-center gap-3">
               <Link
-                href="/signup?role=individual&topic=Student%20Life%20and%20Youth%20Development"
+                href="/signup"
                 className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-[#4F46E5] to-[#7C3AED] px-6 py-3 text-xs sm:text-sm font-bold text-white shadow-[0_10px_25px_-5px_rgba(79,70,229,0.5)] hover:scale-105 active:scale-95 transition-all"
               >
                 <span>Claim 1-on-1 Student Mentorship</span>
@@ -761,7 +761,7 @@ export default function StudentLifeView() {
                 {/* Bottom Action CTA Button */}
                 <div className="pt-2 border-t border-slate-100 flex items-center justify-between">
                   <Link
-                    href={`/signup?role=individual&topic=${encodeURIComponent(arena.ctaTopic)}`}
+                    href="/signup"
                     className="inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-xs font-bold text-white shadow-sm hover:scale-105 active:scale-95 transition-all"
                     style={{
                       backgroundColor: arena.accent,
@@ -946,7 +946,7 @@ export default function StudentLifeView() {
             Schedule a personalized 1-on-1 mentorship session with Pranav Mahajan to calibrate your study systems, neutralize academic fear, and design your unfair future.
           </p>
           <Link
-            href="/signup?role=individual&topic=Student%20Life%20and%20Youth%20Development"
+            href="/signup"
             className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-cyan-400 via-indigo-400 to-purple-400 px-8 py-3.5 text-sm font-extrabold text-slate-950 shadow-lg hover:scale-105 active:scale-95 transition-all"
           >
             <span>Start 1-on-1 Student Mentorship &rarr;</span>

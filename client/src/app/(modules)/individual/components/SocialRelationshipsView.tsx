@@ -348,7 +348,7 @@ export default function SocialRelationshipsView() {
 
         <div className="flex items-center gap-2 sm:gap-3">
           <Link
-            href="/signup?role=individual&topic=Social%20Relationships%20and%20Reputation"
+            href="/signup"
             className="inline-flex items-center justify-center rounded-full border border-sky-400/50 bg-[#0C4A6E]/90 px-3.5 py-1.5 text-xs font-bold tracking-wide text-sky-200 shadow-[0_4px_16px_rgba(2,132,199,0.25)] backdrop-blur-md transition-all duration-300 hover:scale-105 hover:border-sky-300 hover:bg-[#075985] hover:text-white sm:px-5 sm:py-2"
           >
             Sign Up
@@ -437,7 +437,7 @@ export default function SocialRelationshipsView() {
             Ready to step into effortless social fluency, unassailable trust, and cultural agility?
           </p>
           <Link
-            href="/signup?role=individual&topic=Social%20Relationships%20and%20Reputation"
+            href="/signup"
             onClick={() => setMenuOpen(false)}
             className="mt-4 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-full bg-[#0284C7] px-5 text-sm font-semibold text-white shadow-md transition hover:bg-[#0369A1]"
           >
@@ -900,7 +900,7 @@ export default function SocialRelationshipsView() {
                 {/* Action Buttons Row */}
                 <div className="flex items-center justify-between">
                   <Link
-                    href={`/signup?role=individual&topic=${encodeURIComponent(`Social Reputation - ${activeScenario.name}`)}`}
+                    href="/signup"
                     className="text-[10.5px] sm:text-[11px] font-bold text-[#0284C7] hover:underline flex items-center gap-1 group"
                   >
                     <span>Practice in 1-on-1 Mentorship</span>
@@ -1115,7 +1115,7 @@ export default function SocialRelationshipsView() {
                     {/* Action Buttons Row */}
                     <div className="flex flex-wrap items-center gap-3 pt-1">
                       <Link
-                        href={`/signup?role=individual&topic=${encodeURIComponent(pillar.ctaTopic)}`}
+                        href="/signup"
                         className="inline-flex items-center gap-2 rounded-full px-5 sm:px-6 py-2.5 sm:py-3 text-xs sm:text-sm font-bold text-white shadow-lg hover:scale-105 active:scale-95 transition-all"
                         style={{
                           backgroundColor: pillar.accent,

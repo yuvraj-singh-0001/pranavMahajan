@@ -275,7 +275,7 @@ export default function TopicDetailView({ slug }: { slug: string }) {
               }`}
           >
             <Link
-              href={`/signup?role=individual&topic=${encodeURIComponent(topic.title)}`}
+              href="/signup"
               className="group flex flex-col justify-between rounded-2xl border border-amber-900/15 bg-white/90 p-4 shadow-xs transition-all duration-300 hover:-translate-y-1 hover:shadow-md hover:border-amber-500/40"
             >
               <div>
@@ -441,7 +441,7 @@ export default function TopicDetailView({ slug }: { slug: string }) {
 
           <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3.5">
             <Link
-              href={`/signup?role=individual&topic=${encodeURIComponent(topic.title)}`}
+              href="/signup"
               className="inline-flex min-h-12 w-full sm:w-auto items-center justify-center gap-2 rounded-full bg-[#dfa547] px-8 text-sm font-bold text-[#162a1c] shadow-lg transition-all duration-300 hover:bg-[#e8b55d] hover:scale-105 active:scale-95"
             >
               <span>Begin Mentorship in this Topic</span>

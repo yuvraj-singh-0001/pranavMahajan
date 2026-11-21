@@ -200,7 +200,7 @@ export default function HealthWellbeingView() {
 
         <div className="flex items-center gap-2 sm:gap-3">
           <Link
-            href="/signup?role=individual&topic=Health%20and%20Wellbeing"
+            href="/signup"
             className="inline-flex items-center justify-center rounded-full border border-emerald-500/50 bg-[#09231A]/90 px-3.5 py-1.5 text-xs font-bold tracking-wide text-emerald-200 shadow-[0_4px_16px_rgba(13,148,136,0.25)] backdrop-blur-md transition-all duration-300 hover:scale-105 hover:border-emerald-400 hover:bg-[#13382B] hover:text-white sm:px-5 sm:py-2"
           >
             Sign Up
@@ -344,7 +344,7 @@ export default function HealthWellbeingView() {
               </button>
 
               <Link
-                href="/signup?role=individual&topic=Health%20and%20Wellbeing"
+                href="/signup"
                 className="group inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-[#047857] to-[#0D9488] px-5 py-2 text-xs font-bold text-white shadow-md hover:scale-105 active:scale-95 transition"
               >
                 <span>Start Your Journey</span>

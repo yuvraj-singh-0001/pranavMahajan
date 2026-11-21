@@ -304,7 +304,7 @@ export default function LoveRelationshipsView() {
 
         <div className="flex items-center gap-2 sm:gap-3">
           <Link
-            href="/signup?role=individual&topic=Love%20Relationships%2C%20Marriage%20and%20Family%20Dynamics"
+            href="/signup"
             className="inline-flex items-center justify-center rounded-full border border-rose-500/50 bg-[#250810]/90 px-3.5 py-1.5 text-xs font-bold tracking-wide text-rose-200 shadow-[0_4px_16px_rgba(180,40,70,0.25)] backdrop-blur-md transition-all duration-300 hover:scale-105 hover:border-rose-400 hover:bg-[#3D0F1B] hover:text-white sm:px-5 sm:py-2"
           >
             Sign Up
@@ -336,17 +336,15 @@ export default function LoveRelationshipsView() {
         aria-label="Close navigation menu"
         tabIndex={menuOpen ? 0 : -1}
         onClick={() => setMenuOpen(false)}
-        className={`fixed inset-0 z-40 bg-[#120407]/40 backdrop-blur-[2px] transition-opacity duration-300 ${
-          menuOpen ? 'opacity-100' : 'pointer-events-none opacity-0'
-        }`}
+        className={`fixed inset-0 z-40 bg-[#120407]/40 backdrop-blur-[2px] transition-opacity duration-300 ${menuOpen ? 'opacity-100' : 'pointer-events-none opacity-0'
+          }`}
       />
       <aside
         aria-label="Site navigation"
         aria-hidden={!menuOpen}
         inert={!menuOpen}
-        className={`fixed right-0 top-0 z-[60] flex h-dvh w-[min(22rem,88vw)] flex-col border-l border-[#8E7650]/20 bg-[#FBF3EA] px-6 pb-8 pt-6 shadow-2xl transition-transform duration-500 ease-[cubic-bezier(.22,1,.36,1)] sm:px-8 ${
-          menuOpen ? 'translate-x-0' : 'translate-x-full'
-        }`}
+        className={`fixed right-0 top-0 z-[60] flex h-dvh w-[min(22rem,88vw)] flex-col border-l border-[#8E7650]/20 bg-[#FBF3EA] px-6 pb-8 pt-6 shadow-2xl transition-transform duration-500 ease-[cubic-bezier(.22,1,.36,1)] sm:px-8 ${menuOpen ? 'translate-x-0' : 'translate-x-full'
+          }`}
       >
         <div className="flex items-center justify-between border-b border-rose-900/15 pb-5">
           <div>
@@ -391,7 +389,7 @@ export default function LoveRelationshipsView() {
             Ready to build steady emotional safety and mutual trust in your relationship?
           </p>
           <Link
-            href="/signup?role=individual&topic=Love%20Relationships%2C%20Marriage%20and%20Family%20Dynamics"
+            href="/signup"
             onClick={() => setMenuOpen(false)}
             className="mt-4 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-full bg-[#581523] px-5 text-sm font-semibold text-white shadow-md transition hover:bg-[#721B2E]"
           >
@@ -402,13 +400,13 @@ export default function LoveRelationshipsView() {
 
       {/* HERO SECTION: Panoramic Heart-Tree Landscape with Glassmorphism */}
       <section className="relative overflow-hidden pt-24 sm:pt-28 md:pt-32 pb-10 sm:pb-14 lg:pb-18 px-4 sm:px-8 lg:px-12 2xl:px-18">
-        
+
         {/* Background Panoramic Graphic Overlay */}
         <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden opacity-90">
           <img
-            src="/love-relationships-hero.jpg?v=3"
-            alt="Love, Relationships, Conflict Resolution, and Family Dynamics Panorama"
-            className="w-full h-full object-cover object-center filter saturate-[1.10] brightness-[1.02]"
+            src="/love-relationships-hero.jpg?v=2"
+            alt="Love, Relationships, and Family Dynamics Mentorship Sanctuary"
+            className="w-full h-full object-cover object-center filter saturate-[1.12] brightness-[1.02]"
           />
           {/* Warm Champagne & Rose Radial Vignette */}
           <div className="absolute inset-0 bg-gradient-to-t from-[#FBF6F0] via-[#FBF6F0]/40 to-transparent" />
@@ -426,7 +424,7 @@ export default function LoveRelationshipsView() {
 
         <div className="relative z-10 max-w-[1680px] 2xl:max-w-[1800px] mx-auto">
           <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-8 pt-4">
-            
+
             {/* Left Headline & Modern Animated Glass Card */}
             <div className="max-w-xl lg:max-w-2xl py-2">
               {/* Animated Floating Dimension Badge */}
@@ -461,9 +459,8 @@ export default function LoveRelationshipsView() {
                   type="button"
                   onClick={() => setIsPlayingAudio(!isPlayingAudio)}
                   aria-label={isPlayingAudio ? 'Pause reflection guidance' : 'Listen to 1-minute audio reflection'}
-                  className={`group flex items-center gap-2.5 rounded-full border border-rose-800/20 bg-white/90 px-4 py-2.5 shadow-sm backdrop-blur-md transition-all duration-300 hover:scale-105 hover:bg-white hover:border-rose-400 ${
-                    isPlayingAudio ? 'ring-2 ring-rose-400 bg-rose-50' : ''
-                  }`}
+                  className={`group flex items-center gap-2.5 rounded-full border border-rose-800/20 bg-white/90 px-4 py-2.5 shadow-sm backdrop-blur-md transition-all duration-300 hover:scale-105 hover:bg-white hover:border-rose-400 ${isPlayingAudio ? 'ring-2 ring-rose-400 bg-rose-50' : ''
+                    }`}
                 >
                   <div className="flex h-6 w-6 items-center justify-center rounded-full bg-gradient-to-tr from-[#9E2038] to-[#E25372] text-white shadow-xs">
                     {isPlayingAudio ? (
@@ -484,7 +481,7 @@ export default function LoveRelationshipsView() {
 
                 {/* Primary CTA Button */}
                 <Link
-                  href="/signup?role=individual&topic=Love%20Relationships%2C%20Marriage%20and%20Family%20Dynamics"
+                  href="/signup"
                   className="group inline-flex items-center gap-2.5 rounded-full bg-gradient-to-r from-[#6B1828] via-[#851E32] to-[#551320] px-6 py-2.5 text-xs sm:text-sm font-bold text-white shadow-[0_8px_25px_rgba(107,24,40,0.35)] transition-all duration-300 hover:scale-105 hover:shadow-[0_12px_32px_rgba(107,24,40,0.45)] hover:from-[#7B1B2E] hover:to-[#601524] active:scale-95"
                 >
                   <span>Start Your Journey</span>
@@ -562,7 +559,7 @@ export default function LoveRelationshipsView() {
 
       {/* 6-STAGE WINDING JOURNEY RIBBON (Using User's Exact Uploaded Graphic) */}
       <section className="relative px-4 sm:px-8 lg:px-12 max-w-7xl mx-auto py-8">
-        
+
         {/* Section Heading & Helper */}
         <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between gap-4 mb-6">
           <div>
@@ -663,7 +660,7 @@ export default function LoveRelationshipsView() {
                 Close
               </button>
               <Link
-                href="/signup?role=individual&topic=Love%20Relationships%2C%20Marriage%20and%20Family%20Dynamics"
+                href="/signup"
                 onClick={() => setStepModalOpen(false)}
                 className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-[#6B1828] text-white text-xs font-bold shadow-md hover:bg-[#851E32] transition"
               >
@@ -755,11 +752,10 @@ export default function LoveRelationshipsView() {
                       key={pillar.id}
                       type="button"
                       onClick={() => setActivePillar(pillar)}
-                      className={`flex items-center gap-2.5 rounded-2xl p-3 text-left transition-all duration-300 ${
-                        isSelected
-                          ? 'bg-[#6B1828] text-white shadow-md scale-[1.02]'
-                          : 'bg-rose-50/60 text-[#4A262D] hover:bg-rose-100/70 border border-rose-900/5'
-                      }`}
+                      className={`flex items-center gap-2.5 rounded-2xl p-3 text-left transition-all duration-300 ${isSelected
+                        ? 'bg-[#6B1828] text-white shadow-md scale-[1.02]'
+                        : 'bg-rose-50/60 text-[#4A262D] hover:bg-rose-100/70 border border-rose-900/5'
+                        }`}
                     >
                       <div className={`flex h-7 w-7 items-center justify-center rounded-xl ${isSelected ? 'bg-white/20' : 'bg-white text-[#8C2438]'}`}>
                         <Icon className="h-3.5 w-3.5" />
@@ -791,7 +787,7 @@ export default function LoveRelationshipsView() {
 
             <div className="mt-5">
               <Link
-                href={`/signup?role=individual&topic=${encodeURIComponent('Love Relationships, Marriage and Family Dynamics')}`}
+                href="/signup"
                 className="w-full inline-flex items-center justify-center gap-2 rounded-full border border-rose-900/20 bg-white py-2.5 text-xs font-bold text-[#6B1828] transition hover:bg-rose-50"
               >
                 <span>Cultivate These 4 Pillars</span>
@@ -831,11 +827,10 @@ export default function LoveRelationshipsView() {
                       key={scen.id}
                       type="button"
                       onClick={() => setActiveScenario(scen)}
-                      className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-bold transition-all ${
-                        isSelected
-                          ? 'bg-[#6B1828] text-white shadow-xs scale-[1.02]'
-                          : 'bg-rose-50 text-[#5A383F] hover:bg-rose-100/80 border border-rose-900/5'
-                      }`}
+                      className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-bold transition-all ${isSelected
+                        ? 'bg-[#6B1828] text-white shadow-xs scale-[1.02]'
+                        : 'bg-rose-50 text-[#5A383F] hover:bg-rose-100/80 border border-rose-900/5'
+                        }`}
                     >
                       <Icon className="h-3 w-3" />
                       <span>{scen.category}</span>
@@ -881,7 +876,7 @@ export default function LoveRelationshipsView() {
 
             <div className="mt-5">
               <Link
-                href={`/signup?role=individual&topic=${encodeURIComponent(`Love Relationships (${activeScenario.category} Focus)`)}`}
+                href="/signup"
                 className="w-full inline-flex items-center justify-center gap-2 rounded-full bg-[#6B1828] py-3 text-xs font-bold text-white shadow-md transition hover:bg-[#851E32]"
               >
                 <span>Discuss {activeScenario.category} with Pranav</span>
@@ -962,7 +957,7 @@ export default function LoveRelationshipsView() {
                   </button>
 
                   <Link
-                    href={`/signup?role=individual&topic=${encodeURIComponent(`Love Relationships (${quizResult} Focus)`)}`}
+                    href="/signup"
                     onClick={() => setQuizOpen(false)}
                     className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-[#6B1828] text-white text-xs font-bold shadow-md hover:bg-[#851E32]"
                   >

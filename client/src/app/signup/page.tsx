@@ -1,10 +1,17 @@
 'use client';
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 
 export default function SignUpPage() {
   const [mode, setMode] = useState<'signup' | 'signin'>('signup');
+
+  // Clean URL immediately: if user arrives from any legacy link with query params (e.g. ?role=...&topic=...), sanitize address bar to /signup
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.location.search) {
+      window.history.replaceState(null, '', window.location.pathname);
+    }
+  }, []);
   const [fullName, setFullName] = useState('');
   const [username, setUsername] = useState('');
   const [usernameStatus, setUsernameStatus] = useState<'idle' | 'checking' | 'available' | 'taken' | 'invalid'>('idle');

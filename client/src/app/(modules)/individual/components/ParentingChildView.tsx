@@ -270,7 +270,7 @@ export default function ParentingChildView() {
 
         <div className="flex items-center gap-2 sm:gap-3">
           <Link
-            href="/signup?role=individual&topic=Parenting%20and%20Child%20Development"
+            href="/signup"
             className="inline-flex items-center justify-center rounded-full border border-emerald-500/50 bg-[#0F382B] px-4 py-1.5 text-xs sm:text-sm font-bold tracking-wide text-emerald-200 shadow-xs backdrop-blur-md transition-all duration-300 hover:scale-105 hover:bg-[#154D3C] hover:text-white sm:px-5 sm:py-2"
           >
             Sign Up
@@ -360,7 +360,7 @@ export default function ParentingChildView() {
             Ready to replace yelling and guilt with grounded connection and mutual trust?
           </p>
           <Link
-            href="/signup?role=individual&topic=Parenting%20and%20Child%20Development"
+            href="/signup"
             onClick={() => setMenuOpen(false)}
             className="mt-4 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-full bg-[#0F382B] px-5 text-sm font-semibold text-white shadow-md transition hover:bg-[#154D3C]"
           >
@@ -645,7 +645,7 @@ export default function ParentingChildView() {
                   {/* Action Buttons */}
                   <div className="mt-2.5 flex items-center justify-center gap-2 w-full">
                     <Link
-                      href={`/signup?role=individual&topic=${encodeURIComponent(`Parenting Mentorship - ${activeProblem.badgeTitle}`)}`}
+                      href="/signup"
                       className="inline-flex items-center justify-center gap-1.5 rounded-full px-3.5 sm:px-4 py-1.5 text-xs font-bold text-white shadow-sm hover:scale-105 active:scale-95 transition-all"
                       style={{ backgroundColor: activeProblem.accentHex }}
                     >
