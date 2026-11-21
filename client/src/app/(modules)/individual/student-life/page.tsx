@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import TopicDetailView from '../components/TopicDetailView';
+import StudentLifeView from '../components/StudentLifeView';
 import { getTopicById } from '@/data/topicsData';
 
 const SLUG = 'student-life';
@@ -13,5 +13,6 @@ export function generateMetadata(): Metadata {
 }
 
 export default function Page() {
-  return <TopicDetailView slug={SLUG} />;
+  return <StudentLifeView />;
 }
+

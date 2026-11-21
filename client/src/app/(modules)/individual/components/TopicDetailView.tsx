@@ -12,6 +12,7 @@ import PersonalDevelopmentView from './PersonalDevelopmentView';
 import ParentingChildView from './ParentingChildView';
 import SocialRelationshipsView from './SocialRelationshipsView';
 import StudentLifeView from './StudentLifeView';
+import ProfessionalDevelopmentView from './ProfessionalDevelopmentView';
 
 const navigation = [
   { href: '/individual#top', label: 'Explore Life & Growth' },
@@ -63,6 +64,10 @@ export default function TopicDetailView({ slug }: { slug: string }) {
 
   if (topic.id === 'student-life') {
     return <StudentLifeView />;
+  }
+
+  if (topic.id === 'professional-development') {
+    return <ProfessionalDevelopmentView />;
   }
 
   const currentIndex = TOPICS.findIndex((t) => t.id === topic.id);

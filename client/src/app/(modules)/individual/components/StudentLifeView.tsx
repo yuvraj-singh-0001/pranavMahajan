@@ -207,14 +207,93 @@ const STUDENT_DILEMMAS = [
   },
 ];
 
+// 5 Real Student Journey Challenges vs Conscious Mentorship Solutions
+const STUDENT_CHALLENGES = [
+  {
+    id: 'exam-panic',
+    stageLabel: 'Exam & Test Anxiety',
+    problem: 'Mind going completely blank on Question 1, shaking hands, and sudden cortisol-induced panic in the exam hall.',
+    solution: 'Clinical Stillness & Retrieval Sprints: 3 belly exhales decouple nervous system panic from working memory.',
+    action: 'Skip to Question 4; initial 2-mark win immediately reactivates cognitive retrieval pathways.',
+    accent: '#4F46E5',
+    tag: '01 • EXAM COMPOSURE',
+  },
+  {
+    id: 'late-night-cramming',
+    stageLabel: 'Late-Night Burnout',
+    problem: '12-hour passive highlighting and sleep deprivation that dissolves into exhausted brain-fog by morning.',
+    solution: 'Feynman Synthesis & Spaced Recall: 90-minute focused recall cycles master syllabi in 1/3rd the time.',
+    action: 'Explain the core concept aloud in 2 minutes without opening notes to verify true mental retention.',
+    accent: '#7C3AED',
+    tag: '02 • META-LEARNING',
+  },
+  {
+    id: 'peer-comparison',
+    stageLabel: 'Parental Comparison',
+    problem: 'Hearing “Look at Sharma ji’s son” causing deep silent resentment, self-doubt, and helpless despair.',
+    solution: 'Objective Trajectory Architecture: Channeling external expectations into clear, transparent personal milestones.',
+    action: 'Present parents with a written weekly learning roadmap to replace their anxiety with grounded trust.',
+    accent: '#06B6D4',
+    tag: '03 • EMOTIONAL POISE',
+  },
+  {
+    id: 'digital-doomscroll',
+    stageLabel: 'Attention Hijack & FOMO',
+    problem: 'Bedtime doomscrolling, reels bingeing till 3 AM, and chronic daily guilt over wasted study hours.',
+    solution: 'The Attention Fortress: Physical zero-phone zones restore baseline dopamine sensitivity to deep intellectual work.',
+    action: 'Phone parked in another room during study blocks; deep study sprints are non-negotiable.',
+    accent: '#F59E0B',
+    tag: '04 • ATTENTION ARMOR',
+  },
+  {
+    id: 'career-confusion',
+    stageLabel: 'Career Trap & Rat Race',
+    problem: 'Blindly following crowded tuition herd trends into competitive fields you secretly dread or hate.',
+    solution: 'Category-of-One Blueprint: Synthesizing unfair strengths into modern high-impact skill stacks.',
+    action: 'Stop collecting generic certificates; build proof of real-world problem-solving ability.',
+    accent: '#10B981',
+    tag: '05 • UNFAIR ADVANTAGE',
+  },
+];
+
 export default function StudentLifeView() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [activeModeIdx, setActiveModeIdx] = useState(0);
   const [activeDilemmaIdx, setActiveDilemmaIdx] = useState(0);
+  const [activeChallengeIdx, setActiveChallengeIdx] = useState(0);
+  const [showScrollTop, setShowScrollTop] = useState(false);
   const scrollRootRef = useRef<HTMLDivElement>(null);
 
   const activeMode = YOUTH_MODES[activeModeIdx];
   const activeDilemma = STUDENT_DILEMMAS[activeDilemmaIdx];
+  const activeChallenge = STUDENT_CHALLENGES[activeChallengeIdx];
+
+  // Scroll to top on mount
+  useEffect(() => {
+    if (scrollRootRef.current) {
+      scrollRootRef.current.scrollTo({ top: 0, behavior: 'instant' });
+    }
+  }, []);
+
+  // Back to top button listener
+  useEffect(() => {
+    const handleScroll = () => {
+      if (scrollRootRef.current) {
+        setShowScrollTop(scrollRootRef.current.scrollTop > 350);
+      }
+    };
+    const el = scrollRootRef.current;
+    if (el) el.addEventListener('scroll', handleScroll, { passive: true });
+    return () => {
+      if (el) el.removeEventListener('scroll', handleScroll);
+    };
+  }, []);
+
+  const scrollToTop = () => {
+    if (scrollRootRef.current) {
+      scrollRootRef.current.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
 
   return (
     <div
@@ -232,25 +311,43 @@ export default function StudentLifeView() {
       </div>
 
       {/* =========================================================================
-          OFFICIAL TRANSPARENT HEADER (Exact match to other individual pages)
+          OFFICIAL NAVBAR (Identical to Home & Role Page)
          ========================================================================= */}
-      <header className="relative z-50 flex items-center justify-between border-b border-indigo-900/10 bg-black/40 px-4 py-2.5 backdrop-blur-md sm:border-b-0 sm:bg-transparent sm:px-10 lg:px-14 2xl:px-20 sm:py-5 sm:backdrop-blur-none shrink-0">
-        <div className="flex items-center gap-2 sm:gap-3">
-          <Link href="/" aria-label="Pranav Mahajan home" className="inline-flex items-center group">
+      <header className="fixed inset-x-0 top-0 z-50 flex items-center justify-between border-b border-amber-500/15 bg-black/40 px-4 py-2.5 backdrop-blur-md sm:border-b-0 sm:bg-transparent sm:px-10 lg:px-14 2xl:px-20 sm:py-5 sm:backdrop-blur-none transition-all duration-500">
+        <div className="flex items-center">
+          <button
+            type="button"
+            onClick={() => {
+              if (typeof window !== 'undefined') {
+                if (window.history.length > 1) {
+                  window.history.back();
+                } else {
+                  window.location.assign('/');
+                }
+              }
+            }}
+            aria-label="Go back"
+            title="Back"
+            className="mr-2 flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-amber-500/40 bg-[#16120e]/90 text-amber-200 transition hover:bg-[#2e2318] hover:text-white sm:mr-3 sm:h-10 sm:w-10 shadow-md cursor-pointer"
+          >
+            <ArrowLeft className="h-4 w-4" />
+          </button>
+
+          <Link href="/" aria-label="Pranav Mahajan home" className="inline-flex items-center group cursor-pointer transition-transform hover:scale-105">
             <img
               src="/pranav_mahajan_transparent.png"
-              alt="Pranav Mahajan"
-              className="h-10 w-auto object-contain drop-shadow-[0_4px_20px_rgba(79,70,229,0.35)] transition-transform duration-300 group-hover:scale-105 sm:h-16 md:h-20"
+              alt="Pranav Mahajan Logo"
+              className="h-10 w-auto object-contain drop-shadow-[0_4px_20px_rgba(223,165,71,0.4)] sm:h-16 md:h-20"
             />
           </Link>
         </div>
 
         <div className="flex items-center gap-2 sm:gap-3">
           <Link
-            href="/signup"
-            className="inline-flex items-center justify-center rounded-full border border-indigo-400/50 bg-[#312E81]/90 px-3.5 py-1.5 text-xs font-bold tracking-wide text-indigo-200 shadow-[0_4px_16px_rgba(79,70,229,0.25)] backdrop-blur-md transition-all duration-300 hover:scale-105 hover:border-indigo-300 hover:bg-[#3730A3] hover:text-white sm:px-5 sm:py-2"
+            href="/#roles"
+            className="inline-flex items-center justify-center gap-1.5 py-1.5 sm:py-2 px-3.5 sm:px-5 text-xs font-bold tracking-wide rounded-full text-amber-200 border border-amber-500/50 bg-[#1e1710]/80 hover:bg-[#2e2318] hover:border-amber-400 hover:text-white transition-all shadow-[0_4px_16px_rgba(223,165,71,0.2)] hover:scale-105 active:scale-95 backdrop-blur-md cursor-pointer"
           >
-            Sign Up
+            Go to your role
           </Link>
 
           <button
@@ -258,15 +355,15 @@ export default function StudentLifeView() {
             aria-label={menuOpen ? 'Close navigation menu' : 'Open navigation menu'}
             aria-expanded={menuOpen}
             onClick={() => setMenuOpen((open) => !open)}
-            className="flex h-9 w-9 flex-col items-center justify-center gap-1 rounded-xl border border-indigo-400/30 bg-[#1E1B4B]/90 text-white shadow-xs backdrop-blur-md transition-all duration-200 hover:bg-[#312E81] hover:border-indigo-300 active:scale-95 sm:h-10 sm:w-10 sm:rounded-2xl"
+            className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl flex flex-col items-center justify-center gap-1 cursor-pointer transition-all shadow-md bg-[#16120e]/90 hover:bg-[#221b14] border border-amber-500/30 text-white backdrop-blur-md"
           >
             {menuOpen ? (
-              <X className="h-5 w-5 text-indigo-300" />
+              <X className="h-5 w-5 text-amber-200" />
             ) : (
               <>
-                <span className="h-0.5 w-4 rounded-full bg-indigo-100" />
-                <span className="ml-3.5 h-0.5 w-3 self-start rounded-full bg-[#4F46E5]" />
-                <span className="h-0.5 w-4 rounded-full bg-indigo-100" />
+                <span className="h-0.5 w-4 rounded-full bg-amber-100" />
+                <span className="ml-3.5 h-0.5 w-3 self-start rounded-full bg-[#DFA547]" />
+                <span className="h-0.5 w-4 rounded-full bg-amber-100" />
               </>
             )}
           </button>
@@ -347,267 +444,179 @@ export default function StudentLifeView() {
       </aside>
 
       {/* =========================================================================
-          SCREEN 1: HERO SECTION & INTERACTIVE "NEURAL COGNITIVE FLOW COCKPIT"
+          SCREEN 1: HERO SECTION WITH REALISTIC PANORAMIC BACKGROUND & CROSS-STUDENT DYNAMICS
          ========================================================================= */}
-      <section className="relative z-10 px-4 sm:px-8 lg:px-12 max-w-7xl mx-auto pt-4 sm:pt-8 pb-12 sm:pb-16 select-text">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
-          
-          {/* Left Column: Bold Vision & Micro Trajectory */}
-          <div className="lg:col-span-6 flex flex-col justify-center">
-            {/* Live Indicator Chip */}
-            <div className="inline-flex items-center gap-2.5 rounded-full bg-white/95 px-3.5 py-1.5 border border-indigo-200/90 shadow-2xs w-fit mb-4">
-              <span className="relative flex h-2.5 w-2.5">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75" />
-                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-[#06B6D4]" />
-              </span>
-              <span className="font-mono text-[10.5px] sm:text-xs font-bold uppercase tracking-[0.2em] text-[#4F46E5]">
-                Neural Velocity &bull; Academic Sovereignty
-              </span>
-            </div>
+      <section className="relative z-10 min-h-[94vh] flex items-center pt-24 sm:pt-28 pb-12 sm:pb-16 select-text overflow-hidden">
+        {/* Full-Bleed Photorealistic Background Image */}
+        <div className="absolute inset-0 z-0 pointer-events-none">
+          <img
+            src="/student-life-hero.jpg"
+            alt="Student Life & Youth Mentorship"
+            className="h-full w-full object-cover object-center lg:object-right"
+          />
+          {/* Luminous Soft Mist Gradient Overlay for crystal clear readability on the left */}
+          <div className="absolute inset-0 bg-gradient-to-r from-[#F8FAFF] via-[#F8FAFF]/95 to-transparent sm:via-[#F8FAFF]/80 lg:to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#F8FAFF] via-transparent to-transparent" />
+        </div>
 
-            {/* Main Headline */}
-            <h1 className="text-3xl sm:text-5xl lg:text-[54px] font-extrabold text-[#0F172A] font-serif leading-[1.12] tracking-tight">
-              Master Your Mind. <br />
-              <span className="bg-gradient-to-r from-[#4F46E5] via-[#7C3AED] to-[#06B6D4] bg-clip-text text-transparent">
-                Conquer the Pressure.
-              </span>
-            </h1>
-
-            {/* Minimal Punchy Subtitle */}
-            <p className="mt-3.5 text-sm sm:text-base text-[#475569] leading-relaxed max-w-xl font-medium">
-              From 2 AM exam panic and doomscroll brain-fog to razor-sharp cognitive stamina, deep meta-learning, and an authentic career trajectory.
-            </p>
-
-            {/* 4 Interactive Breakthrough Mode Selectors */}
-            <div className="grid grid-cols-2 gap-2.5 my-6 max-w-lg">
-              {YOUTH_MODES.map((mode, idx) => {
-                const Icon = mode.icon;
-                const isSelected = activeModeIdx === idx;
-                return (
-                  <button
-                    key={mode.id}
-                    type="button"
-                    onClick={() => setActiveModeIdx(idx)}
-                    className={`flex items-center gap-2.5 p-3 rounded-2xl border text-left transition-all duration-300 shadow-2xs ${
-                      isSelected
-                        ? 'bg-white border-[#4F46E5] ring-2 ring-indigo-200 scale-[1.02] shadow-sm'
-                        : 'bg-white/70 border-slate-200/80 hover:bg-white hover:border-indigo-300'
-                    }`}
-                  >
-                    <div
-                      className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl text-white shadow-xs"
-                      style={{ backgroundColor: mode.accentColor }}
-                    >
-                      <Icon className="h-4 w-4" />
-                    </div>
-                    <div className="overflow-hidden">
-                      <span className="font-mono text-[9.5px] font-bold text-slate-400 block truncate">
-                        {mode.tag}
-                      </span>
-                      <span className="text-xs font-bold text-slate-900 block truncate">
-                        {mode.label}
-                      </span>
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-
-            {/* Active Mode Protocol Card */}
-            <div className="rounded-2xl border border-indigo-100 bg-white/95 p-4 shadow-sm mb-6 max-w-lg">
-              <div className="flex items-center justify-between mb-1.5">
-                <span
-                  className="font-mono text-[10.5px] font-bold uppercase tracking-wider"
-                  style={{ color: activeMode.accentColor }}
-                >
-                  ⚡ Grounded Mental Shift:
+        <div className="relative z-10 px-4 sm:px-8 lg:px-12 max-w-7xl mx-auto w-full">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
+            
+            {/* Left Column: Bold Vision, Problem/Solution Interactive Explorer & CTAs */}
+            <div className="lg:col-span-7 flex flex-col justify-center max-w-2xl">
+              {/* Live Indicator Chip */}
+              <div className="inline-flex items-center gap-2.5 rounded-full bg-white/95 px-3.5 py-1.5 border border-indigo-200/90 shadow-2xs w-fit mb-3.5">
+                <span className="relative flex h-2.5 w-2.5">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75" />
+                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-[#06B6D4]" />
                 </span>
-                <span className="font-mono text-[11px] font-semibold text-slate-500">
-                  {activeMode.rule}
+                <span className="font-mono text-[10.5px] sm:text-xs font-bold uppercase tracking-[0.2em] text-[#4F46E5]">
+                  Neural Velocity &bull; Academic Sovereignty
                 </span>
               </div>
-              <p className="text-xs sm:text-[13px] text-slate-700 leading-snug font-medium italic">
-                &ldquo;{activeMode.activePhrase}&rdquo;
+
+              {/* Main Headline */}
+              <h1 className="text-3xl sm:text-5xl lg:text-[50px] font-extrabold text-[#0F172A] font-serif leading-[1.12] tracking-tight">
+                Master Your Mind. <br />
+                <span className="bg-gradient-to-r from-[#4F46E5] via-[#7C3AED] to-[#06B6D4] bg-clip-text text-transparent">
+                  Conquer the Pressure.
+                </span>
+              </h1>
+
+              {/* Minimal Punchy Subtitle */}
+              <p className="mt-3 text-sm sm:text-base text-[#475569] leading-relaxed max-w-xl font-medium">
+                From 2 AM exam panic and doomscroll brain-fog to razor-sharp cognitive stamina, deep meta-learning, and an authentic career trajectory.
               </p>
-            </div>
 
-            {/* CTA Buttons */}
-            <div className="flex flex-wrap items-center gap-3">
-              <Link
-                href="/signup"
-                className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-[#4F46E5] to-[#7C3AED] px-6 py-3 text-xs sm:text-sm font-bold text-white shadow-[0_10px_25px_-5px_rgba(79,70,229,0.5)] hover:scale-105 active:scale-95 transition-all"
-              >
-                <span>Claim 1-on-1 Student Mentorship</span>
-                <ArrowRight className="h-4 w-4" />
-              </Link>
-
-              <a
-                href="#youth-arenas"
-                className="inline-flex items-center gap-1.5 rounded-full bg-white px-5 py-3 text-xs sm:text-sm font-bold text-slate-700 border border-slate-200/90 shadow-2xs hover:bg-slate-50 hover:border-indigo-300 transition-all"
-              >
-                <span>4 Cognitive Engines</span>
-                <ChevronRight className="h-4 w-4 text-indigo-500" />
-              </a>
-            </div>
-
-          </div>
-
-          {/* Right Column: 100% Pure Code-Built Cognitive Engine Visual (Zero External Images) */}
-          <div className="lg:col-span-6 flex justify-center">
-            <div className="relative w-full max-w-lg lg:max-w-none rounded-3xl p-6 sm:p-8 bg-gradient-to-br from-white via-[#F8FAFF] to-indigo-50/40 border border-indigo-200/90 shadow-[0_20px_50px_-15px_rgba(79,70,229,0.18)] overflow-hidden">
-              {/* Ambient Mesh Glow behind widget */}
-              <div
-                className="absolute -top-12 -right-12 w-48 h-48 rounded-full blur-3xl pointer-events-none opacity-40 transition-colors duration-700"
-                style={{ backgroundColor: activeMode.accentColor }}
-              />
-              <div className="absolute -bottom-12 -left-12 w-48 h-48 rounded-full bg-cyan-400/20 blur-3xl pointer-events-none" />
-
-              {/* Top System Status Bar */}
-              <div className="flex items-center justify-between pb-3.5 mb-4 border-b border-indigo-100 relative z-10">
-                <div className="flex items-center gap-2">
-                  <span className="relative flex h-2.5 w-2.5">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75" />
-                    <span
-                      className="relative inline-flex rounded-full h-2.5 w-2.5"
-                      style={{ backgroundColor: activeMode.accentColor }}
-                    />
-                  </span>
-                  <span className="font-mono text-[11px] font-bold text-slate-700 tracking-wider uppercase">
-                    Cognitive State: {activeMode.headingTheme}
-                  </span>
-                </div>
-                <div className="inline-flex items-center gap-1.5 rounded-full bg-indigo-50 px-3 py-1 border border-indigo-200/80 text-[10.5px] font-mono font-bold text-indigo-700">
-                  <Cpu className="h-3 w-3" />
-                  <span>{activeMode.radarLabel}</span>
-                </div>
-              </div>
-
-              {/* Centerpiece: The Animated Neural Circular Flow Gauge */}
-              <div className="relative flex items-center justify-center my-6 z-10">
-                {/* SVG Dual-Track Orbital Gauge */}
-                <svg className="w-52 h-52 sm:w-60 sm:h-60 -rotate-90 transform" viewBox="0 0 100 100">
-                  {/* Background Track */}
-                  <circle cx="50" cy="50" r="42" stroke="#E2E8F0" strokeWidth="4" fill="none" />
-                  <circle cx="50" cy="50" r="34" stroke="#F1F5F9" strokeWidth="3" fill="none" />
-
-                  {/* Outer Glowing Active Arc */}
-                  <circle
-                    cx="50"
-                    cy="50"
-                    r="42"
-                    stroke={activeMode.accentColor}
-                    strokeWidth="5"
-                    strokeDasharray="264"
-                    strokeDashoffset={
-                      activeModeIdx === 0 ? '55' : activeModeIdx === 1 ? '35' : activeModeIdx === 2 ? '20' : '45'
-                    }
-                    strokeLinecap="round"
-                    fill="none"
-                    className="transition-all duration-700 ease-out"
-                  />
-
-                  {/* Secondary Cyan Inner Arc */}
-                  <circle
-                    cx="50"
-                    cy="50"
-                    r="34"
-                    stroke="#06B6D4"
-                    strokeWidth="3.5"
-                    strokeDasharray="213"
-                    strokeDashoffset="60"
-                    strokeLinecap="round"
-                    fill="none"
-                    className="transition-all duration-700 ease-out"
-                  />
-                </svg>
-
-                {/* Center Core Disc */}
-                <div className="absolute flex flex-col items-center justify-center text-center p-4 rounded-full w-36 h-36 sm:w-40 sm:h-40 bg-white/95 border border-indigo-100 shadow-xl backdrop-blur-md">
-                  <div
-                    className="flex h-10 w-10 sm:h-11 sm:w-11 items-center justify-center rounded-2xl text-white shadow-md transition-all duration-500 mb-1"
-                    style={{ backgroundColor: activeMode.accentColor }}
-                  >
-                    {React.createElement(activeMode.icon, { className: 'h-5 w-5' })}
-                  </div>
-                  <span className="font-mono text-base sm:text-lg font-black text-slate-900 leading-none">
-                    {activeModeIdx === 0
-                      ? '3.4x'
-                      : activeModeIdx === 1
-                      ? '100%'
-                      : activeModeIdx === 2
-                      ? '0 min'
-                      : 'Top 1%'}
-                  </span>
-                  <span className="font-mono text-[9px] sm:text-[9.5px] uppercase font-bold text-slate-400 mt-0.5">
-                    {activeModeIdx === 0
-                      ? 'Retention Velocity'
-                      : activeModeIdx === 1
-                      ? 'Panic Neutralized'
-                      : activeModeIdx === 2
-                      ? 'Doomscroll Leak'
-                      : 'Unfair Advantage'}
-                  </span>
-                </div>
-
-                {/* Floating Satellite Telemetry Chips (Pure Code UI) */}
-                <div className="absolute -top-1 left-2 sm:left-4 rounded-full bg-white/95 px-3 py-1 shadow-sm border border-slate-200 text-[10px] font-mono font-bold text-slate-700 flex items-center gap-1.5">
-                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                  <span>Deep Stasis Active</span>
-                </div>
-
-                <div className="absolute -bottom-1 right-2 sm:right-4 rounded-full bg-white/95 px-3 py-1 shadow-sm border border-slate-200 text-[10px] font-mono font-bold text-slate-700 flex items-center gap-1.5">
-                  <Activity className="h-3 w-3 text-cyan-500" />
-                  <span>Alpha: 10.4 Hz</span>
-                </div>
-              </div>
-
-              {/* 3-Stage Feynman Synthesis Pipeline */}
-              <div className="mt-4 pt-3.5 border-t border-indigo-100 relative z-10">
+              {/* 5 Real Student Journey Challenges vs Conscious Solutions Selector */}
+              <div className="mt-5 mb-4">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="font-mono text-[9.5px] uppercase font-bold text-slate-400 tracking-wider">
-                    Sovereign Cognitive Pipeline
+                  <span className="font-mono text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-slate-500">
+                    Real Student Struggles vs. Mentorship Breakthroughs:
                   </span>
-                  <span className="font-mono text-[10.5px] font-bold text-indigo-600">
-                    Active Recall Cycle
+                  <span className="font-mono text-[9.5px] font-bold px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-700">
+                    5 Dimensions
                   </span>
                 </div>
 
-                <div className="grid grid-cols-3 gap-2">
-                  <div className="rounded-xl bg-white p-2.5 border border-slate-200/90 text-center">
-                    <span className="font-mono text-[8.5px] text-slate-400 uppercase block">Stage 01</span>
-                    <span className="font-bold text-xs text-slate-800 block mt-0.5">Rapid Input</span>
-                    <span className="text-[10px] text-slate-500 block truncate">15m Scan</span>
+                {/* Stage Tabs */}
+                <div className="flex flex-wrap gap-1.5 mb-3">
+                  {STUDENT_CHALLENGES.map((item, idx) => (
+                    <button
+                      key={item.id}
+                      type="button"
+                      onClick={() => setActiveChallengeIdx(idx)}
+                      className={`text-[10px] sm:text-[11px] font-bold px-3 py-1.5 rounded-xl transition-all duration-200 cursor-pointer ${
+                        activeChallengeIdx === idx
+                          ? 'bg-[#1E1B4B] text-white shadow-sm scale-102 ring-2 ring-indigo-400/50'
+                          : 'bg-white/90 border border-slate-200/90 text-slate-700 hover:bg-white hover:border-indigo-300'
+                      }`}
+                    >
+                      {item.stageLabel}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Active Challenge & Solution Interactive Card */}
+                <div
+                  className="rounded-2xl border bg-white/95 backdrop-blur-md p-4 sm:p-5 shadow-sm transition-all duration-300"
+                  style={{
+                    borderColor: `${activeChallenge.accent}40`,
+                  }}
+                >
+                  <div className="flex items-center justify-between mb-2">
+                    <span
+                      className="font-mono text-[10px] sm:text-[10.5px] font-bold uppercase tracking-wider"
+                      style={{ color: activeChallenge.accent }}
+                    >
+                      {activeChallenge.tag}
+                    </span>
+                    <span className="font-mono text-[9px] text-slate-400">
+                      Phase 0{activeChallengeIdx + 1}
+                    </span>
                   </div>
 
-                  <div className="rounded-xl bg-indigo-50/70 p-2.5 border border-indigo-200 text-center relative">
-                    <span className="font-mono text-[8.5px] text-indigo-500 uppercase block font-bold">Stage 02</span>
-                    <span className="font-bold text-xs text-indigo-900 block mt-0.5">Feynman Test</span>
-                    <span className="text-[10px] text-indigo-600 font-semibold block truncate">Plain English</span>
+                  {/* Problem vs Solution Split */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-left">
+                    {/* The Problem / Struggle */}
+                    <div className="rounded-xl border border-rose-200 bg-rose-50/70 p-3">
+                      <div className="flex items-center gap-1.5 mb-1">
+                        <AlertCircle className="h-3.5 w-3.5 text-rose-600 shrink-0" />
+                        <span className="font-mono text-[9.5px] font-bold uppercase text-rose-700">
+                          The Pressure / Struggle:
+                        </span>
+                      </div>
+                      <p className="text-xs text-rose-950 font-medium leading-relaxed">
+                        {activeChallenge.problem}
+                      </p>
+                    </div>
+
+                    {/* The Conscious Solution */}
+                    <div
+                      className="rounded-xl border p-3"
+                      style={{
+                        backgroundColor: `${activeChallenge.accent}0D`,
+                        borderColor: `${activeChallenge.accent}35`,
+                      }}
+                    >
+                      <div className="flex items-center gap-1.5 mb-1">
+                        <CheckCircle2
+                          className="h-3.5 w-3.5 shrink-0"
+                          style={{ color: activeChallenge.accent }}
+                        />
+                        <span
+                          className="font-mono text-[9.5px] font-bold uppercase tracking-wider"
+                          style={{ color: activeChallenge.accent }}
+                        >
+                          Conscious Breakthrough:
+                        </span>
+                      </div>
+                      <p className="text-xs text-slate-900 font-semibold leading-relaxed">
+                        {activeChallenge.solution}
+                      </p>
+                    </div>
                   </div>
 
-                  <div className="rounded-xl bg-cyan-50/70 p-2.5 border border-cyan-200 text-center">
-                    <span className="font-mono text-[8.5px] text-cyan-600 uppercase block font-bold">Stage 03</span>
-                    <span className="font-bold text-xs text-cyan-950 block mt-0.5">Neural Lock</span>
-                    <span className="text-[10px] text-cyan-700 font-semibold block truncate">Permanent</span>
+                  {/* Immediate Actionable Micro-Step */}
+                  <div className="mt-2.5 pt-2 border-t border-slate-100 flex items-center justify-between text-[11px]">
+                    <span className="text-slate-500 font-medium">
+                      🎯 <strong className="text-slate-800">Direct Action:</strong> {activeChallenge.action}
+                    </span>
                   </div>
                 </div>
               </div>
 
-              {/* Bottom Grounded Executive Shift Chip */}
-              <div className="mt-3.5 p-3 rounded-xl bg-slate-50 border border-slate-200/80 flex items-center justify-between relative z-10">
-                <div className="flex items-center gap-2 overflow-hidden">
-                  <Sparkles className="h-4 w-4 shrink-0 text-amber-500" />
-                  <p className="text-xs text-slate-700 font-medium truncate italic">
-                    &ldquo;{activeMode.rule}&rdquo;
-                  </p>
-                </div>
-                <span className="font-mono text-[10px] font-bold text-slate-400 shrink-0 ml-2">
-                  100% Stillness
-                </span>
+              {/* CTA Buttons Row */}
+              <div className="flex flex-wrap items-center gap-3 pt-1">
+                <Link
+                  href="/signup"
+                  className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-[#4F46E5] to-[#7C3AED] px-6 py-3 text-xs sm:text-sm font-bold text-white shadow-[0_10px_25px_-5px_rgba(79,70,229,0.5)] hover:scale-105 active:scale-95 transition-all"
+                >
+                  <span>Claim 1-on-1 Student Mentorship</span>
+                  <ArrowRight className="h-4 w-4" />
+                </Link>
+
+                <a
+                  href="#flow-cockpit"
+                  className="inline-flex items-center gap-1.5 rounded-full bg-white/90 px-4 py-3 text-xs sm:text-sm font-bold text-slate-700 border border-slate-200/90 shadow-2xs hover:bg-white hover:border-indigo-300 transition-all"
+                >
+                  <span>Cognitive Cockpit &darr;</span>
+                </a>
+
+                <a
+                  href="#youth-arenas"
+                  className="inline-flex items-center gap-1 rounded-full px-3.5 py-3 text-xs sm:text-sm font-bold text-indigo-700 hover:text-indigo-900 transition-all"
+                >
+                  <span>4 Cognitive Engines</span>
+                  <ChevronRight className="h-4 w-4" />
+                </a>
               </div>
             </div>
-          </div>
 
+            {/* Right Column: Kept completely open so the photorealistic Indian students in the background photograph are unobstructed */}
+            <div className="hidden lg:block lg:col-span-5 pointer-events-none" />
+
+          </div>
         </div>
       </section>
 
@@ -953,6 +962,272 @@ export default function StudentLifeView() {
           </Link>
         </div>
       </section>
+
+      {/* =========================================================================
+          SECTION: NEURAL COGNITIVE FLOW COCKPIT (Interactive Radar & Flow Telemetry)
+          Relocated to bottom to keep Screen 1 airy and panoramic
+         ========================================================================= */}
+      <section id="flow-cockpit" className="relative z-10 px-4 sm:px-8 lg:px-12 max-w-5xl mx-auto py-12 scroll-mt-20 select-text">
+        <div className="text-center max-w-2xl mx-auto mb-8">
+          <div className="inline-flex items-center gap-2 rounded-full bg-white px-3.5 py-1 border border-indigo-200/90 shadow-2xs mb-2">
+            <Cpu className="h-3.5 w-3.5 text-[#4F46E5]" />
+            <span className="font-mono text-[10.5px] font-bold uppercase tracking-wider text-[#4F46E5]">
+              Interactive Cockpit &bull; Live Telemetry
+            </span>
+          </div>
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-[#0F172A] font-serif">
+            Neural Cognitive Flow Cockpit
+          </h2>
+          <p className="text-xs sm:text-sm text-slate-500 mt-1">
+            Toggle between the 4 cognitive states to view live retention velocity, working memory calibration, and Feynman recall protocols.
+          </p>
+        </div>
+
+        {/* 4 Mode Selectors Grid */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 mb-6">
+          {YOUTH_MODES.map((mode, idx) => {
+            const Icon = mode.icon;
+            const isSelected = activeModeIdx === idx;
+            return (
+              <button
+                key={mode.id}
+                type="button"
+                onClick={() => setActiveModeIdx(idx)}
+                className={`flex items-center gap-2 p-3 rounded-2xl border text-left transition-all duration-300 shadow-2xs cursor-pointer ${
+                  isSelected
+                    ? 'bg-white border-[#4F46E5] ring-2 ring-indigo-200 scale-102 shadow-sm'
+                    : 'bg-white/80 border-slate-200/80 hover:bg-white hover:border-indigo-300'
+                }`}
+              >
+                <div
+                  className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl text-white shadow-xs"
+                  style={{ backgroundColor: mode.accentColor }}
+                >
+                  <Icon className="h-4 w-4" />
+                </div>
+                <div className="overflow-hidden">
+                  <span className="font-mono text-[9px] font-bold text-slate-400 block truncate">
+                    {mode.tag}
+                  </span>
+                  <span className="text-xs font-bold text-slate-900 block truncate">
+                    {mode.label}
+                  </span>
+                </div>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* The Animated Cockpit Card */}
+        <div className="relative w-full rounded-3xl p-6 sm:p-8 bg-gradient-to-br from-white via-[#F8FAFF] to-indigo-50/40 border border-indigo-200/90 shadow-[0_20px_50px_-15px_rgba(79,70,229,0.18)] overflow-hidden">
+          {/* Ambient Mesh Glow behind widget */}
+          <div
+            className="absolute -top-12 -right-12 w-48 h-48 rounded-full blur-3xl pointer-events-none opacity-40 transition-colors duration-700"
+            style={{ backgroundColor: activeMode.accentColor }}
+          />
+          <div className="absolute -bottom-12 -left-12 w-48 h-48 rounded-full bg-cyan-400/20 blur-3xl pointer-events-none" />
+
+          {/* Top System Status Bar */}
+          <div className="flex items-center justify-between pb-3.5 mb-4 border-b border-indigo-100 relative z-10">
+            <div className="flex items-center gap-2">
+              <span className="relative flex h-2.5 w-2.5">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75" />
+                <span
+                  className="relative inline-flex rounded-full h-2.5 w-2.5"
+                  style={{ backgroundColor: activeMode.accentColor }}
+                />
+              </span>
+              <span className="font-mono text-[11px] font-bold text-slate-700 tracking-wider uppercase">
+                Cognitive State: {activeMode.headingTheme}
+              </span>
+            </div>
+            <div className="inline-flex items-center gap-1.5 rounded-full bg-indigo-50 px-3 py-1 border border-indigo-200/80 text-[10.5px] font-mono font-bold text-indigo-700">
+              <Cpu className="h-3 w-3" />
+              <span>{activeMode.radarLabel}</span>
+            </div>
+          </div>
+
+          {/* Centerpiece: The Animated Neural Circular Flow Gauge */}
+          <div className="relative flex items-center justify-center my-6 z-10">
+            {/* SVG Dual-Track Orbital Gauge */}
+            <svg className="w-52 h-52 sm:w-60 sm:h-60 -rotate-90 transform" viewBox="0 0 100 100">
+              {/* Background Track */}
+              <circle cx="50" cy="50" r="42" stroke="#E2E8F0" strokeWidth="4" fill="none" />
+              <circle cx="50" cy="50" r="34" stroke="#F1F5F9" strokeWidth="3" fill="none" />
+
+              {/* Outer Glowing Active Arc */}
+              <circle
+                cx="50"
+                cy="50"
+                r="42"
+                stroke={activeMode.accentColor}
+                strokeWidth="5"
+                strokeDasharray="264"
+                strokeDashoffset={
+                  activeModeIdx === 0 ? '55' : activeModeIdx === 1 ? '35' : activeModeIdx === 2 ? '20' : '45'
+                }
+                strokeLinecap="round"
+                fill="none"
+                className="transition-all duration-700 ease-out"
+              />
+
+              {/* Secondary Cyan Inner Arc */}
+              <circle
+                cx="50"
+                cy="50"
+                r="34"
+                stroke="#06B6D4"
+                strokeWidth="3.5"
+                strokeDasharray="213"
+                strokeDashoffset="60"
+                strokeLinecap="round"
+                fill="none"
+                className="transition-all duration-700 ease-out"
+              />
+            </svg>
+
+            {/* Center Core Disc */}
+            <div className="absolute flex flex-col items-center justify-center text-center p-4 rounded-full w-36 h-36 sm:w-40 sm:h-40 bg-white/95 border border-indigo-100 shadow-xl backdrop-blur-md">
+              <div
+                className="flex h-10 w-10 sm:h-11 sm:w-11 items-center justify-center rounded-2xl text-white shadow-md transition-all duration-500 mb-1"
+                style={{ backgroundColor: activeMode.accentColor }}
+              >
+                {React.createElement(activeMode.icon, { className: 'h-5 w-5' })}
+              </div>
+              <span className="font-mono text-base sm:text-lg font-black text-slate-900 leading-none">
+                {activeModeIdx === 0
+                  ? '3.4x'
+                  : activeModeIdx === 1
+                  ? '100%'
+                  : activeModeIdx === 2
+                  ? '0 min'
+                  : 'Top 1%'}
+              </span>
+              <span className="font-mono text-[9px] sm:text-[9.5px] uppercase font-bold text-slate-400 mt-0.5">
+                {activeModeIdx === 0
+                  ? 'Retention Velocity'
+                  : activeModeIdx === 1
+                  ? 'Panic Neutralized'
+                  : activeModeIdx === 2
+                  ? 'Doomscroll Leak'
+                  : 'Unfair Advantage'}
+              </span>
+            </div>
+
+            {/* Floating Satellite Telemetry Chips */}
+            <div className="absolute -top-1 left-2 sm:left-4 rounded-full bg-white/95 px-3 py-1 shadow-sm border border-slate-200 text-[10px] font-mono font-bold text-slate-700 flex items-center gap-1.5">
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+              <span>Deep Stasis Active</span>
+            </div>
+
+            <div className="absolute -bottom-1 right-2 sm:right-4 rounded-full bg-white/95 px-3 py-1 shadow-sm border border-slate-200 text-[10px] font-mono font-bold text-slate-700 flex items-center gap-1.5">
+              <Activity className="h-3 w-3 text-cyan-500" />
+              <span>Alpha: 10.4 Hz</span>
+            </div>
+          </div>
+
+          {/* 3-Stage Feynman Synthesis Pipeline */}
+          <div className="mt-4 pt-3.5 border-t border-indigo-100 relative z-10">
+            <div className="flex items-center justify-between mb-2">
+              <span className="font-mono text-[9.5px] uppercase font-bold text-slate-400 tracking-wider">
+                Sovereign Cognitive Pipeline
+              </span>
+              <span className="font-mono text-[10.5px] font-bold text-indigo-600">
+                Active Recall Cycle
+              </span>
+            </div>
+
+            <div className="grid grid-cols-3 gap-2">
+              <div className="rounded-xl bg-white p-2.5 border border-slate-200/90 text-center">
+                <span className="font-mono text-[8.5px] text-slate-400 uppercase block">Stage 01</span>
+                <span className="font-bold text-xs text-slate-800 block mt-0.5">Rapid Input</span>
+                <span className="text-[10px] text-slate-500 block truncate">15m Scan</span>
+              </div>
+
+              <div className="rounded-xl bg-indigo-50/70 p-2.5 border border-indigo-200 text-center relative">
+                <span className="font-mono text-[8.5px] text-indigo-500 uppercase block font-bold">Stage 02</span>
+                <span className="font-bold text-xs text-indigo-900 block mt-0.5">Feynman Test</span>
+                <span className="text-[10px] text-indigo-600 font-semibold block truncate">Plain English</span>
+              </div>
+
+              <div className="rounded-xl bg-cyan-50/70 p-2.5 border border-cyan-200 text-center">
+                <span className="font-mono text-[8.5px] text-cyan-600 uppercase block font-bold">Stage 03</span>
+                <span className="font-bold text-xs text-cyan-950 block mt-0.5">Neural Lock</span>
+                <span className="text-[10px] text-cyan-700 font-semibold block truncate">Permanent</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Bottom Grounded Executive Shift Chip */}
+          <div className="mt-3.5 p-3 rounded-xl bg-slate-50 border border-slate-200/80 flex items-center justify-between relative z-10">
+            <div className="flex items-center gap-2 overflow-hidden">
+              <Sparkles className="h-4 w-4 shrink-0 text-amber-500" />
+              <p className="text-xs text-slate-700 font-medium truncate italic">
+                &ldquo;{activeMode.rule}&rdquo;
+              </p>
+            </div>
+            <span className="font-mono text-[10px] font-bold text-slate-400 shrink-0 ml-2">
+              100% Stillness
+            </span>
+          </div>
+        </div>
+      </section>
+
+      {/* =========================================================================
+          SCREEN 5: EDITORIAL QUOTE & 10 DIMENSIONS HUB NAVIGATION
+         ========================================================================= */}
+      <section className="relative z-10 px-4 sm:px-8 lg:px-12 max-w-5xl mx-auto py-12 text-center select-text">
+        <div className="flex items-center justify-center gap-3 mb-5">
+          <span className="h-px w-20 bg-indigo-900/20" />
+          <span className="h-2 w-2 rounded-full bg-[#4F46E5]" />
+          <span className="h-px w-20 bg-indigo-900/20" />
+        </div>
+
+        <blockquote className="text-2xl sm:text-3xl font-serif italic text-[#0F172A] max-w-2xl mx-auto leading-relaxed">
+          &ldquo;True learning is not how much you swallow; it is how sharply your mind can construct, stay still under pressure, and navigate an authentic future.&rdquo;
+        </blockquote>
+        <p className="mt-2.5 font-mono text-xs sm:text-sm font-bold uppercase tracking-wider text-[#4F46E5]">
+          — Pranav Mahajan &bull; Dimension 06
+        </p>
+
+        <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
+          <Link
+            href="/individual/social-relationships"
+            className="inline-flex items-center gap-2.5 rounded-full border border-indigo-900/15 bg-white/90 px-6 py-3 text-sm font-bold text-[#0F172A] shadow-xs transition hover:bg-white hover:border-indigo-400 cursor-pointer"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            <span>Prev: Social Relationships</span>
+          </Link>
+
+          <Link
+            href="/individual#top"
+            className="inline-flex items-center gap-2.5 rounded-full bg-[#4F46E5] px-7 py-3 text-sm font-bold text-white shadow-md transition hover:bg-[#4338CA] cursor-pointer"
+          >
+            <span>Explore All 10 Dimensions</span>
+          </Link>
+
+          <Link
+            href="/individual/personal-development"
+            className="inline-flex items-center gap-2.5 rounded-full border border-indigo-900/15 bg-white/90 px-6 py-3 text-sm font-bold text-[#0F172A] shadow-xs transition hover:bg-white hover:border-indigo-400 cursor-pointer"
+          >
+            <span>Personal Development</span>
+            <ArrowRight className="h-4 w-4" />
+          </Link>
+        </div>
+      </section>
+
+      {/* Floating Smooth Scroll to Top Button */}
+      {showScrollTop && (
+        <button
+          type="button"
+          onClick={scrollToTop}
+          aria-label="Scroll to top"
+          className="fixed bottom-6 right-6 z-50 flex h-11 w-11 items-center justify-center rounded-full bg-[#4F46E5] text-white shadow-2xl hover:bg-[#4338CA] hover:scale-110 active:scale-95 transition-all duration-300 border border-white/20 animate-in fade-in cursor-pointer"
+          title="Back to Top"
+        >
+          <ArrowLeft className="h-5 w-5 rotate-90" />
+        </button>
+      )}
 
       {/* Footer */}
       <Footer />
