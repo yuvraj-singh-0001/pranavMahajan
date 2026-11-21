@@ -18,9 +18,10 @@ export default function SignUpPage() {
   const [dobYear, setDobYear] = useState('');
   const [location, setLocation] = useState('');
   const [classGrade, setClassGrade] = useState('');
-  const [accountType, setAccountType] = useState('Seeker');
+  const [accountType, setAccountType] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [isPasswordFocused, setIsPasswordFocused] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [unlocked, setUnlocked] = useState(false);
@@ -53,6 +54,15 @@ export default function SignUpPage() {
   const pwdHasSpecial = /[\d\W_]/.test(password);
   const pwdIsStrong = pwdHasMinLen && pwdHasUpper && pwdHasLower && pwdHasSpecial;
   const pwdMatch = password.length > 0 && confirmPassword.length > 0 && password === confirmPassword;
+
+  // Dynamic Password Requirements list (Items disappear from the list as the user fulfills them)
+  const pwdRules = [
+    { id: 'len', label: 'At least 8 characters', done: pwdHasMinLen },
+    { id: 'upper', label: '1 uppercase letter (A-Z)', done: pwdHasUpper },
+    { id: 'lower', label: '1 lowercase letter (a-z)', done: pwdHasLower },
+    { id: 'digit', label: '1 numeric digit (0-9)', done: /\d/.test(password) },
+  ];
+  const remainingRules = pwdRules.filter(r => !r.done);
 
   // Live real-time username validation and availability check
   const handleUsernameChange = (val: string) => {
@@ -248,22 +258,18 @@ export default function SignUpPage() {
           0%, 100% { opacity: 0.4; filter: blur(12px); transform: scale(1); }
           50% { opacity: 0.85; filter: blur(18px); transform: scale(1.2); }
         }
-        @keyframes btnHoverGlow {
-          0%, 100% {
-            box-shadow: 0 0 20px rgba(223, 165, 71, 0.4), inset 0 0 10px rgba(255, 230, 150, 0.3);
-          }
-          50% {
-            box-shadow: 0 0 35px rgba(251, 191, 36, 0.75), inset 0 0 20px rgba(255, 240, 180, 0.6);
-          }
+        * {
+          -webkit-tap-highlight-color: transparent !important;
         }
         .clean-input {
-          outline: none;
-          border: none;
-          background: transparent;
+          outline: none !important;
+          border: none !important;
+          background: transparent !important;
+          background-color: transparent !important;
           color: #ffffff;
           font-family: Georgia, serif;
           font-weight: 600;
-          font-size: clamp(0.72rem, 1.15vw, 0.98rem);
+          font-size: clamp(0.72rem, 1.45cqi, 1.05rem);
           letter-spacing: 0.02em;
           text-shadow: 0 1px 3px rgba(0,0,0,0.95), 0 0 6px rgba(255,220,130,0.4);
           box-sizing: border-box;
@@ -271,10 +277,34 @@ export default function SignUpPage() {
           caret-color: #ffd875;
           line-height: 1.2;
           z-index: 20;
+          box-shadow: none !important;
+          -webkit-box-shadow: none !important;
         }
-        .clean-input:focus {
-          background: rgba(255, 235, 170, 0.08);
-          border-radius: 2px;
+        .clean-input::placeholder {
+          color: transparent !important;
+          opacity: 0 !important;
+        }
+        .clean-input:focus,
+        .clean-input:focus-visible,
+        .clean-input:hover,
+        .clean-input:active {
+          background: transparent !important;
+          background-color: transparent !important;
+          outline: none !important;
+          border: none !important;
+          box-shadow: none !important;
+          -webkit-box-shadow: none !important;
+        }
+        input:-webkit-autofill,
+        input:-webkit-autofill:hover,
+        input:-webkit-autofill:focus,
+        input:-webkit-autofill:active {
+          -webkit-text-fill-color: #ffffff !important;
+          -webkit-box-shadow: 0 0 0px 1000px transparent inset !important;
+          box-shadow: 0 0 0px 1000px transparent inset !important;
+          transition: background-color 999999s ease-in-out 0s;
+          background-color: transparent !important;
+          background: transparent !important;
         }
       `}</style>
 
@@ -379,6 +409,7 @@ export default function SignUpPage() {
           width: 'min(100vw, calc(100vh * 1.7778))',
           height: 'min(100vh, calc(100vw / 1.7778))',
           aspectRatio: '16 / 9',
+          containerType: 'inline-size',
           zIndex: 5,
           display: 'flex',
           alignItems: 'center',
@@ -497,7 +528,6 @@ export default function SignUpPage() {
                   type="text"
                   value={fullName}
                   onChange={e => handleFullNameChange(e.target.value)}
-                  placeholder="e.g. Yuvraj Singh"
                   className="clean-input"
                   style={{
                     position: 'absolute',
@@ -509,39 +539,7 @@ export default function SignUpPage() {
                   required
                 />
 
-                {/* ── 2. Username Slot (Row 1 Right) ── */}
-                {/* 2a. Elegant Gold Header Plate concealing "Class / Grade" label */}
-                <div style={{
-                  position: 'absolute',
-                  left: '52.5%',
-                  top: '18.6%',
-                  width: '24.2%',
-                  height: '3.6%',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  background: 'linear-gradient(90deg, rgba(35, 20, 9, 0.96) 0%, rgba(65, 38, 16, 0.98) 50%, rgba(35, 20, 9, 0.96) 100%)',
-                  borderRadius: '4px',
-                  padding: '0 8px',
-                  border: '1px solid rgba(223, 165, 71, 0.55)',
-                  boxShadow: '0 2px 8px rgba(0,0,0,0.7), inset 0 1px 2px rgba(255,230,150,0.35)',
-                  zIndex: 15,
-                  pointerEvents: 'none',
-                }}>
-                  <span style={{ color: '#dfa547', fontSize: 'clamp(0.75rem, 1.05vw, 0.95rem)', fontWeight: 800 }}>@</span>
-                  <span style={{
-                    color: '#fbe6af',
-                    fontFamily: 'Georgia, serif',
-                    fontSize: 'clamp(0.65rem, 0.92vw, 0.85rem)',
-                    fontWeight: 700,
-                    textShadow: '0 1px 3px rgba(0,0,0,0.9)',
-                    letterSpacing: '0.02em',
-                  }}>
-                    Username (@handle)
-                  </span>
-                </div>
-
-                {/* 2b. Instagram-Style Username Handle Input */}
+                {/* ── 2. Username Handle (Row 1 Right) ── */}
                 <div style={{
                   position: 'absolute',
                   left: '52.8%',
@@ -552,21 +550,22 @@ export default function SignUpPage() {
                   alignItems: 'center',
                   zIndex: 20,
                 }}>
-                  <span style={{
-                    color: usernameStatus === 'available' ? '#34d399' : '#dfa547',
-                    fontWeight: 800,
-                    fontSize: 'clamp(0.75rem, 1.1vw, 0.95rem)',
-                    fontFamily: 'Georgia, serif',
-                    marginRight: '2px',
-                    textShadow: '0 0 6px rgba(223, 165, 71, 0.6)',
-                  }}>
-                    @
-                  </span>
+                  {username && (
+                    <span style={{
+                      color: usernameStatus === 'available' ? '#34d399' : '#dfa547',
+                      fontWeight: 800,
+                      fontSize: 'clamp(0.75rem, 1.4cqi, 0.95rem)',
+                      fontFamily: 'Georgia, serif',
+                      marginRight: '2px',
+                      textShadow: '0 0 6px rgba(223, 165, 71, 0.6)',
+                    }}>
+                      @
+                    </span>
+                  )}
                   <input
                     type="text"
                     value={username}
                     onChange={e => handleUsernameChange(e.target.value)}
-                    placeholder="username"
                     autoCapitalize="none"
                     autoCorrect="off"
                     spellCheck="false"
@@ -580,7 +579,7 @@ export default function SignUpPage() {
                   />
                 </div>
 
-                {/* 2c. Compact Live Username Availability Pill (Docked on Right edge of Slot 1) */}
+                {/* 2b. Live Username Availability Pill (Docked cleanly on Right edge of Row 1) */}
                 <div style={{
                   position: 'absolute',
                   left: '69.5%',
@@ -595,7 +594,7 @@ export default function SignUpPage() {
                 }}>
                   {usernameStatus === 'checking' && (
                     <span style={{
-                      fontSize: 'clamp(0.48rem, 0.68vw, 0.62rem)',
+                      fontSize: 'clamp(0.48rem, 0.85cqi, 0.62rem)',
                       color: '#ffd875',
                       background: 'rgba(45, 30, 12, 0.95)',
                       border: '1px solid rgba(223, 165, 71, 0.6)',
@@ -609,7 +608,7 @@ export default function SignUpPage() {
                   )}
                   {usernameStatus === 'available' && (
                     <span style={{
-                      fontSize: 'clamp(0.48rem, 0.68vw, 0.62rem)',
+                      fontSize: 'clamp(0.48rem, 0.85cqi, 0.62rem)',
                       color: '#a7f3d0',
                       background: 'rgba(6, 40, 24, 0.95)',
                       border: '1px solid rgba(52, 211, 153, 0.8)',
@@ -624,7 +623,7 @@ export default function SignUpPage() {
                   )}
                   {usernameStatus === 'taken' && (
                     <span style={{
-                      fontSize: 'clamp(0.48rem, 0.68vw, 0.62rem)',
+                      fontSize: 'clamp(0.48rem, 0.85cqi, 0.62rem)',
                       color: '#fecaca',
                       background: 'rgba(60, 15, 15, 0.95)',
                       border: '1px solid rgba(248, 113, 113, 0.8)',
@@ -636,9 +635,9 @@ export default function SignUpPage() {
                       ✕ Taken
                     </span>
                   )}
-                  {usernameStatus === 'invalid' && (
+                  {usernameStatus === 'invalid' && username.length > 0 && (
                     <span style={{
-                      fontSize: 'clamp(0.48rem, 0.68vw, 0.62rem)',
+                      fontSize: 'clamp(0.48rem, 0.85cqi, 0.62rem)',
                       color: '#fed7aa',
                       background: 'rgba(60, 30, 10, 0.95)',
                       border: '1px solid rgba(251, 146, 60, 0.8)',
@@ -657,60 +656,16 @@ export default function SignUpPage() {
                   type="email"
                   value={email}
                   onChange={e => setEmail(e.target.value)}
-                  placeholder="name@gmail.com"
                   className="clean-input"
                   style={{
                     position: 'absolute',
                     left: '20.5%',
                     top: '36.4%',
-                    width: '18.0%',
+                    width: '25.0%',
                     height: '3.8%',
                   }}
                   required
                 />
-                {/* 3b. Live Email Status Badge */}
-                {email.trim() && (
-                  <div style={{
-                    position: 'absolute',
-                    left: '38.8%',
-                    top: '36.4%',
-                    width: '6.8%',
-                    height: '3.8%',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'flex-end',
-                    zIndex: 22,
-                    pointerEvents: 'none',
-                  }}>
-                    {isEmailValid ? (
-                      <span style={{
-                        fontSize: 'clamp(0.48rem, 0.68vw, 0.62rem)',
-                        color: '#a7f3d0',
-                        background: 'rgba(6, 40, 24, 0.92)',
-                        border: '1px solid rgba(52, 211, 153, 0.7)',
-                        borderRadius: '3px',
-                        padding: '1px 5px',
-                        fontWeight: 700,
-                        whiteSpace: 'nowrap',
-                      }}>
-                        ✓ Valid
-                      </span>
-                    ) : (
-                      <span style={{
-                        fontSize: 'clamp(0.46rem, 0.65vw, 0.58rem)',
-                        color: '#fed7aa',
-                        background: 'rgba(60, 30, 10, 0.92)',
-                        border: '1px solid rgba(251, 146, 60, 0.7)',
-                        borderRadius: '3px',
-                        padding: '1px 4px',
-                        fontWeight: 600,
-                        whiteSpace: 'nowrap',
-                      }}>
-                        ⚠️ Need domain
-                      </span>
-                    )}
-                  </div>
-                )}
 
                 {/* ── 4. Account Type (Row 2 Right - Select) ── */}
                 <select
@@ -742,67 +697,24 @@ export default function SignUpPage() {
                   type="tel"
                   value={mobile}
                   onChange={e => handleMobileChange(e.target.value)}
-                  placeholder="10-digit number"
                   maxLength={10}
                   className="clean-input"
                   style={{
                     position: 'absolute',
                     left: '20.5%',
                     top: '50.0%',
-                    width: '18.0%',
+                    width: '25.0%',
                     height: '3.8%',
                   }}
                 />
-                {/* 5b. Live Mobile Counter / Status */}
-                {mobile.length > 0 && (
-                  <div style={{
-                    position: 'absolute',
-                    left: '38.8%',
-                    top: '50.0%',
-                    width: '6.8%',
-                    height: '3.8%',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'flex-end',
-                    zIndex: 22,
-                    pointerEvents: 'none',
-                  }}>
-                    {mobile.length === 10 ? (
-                      <span style={{
-                        fontSize: 'clamp(0.48rem, 0.68vw, 0.62rem)',
-                        color: '#a7f3d0',
-                        background: 'rgba(6, 40, 24, 0.92)',
-                        border: '1px solid rgba(52, 211, 153, 0.7)',
-                        borderRadius: '3px',
-                        padding: '1px 5px',
-                        fontWeight: 700,
-                        whiteSpace: 'nowrap',
-                      }}>
-                        ✓ 10 digits
-                      </span>
-                    ) : (
-                      <span style={{
-                        fontSize: 'clamp(0.48rem, 0.68vw, 0.62rem)',
-                        color: '#fed7aa',
-                        background: 'rgba(60, 30, 10, 0.92)',
-                        border: '1px solid rgba(251, 146, 60, 0.7)',
-                        borderRadius: '3px',
-                        padding: '1px 5px',
-                        fontWeight: 600,
-                        whiteSpace: 'nowrap',
-                      }}>
-                        {mobile.length}/10
-                      </span>
-                    )}
-                  </div>
-                )}
 
                 {/* ── 6. Create Password (Row 3 Right) ── */}
                 <input
                   type={showPassword ? 'text' : 'password'}
                   value={password}
                   onChange={e => setPassword(e.target.value)}
-                  placeholder="Min 8 chars, 1 uppercase, 1 symbol"
+                  onFocus={() => setIsPasswordFocused(true)}
+                  onBlur={() => setTimeout(() => setIsPasswordFocused(false), 200)}
                   className="clean-input"
                   style={{
                     position: 'absolute',
@@ -832,75 +744,65 @@ export default function SignUpPage() {
                   title={showPassword ? 'Hide password' : 'Show password'}
                 />
 
-                {/* ── 6b. Live Password Requirements Interactive Checklist (Between Row 3 & 4) ── */}
-                <div style={{
-                  position: 'absolute',
-                  left: '52.6%',
-                  top: '55.2%',
-                  width: '24.6%',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '4px',
-                  zIndex: 22,
-                  pointerEvents: 'none',
-                  flexWrap: 'wrap',
-                }}>
-                  {/* Rule 1: 8+ chars */}
-                  <span style={{
-                    fontSize: 'clamp(0.44rem, 0.64vw, 0.58rem)',
-                    color: pwdHasMinLen ? '#a7f3d0' : 'rgba(251, 230, 175, 0.55)',
-                    background: pwdHasMinLen ? 'rgba(6, 40, 24, 0.92)' : 'rgba(30, 18, 8, 0.85)',
-                    border: `1px solid ${pwdHasMinLen ? 'rgba(52, 211, 153, 0.7)' : 'rgba(223, 165, 71, 0.35)'}`,
-                    borderRadius: '3px',
-                    padding: '1px 4px',
-                    fontWeight: pwdHasMinLen ? 700 : 500,
-                    transition: 'all 0.2s ease',
-                  }}>
-                    {pwdHasMinLen ? '✓' : '◯'} 8+ chars
-                  </span>
-
-                  {/* Rule 2: A-Z */}
-                  <span style={{
-                    fontSize: 'clamp(0.44rem, 0.64vw, 0.58rem)',
-                    color: pwdHasUpper ? '#a7f3d0' : 'rgba(251, 230, 175, 0.55)',
-                    background: pwdHasUpper ? 'rgba(6, 40, 24, 0.92)' : 'rgba(30, 18, 8, 0.85)',
-                    border: `1px solid ${pwdHasUpper ? 'rgba(52, 211, 153, 0.7)' : 'rgba(223, 165, 71, 0.35)'}`,
-                    borderRadius: '3px',
-                    padding: '1px 4px',
-                    fontWeight: pwdHasUpper ? 700 : 500,
-                    transition: 'all 0.2s ease',
-                  }}>
-                    {pwdHasUpper ? '✓' : '◯'} A-Z
-                  </span>
-
-                  {/* Rule 3: a-z */}
-                  <span style={{
-                    fontSize: 'clamp(0.44rem, 0.64vw, 0.58rem)',
-                    color: pwdHasLower ? '#a7f3d0' : 'rgba(251, 230, 175, 0.55)',
-                    background: pwdHasLower ? 'rgba(6, 40, 24, 0.92)' : 'rgba(30, 18, 8, 0.85)',
-                    border: `1px solid ${pwdHasLower ? 'rgba(52, 211, 153, 0.7)' : 'rgba(223, 165, 71, 0.35)'}`,
-                    borderRadius: '3px',
-                    padding: '1px 4px',
-                    fontWeight: pwdHasLower ? 700 : 500,
-                    transition: 'all 0.2s ease',
-                  }}>
-                    {pwdHasLower ? '✓' : '◯'} a-z
-                  </span>
-
-                  {/* Rule 4: Number / Symbol */}
-                  <span style={{
-                    fontSize: 'clamp(0.44rem, 0.64vw, 0.58rem)',
-                    color: pwdHasSpecial ? '#a7f3d0' : 'rgba(251, 230, 175, 0.55)',
-                    background: pwdHasSpecial ? 'rgba(6, 40, 24, 0.92)' : 'rgba(30, 18, 8, 0.85)',
-                    border: `1px solid ${pwdHasSpecial ? 'rgba(52, 211, 153, 0.7)' : 'rgba(223, 165, 71, 0.35)'}`,
-                    borderRadius: '3px',
-                    padding: '1px 4px',
-                    fontWeight: pwdHasSpecial ? 700 : 500,
-                    transition: 'all 0.2s ease',
-                  }}>
-                    {pwdHasSpecial ? '✓' : '◯'} 0-9 / Symbol
-                  </span>
-                </div>
+                {/* Dynamic Password Requirements Popover (Floats under Password, rules disappear as satisfied) */}
+                {isPasswordFocused && remainingRules.length > 0 && (
+                  <div
+                    style={{
+                      position: 'absolute',
+                      left: '52.5%',
+                      top: '54.6%',
+                      width: '26.0%',
+                      background: 'linear-gradient(145deg, rgba(22, 13, 6, 0.98) 0%, rgba(38, 22, 10, 0.98) 100%)',
+                      border: '1.5px solid rgba(223, 165, 71, 0.85)',
+                      borderRadius: '8px',
+                      padding: '0.55rem 0.75rem',
+                      boxShadow: '0 8px 30px rgba(0,0,0,0.95), 0 0 15px rgba(223, 165, 71, 0.25)',
+                      zIndex: 45,
+                      backdropFilter: 'blur(8px)',
+                      pointerEvents: 'none',
+                    }}
+                  >
+                    <div
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        color: '#ffd875',
+                        fontSize: 'clamp(0.62rem, 1.05cqi, 0.82rem)',
+                        fontWeight: 700,
+                        fontFamily: 'Georgia, serif',
+                        marginBottom: '0.35rem',
+                        textShadow: '0 1px 2px rgba(0,0,0,0.8)',
+                      }}
+                    >
+                      <span style={{ fontSize: '0.9em' }}>🔒</span>
+                      <span>Password Requirements:</span>
+                    </div>
+                    <ul
+                      style={{
+                        margin: 0,
+                        paddingLeft: '1.15rem',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '0.22rem',
+                      }}
+                    >
+                      {remainingRules.map(r => (
+                        <li
+                          key={r.id}
+                          style={{
+                            color: '#fbe6af',
+                            fontSize: 'clamp(0.55rem, 0.92cqi, 0.72rem)',
+                            fontFamily: 'Georgia, serif',
+                            lineHeight: 1.3,
+                          }}
+                        >
+                          {r.label}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
 
                 {/* ── 7. Date of Birth (Row 4 Left: DD / MM / YYYY) ── */}
                 <input
@@ -908,7 +810,6 @@ export default function SignUpPage() {
                   value={dobDay}
                   onChange={e => setDobDay(e.target.value.replace(/\D/g, '').slice(0, 2))}
                   maxLength={2}
-                  placeholder="DD"
                   className="clean-input"
                   style={{
                     position: 'absolute',
@@ -924,7 +825,6 @@ export default function SignUpPage() {
                   value={dobMonth}
                   onChange={e => setDobMonth(e.target.value.replace(/\D/g, '').slice(0, 2))}
                   maxLength={2}
-                  placeholder="MM"
                   className="clean-input"
                   style={{
                     position: 'absolute',
@@ -940,7 +840,6 @@ export default function SignUpPage() {
                   value={dobYear}
                   onChange={e => setDobYear(e.target.value.replace(/\D/g, '').slice(0, 4))}
                   maxLength={4}
-                  placeholder="YYYY"
                   className="clean-input"
                   style={{
                     position: 'absolute',
@@ -957,7 +856,6 @@ export default function SignUpPage() {
                   type={showConfirmPassword ? 'text' : 'password'}
                   value={confirmPassword}
                   onChange={e => setConfirmPassword(e.target.value)}
-                  placeholder="Re-enter password"
                   className="clean-input"
                   style={{
                     position: 'absolute',
@@ -991,7 +889,7 @@ export default function SignUpPage() {
                   <div style={{
                     position: 'absolute',
                     left: '54.8%',
-                    top: '68.2%',
+                    top: '68.0%',
                     width: '22.0%',
                     display: 'flex',
                     alignItems: 'center',
@@ -1000,7 +898,7 @@ export default function SignUpPage() {
                   }}>
                     {pwdMatch ? (
                       <span style={{
-                        fontSize: 'clamp(0.48rem, 0.68vw, 0.62rem)',
+                        fontSize: 'clamp(0.48rem, 0.85cqi, 0.62rem)',
                         color: '#a7f3d0',
                         background: 'rgba(6, 40, 24, 0.95)',
                         border: '1px solid rgba(52, 211, 153, 0.7)',
@@ -1012,7 +910,7 @@ export default function SignUpPage() {
                       </span>
                     ) : (
                       <span style={{
-                        fontSize: 'clamp(0.48rem, 0.68vw, 0.62rem)',
+                        fontSize: 'clamp(0.48rem, 0.85cqi, 0.62rem)',
                         color: '#fecaca',
                         background: 'rgba(60, 15, 15, 0.95)',
                         border: '1px solid rgba(248, 113, 113, 0.7)',
@@ -1031,7 +929,6 @@ export default function SignUpPage() {
                   type="text"
                   value={location}
                   onChange={e => setLocation(e.target.value)}
-                  placeholder="e.g. New Delhi"
                   className="clean-input"
                   style={{
                     position: 'absolute',
@@ -1045,6 +942,7 @@ export default function SignUpPage() {
                 {/* ── 10. CREATE ACCOUNT BUTTON (Over the golden badge) ── */}
                 <button
                   type="submit"
+                  disabled={isSubmitting}
                   style={{
                     position: 'absolute',
                     left: '51.5%',
@@ -1054,14 +952,12 @@ export default function SignUpPage() {
                     background: 'transparent',
                     border: 'none',
                     borderRadius: '8px',
-                    cursor: 'pointer',
+                    cursor: isSubmitting ? 'wait' : 'pointer',
                     zIndex: 25,
-                    animation: 'btnHoverGlow 3s ease-in-out infinite',
-                    transition: 'transform 0.15s',
+                    outline: 'none',
+                    boxShadow: 'none',
                   }}
-                  onMouseEnter={e => (e.currentTarget.style.transform = 'scale(1.02)')}
-                  onMouseLeave={e => (e.currentTarget.style.transform = 'scale(1)')}
-                  title="Click to Create Account"
+                  title="Create Account"
                 />
 
                 {/* Toggle Link below book */}
@@ -1153,7 +1049,6 @@ export default function SignUpPage() {
                         type="text"
                         value={signInIdentifier}
                         onChange={e => setSignInIdentifier(e.target.value)}
-                        placeholder="@username or email"
                         autoCapitalize="none"
                         style={{
                           width: '100%',
@@ -1178,7 +1073,6 @@ export default function SignUpPage() {
                         type="password"
                         value={signInPassword}
                         onChange={e => setSignInPassword(e.target.value)}
-                        placeholder="Enter your password"
                         style={{
                           width: '100%',
                           padding: '0.5rem 0.7rem',
