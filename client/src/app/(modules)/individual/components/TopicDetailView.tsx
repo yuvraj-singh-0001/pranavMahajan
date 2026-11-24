@@ -13,6 +13,9 @@ import ParentingChildView from './ParentingChildView';
 import SocialRelationshipsView from './SocialRelationshipsView';
 import StudentLifeView from './StudentLifeView';
 import ProfessionalDevelopmentView from './ProfessionalDevelopmentView';
+import SpiritualityPhilosophyView from './SpiritualityPhilosophyView';
+import LifeTransitionsView from './LifeTransitionsView';
+import TechnologyLiteracyView from './TechnologyLiteracyView';
 
 const navigation = [
   { href: '/individual#top', label: 'Explore Life & Growth' },
@@ -68,6 +71,18 @@ export default function TopicDetailView({ slug }: { slug: string }) {
 
   if (topic.id === 'professional-development') {
     return <ProfessionalDevelopmentView />;
+  }
+
+  if (topic.id === 'spirituality-philosophy') {
+    return <SpiritualityPhilosophyView />;
+  }
+
+  if (topic.id === 'life-transitions') {
+    return <LifeTransitionsView />;
+  }
+
+  if (topic.id === 'technology-literacy') {
+    return <TechnologyLiteracyView />;
   }
 
   const currentIndex = TOPICS.findIndex((t) => t.id === topic.id);

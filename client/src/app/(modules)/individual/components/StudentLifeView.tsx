@@ -448,15 +448,17 @@ export default function StudentLifeView() {
          ========================================================================= */}
       <section className="relative z-10 min-h-[94vh] flex items-center pt-24 sm:pt-28 pb-12 sm:pb-16 select-text overflow-hidden">
         {/* Full-Bleed Photorealistic Background Image */}
-        <div className="absolute inset-0 z-0 pointer-events-none">
+        <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
           <img
             src="/student-life-hero.jpg"
             alt="Student Life & Youth Mentorship"
             className="h-full w-full object-cover object-center lg:object-right"
           />
-          {/* Luminous Soft Mist Gradient Overlay for crystal clear readability on the left */}
-          <div className="absolute inset-0 bg-gradient-to-r from-[#F8FAFF] via-[#F8FAFF]/95 to-transparent sm:via-[#F8FAFF]/80 lg:to-transparent" />
-          <div className="absolute inset-0 bg-gradient-to-t from-[#F8FAFF] via-transparent to-transparent" />
+          {/* Top Luminous White Mist Overlay */}
+          <div className="absolute inset-x-0 top-0 h-44 sm:h-60 bg-gradient-to-b from-white/85 via-white/35 to-transparent pointer-events-none" />
+          {/* Luminous Soft White Mist Gradient Overlay for crystal clear readability on the left */}
+          <div className="absolute inset-0 bg-gradient-to-r from-white/95 via-white/60 to-transparent sm:w-[70%] pointer-events-none" />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#F8FAFF] via-[#F8FAFF]/30 to-transparent pointer-events-none" />
         </div>
 
         <div className="relative z-10 px-4 sm:px-8 lg:px-12 max-w-7xl mx-auto w-full">

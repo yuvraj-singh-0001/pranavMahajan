@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import TopicDetailView from '../components/TopicDetailView';
+import TechnologyLiteracyView from '../components/TechnologyLiteracyView';
 import { getTopicById } from '@/data/topicsData';
 
 const SLUG = 'technology-literacy';
@@ -7,11 +7,11 @@ const SLUG = 'technology-literacy';
 export function generateMetadata(): Metadata {
   const topic = getTopicById(SLUG);
   return {
-    title: `${topic?.title ?? 'Technology Literacy'} | Pranav Mahajan`,
+    title: `${topic?.title ?? 'Technology & AI Literacy'} | Pranav Mahajan`,
     description: topic?.tagline,
   };
 }
 
 export default function Page() {
-  return <TopicDetailView slug={SLUG} />;
+  return <TechnologyLiteracyView />;
 }

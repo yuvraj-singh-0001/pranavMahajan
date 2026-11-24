@@ -335,24 +335,44 @@ export default function ParentingChildView() {
     >
       <RoleCursor role="individual" isActive />
 
-      {/* Official Fixed Header */}
-      <header className="fixed inset-x-0 top-0 z-50 flex items-center justify-between border-b border-emerald-900/10 bg-[#FAF8F5]/90 px-4 py-2.5 sm:px-8 lg:px-12 xl:px-16 backdrop-blur-md">
-        <div className="flex items-center gap-2 sm:gap-3">
-          <Link href="/" aria-label="Pranav Mahajan home" className="inline-flex items-center group">
+      {/* =========================================================================
+          OFFICIAL NAVBAR (Identical to Home & Role Page)
+         ========================================================================= */}
+      <header className="fixed inset-x-0 top-0 z-50 flex items-center justify-between border-b border-amber-500/15 bg-black/40 px-4 py-2.5 backdrop-blur-md sm:border-b-0 sm:bg-transparent sm:px-10 lg:px-14 2xl:px-20 sm:py-5 sm:backdrop-blur-none transition-all duration-500">
+        <div className="flex items-center">
+          <button
+            type="button"
+            onClick={() => {
+              if (typeof window !== 'undefined') {
+                if (window.history.length > 1) {
+                  window.history.back();
+                } else {
+                  window.location.assign('/');
+                }
+              }
+            }}
+            aria-label="Go back"
+            title="Back"
+            className="mr-2 flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-amber-500/40 bg-[#16120e]/90 text-amber-200 transition hover:bg-[#2e2318] hover:text-white sm:mr-3 sm:h-10 sm:w-10 shadow-md cursor-pointer"
+          >
+            <ArrowLeft className="h-4 w-4" />
+          </button>
+
+          <Link href="/" aria-label="Pranav Mahajan home" className="inline-flex items-center group cursor-pointer transition-transform hover:scale-105">
             <img
               src="/pranav_mahajan_transparent.png"
-              alt="Pranav Mahajan"
-              className="h-9 sm:h-12 w-auto object-contain drop-shadow-[0_4px_20px_rgba(223,165,71,0.4)] transition-transform duration-300 group-hover:scale-105"
+              alt="Pranav Mahajan Logo"
+              className="h-10 w-auto object-contain drop-shadow-[0_4px_20px_rgba(223,165,71,0.4)] sm:h-16 md:h-20"
             />
           </Link>
         </div>
 
         <div className="flex items-center gap-2 sm:gap-3">
           <Link
-            href="/signup"
-            className="inline-flex items-center justify-center rounded-full border border-emerald-500/50 bg-[#0F382B] px-4 py-1.5 text-xs sm:text-sm font-bold tracking-wide text-emerald-200 shadow-xs backdrop-blur-md transition-all duration-300 hover:scale-105 hover:bg-[#154D3C] hover:text-white sm:px-5 sm:py-2"
+            href="/#roles"
+            className="inline-flex items-center justify-center gap-1.5 py-1.5 sm:py-2 px-3.5 sm:px-5 text-xs font-bold tracking-wide rounded-full text-amber-200 border border-amber-500/50 bg-[#1e1710]/80 hover:bg-[#2e2318] hover:border-amber-400 hover:text-white transition-all shadow-[0_4px_16px_rgba(223,165,71,0.2)] hover:scale-105 active:scale-95 backdrop-blur-md cursor-pointer"
           >
-            Sign Up
+            Go to your role
           </Link>
 
           <button
@@ -360,15 +380,15 @@ export default function ParentingChildView() {
             aria-label={menuOpen ? 'Close navigation menu' : 'Open navigation menu'}
             aria-expanded={menuOpen}
             onClick={() => setMenuOpen((open) => !open)}
-            className="flex h-9 w-9 sm:h-10 sm:w-10 flex-col items-center justify-center gap-1 rounded-xl border border-emerald-900/15 bg-white text-emerald-950 shadow-xs backdrop-blur-md transition-all duration-200 hover:bg-emerald-50 active:scale-95"
+            className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl flex flex-col items-center justify-center gap-1 cursor-pointer transition-all shadow-md bg-[#16120e]/90 hover:bg-[#221b14] border border-amber-500/30 text-white backdrop-blur-md"
           >
             {menuOpen ? (
-              <X className="h-5 w-5 text-emerald-700" />
+              <X className="h-5 w-5 text-amber-200" />
             ) : (
               <>
-                <span className="h-0.5 w-4 rounded-full bg-emerald-900" />
-                <span className="ml-3.5 h-0.5 w-3 self-start rounded-full bg-[#10b981]" />
-                <span className="h-0.5 w-4 rounded-full bg-emerald-900" />
+                <span className="h-0.5 w-4 rounded-full bg-amber-100" />
+                <span className="ml-3.5 h-0.5 w-3 self-start rounded-full bg-[#DFA547]" />
+                <span className="h-0.5 w-4 rounded-full bg-amber-100" />
               </>
             )}
           </button>
@@ -459,10 +479,11 @@ export default function ParentingChildView() {
             alt="Parenting & Child Development Mentorship Sanctuary - 7 Stages of Raising a Flourishing Human"
             className="w-full h-full object-cover object-center filter saturate-[1.06] brightness-[1.01]"
           />
+          {/* Top Luminous White Mist Overlay */}
+          <div className="absolute inset-x-0 top-0 h-44 sm:h-60 bg-gradient-to-b from-white/85 via-white/35 to-transparent pointer-events-none" />
           {/* Subtle Balanced Vignettes (Soft left text backing, crystal clear characters) */}
           <div className="absolute inset-0 bg-gradient-to-t from-[#FAF8F5] via-[#FAF8F5]/30 to-transparent pointer-events-none" />
-          <div className="absolute inset-0 bg-gradient-to-r from-[#FAF8F5]/95 via-[#FAF8F5]/55 to-transparent pointer-events-none sm:w-[72%]" />
-          <div className="absolute inset-0 bg-gradient-to-b from-[#FAF8F5]/50 via-transparent to-transparent pointer-events-none" />
+          <div className="absolute inset-0 bg-gradient-to-r from-white/95 via-white/55 to-transparent pointer-events-none sm:w-[72%]" />
         </div>
 
         <div className="relative z-10 max-w-7xl mx-auto w-full flex items-center my-auto">
