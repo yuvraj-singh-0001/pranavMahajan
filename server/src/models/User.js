@@ -7,7 +7,7 @@ import mongoose from 'mongoose';
  * 3. Allowed characters: lowercase letters (a-z), digits (0-9), underscores (_), and periods (.)
  * 4. Must not be a reserved system name
  */
-export const USERNAME_REGEX = /^[a-z0-9_.]+$/;
+export const USERNAME_REGEX = /^[a-zA-Z0-9_.-]+$/;
 export const RESERVED_USERNAMES = [
   'admin',
   'administrator',
@@ -40,7 +40,7 @@ export function validateUsernameFormat(rawUsername) {
     return { valid: false, error: 'Username must be 30 characters or fewer.' };
   }
   if (!USERNAME_REGEX.test(clean)) {
-    return { valid: false, error: 'Username can only contain letters, numbers, underscores (_), and dots (.).' };
+    return { valid: false, error: 'Username can only contain letters, numbers, hyphens (-), underscores (_), and dots (.).' };
   }
   if (!/\d/.test(clean)) {
     return { valid: false, error: 'Username must contain at least 1 digit (0-9).' };

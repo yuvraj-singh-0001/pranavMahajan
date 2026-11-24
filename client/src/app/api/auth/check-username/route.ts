@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
+import { isUsernameTaken } from '@/lib/userStore';
 
-export const USERNAME_REGEX = /^[a-z0-9_.]+$/;
+export const USERNAME_REGEX = /^[a-zA-Z0-9_.-]+$/;
 export const RESERVED_USERNAMES = [
   'admin',
   'administrator',
@@ -26,7 +27,8 @@ export function validateUsernameFormat(rawUsername: string) {
   if (!rawUsername || typeof rawUsername !== 'string') {
     return { valid: false, error: 'Username is required.' };
   }
-  const clean = rawUsername.trim().toLowerCase();
+  const clean = rawUsername.trim();
+  const lower = clean.toLowerCase();
   if (clean.length < 4) {
     return { valid: false, error: 'Username must be at least 4 characters long.' };
   }
@@ -34,12 +36,12 @@ export function validateUsernameFormat(rawUsername: string) {
     return { valid: false, error: 'Username must be 30 characters or fewer.' };
   }
   if (!USERNAME_REGEX.test(clean)) {
-    return { valid: false, error: 'Username can only contain letters, numbers, underscores (_), and dots (.).' };
+    return { valid: false, error: 'Username can only contain letters, numbers, hyphens (-), underscores (_), and dots (.).' };
   }
   if (!/\d/.test(clean)) {
     return { valid: false, error: 'Username must contain at least 1 digit (0-9).' };
   }
-  if (RESERVED_USERNAMES.includes(clean)) {
+  if (RESERVED_USERNAMES.includes(lower)) {
     return { valid: false, error: 'This username is reserved. Please choose another one.' };
   }
   return { valid: true, username: clean };
@@ -73,13 +75,14 @@ export async function GET(request: Request) {
       success: true,
       available: false,
       formatValid: false,
-      username: usernameParam.trim().toLowerCase(),
+      username: usernameParam.trim(),
       error: formatCheck.error,
     });
   }
 
   const clean = formatCheck.username!;
-  if (TAKEN_USERNAMES.has(clean)) {
+  const lower = clean.toLowerCase();
+  if (TAKEN_USERNAMES.has(lower) || TAKEN_USERNAMES.has(clean) || isUsernameTaken(clean)) {
     return NextResponse.json({
       success: true,
       available: false,

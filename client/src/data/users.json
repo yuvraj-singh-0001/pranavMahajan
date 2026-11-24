@@ -1,0 +1,38 @@
+[
+  {
+    "username": "IO-yuvraj001",
+    "fullName": "Yuvraj Singh",
+    "email": "yuvraj@gmail.com",
+    "passwordHash": "Pass@123",
+    "accountType": "Individual",
+    "accountCategory": "individual",
+    "createdAt": "2026-11-24T06:05:16.463Z"
+  },
+  {
+    "username": "OI-company01",
+    "fullName": "Acme Innovation Corp",
+    "email": "contact@acme.com",
+    "passwordHash": "Pass@123",
+    "accountType": "Corporate",
+    "accountCategory": "organization",
+    "createdAt": "2026-11-24T06:05:16.463Z"
+  },
+  {
+    "username": "pranav01",
+    "fullName": "Pranav Mahajan",
+    "email": "pranav@test.com",
+    "passwordHash": "Pass@123",
+    "accountType": "Mentor",
+    "accountCategory": "individual",
+    "createdAt": "2026-11-24T06:05:16.463Z"
+  },
+  {
+    "username": "OI-company8296",
+    "fullName": "Acme Enterprise Ltd",
+    "email": "company8296@enterprise.org",
+    "passwordHash": "Password@123",
+    "accountType": "Corporate",
+    "accountCategory": "organization",
+    "createdAt": "2026-11-24T06:43:28.366Z"
+  }
+]

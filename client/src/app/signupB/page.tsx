@@ -82,7 +82,7 @@ export default function SignUpBPage() {
 
   // Live real-time username availability check
   const handleUsernameChange = (val: string) => {
-    const clean = val.toLowerCase().replace(/[^a-z0-9_.]/g, '');
+    const clean = val.toLowerCase().replace(/[^a-z0-9_.-]/g, '');
     setUsername(clean);
 
     if (checkTimeoutRef.current) clearTimeout(checkTimeoutRef.current);

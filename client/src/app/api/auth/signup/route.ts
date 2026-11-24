@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { validateUsernameFormat } from '../check-username/route';
+import { createUser, isUsernameTaken, isEmailTaken } from '@/lib/userStore';
 
 export async function POST(request: Request) {
   try {
@@ -66,14 +67,41 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: false, error: formatCheck.error }, { status: 400 });
     }
 
+    // Uniqueness checks in persistent store
+    if (isUsernameTaken(formatCheck.username!)) {
+      return NextResponse.json({ success: false, error: 'This username is already taken. Please choose another.' }, { status: 409 });
+    }
+    if (isEmailTaken(cleanEmail)) {
+      return NextResponse.json({ success: false, error: 'An account with this email already exists.' }, { status: 409 });
+    }
+
+    // Persist new user
+    const createResult = createUser({
+      username: formatCheck.username!,
+      fullName: fullName.trim(),
+      email: cleanEmail,
+      password,
+      mobile: body.mobile,
+      accountType: body.accountType,
+      accountCategory: body.accountCategory,
+      location: body.location,
+      dob: body.dob,
+    });
+
+    if (!createResult.success || !createResult.user) {
+      return NextResponse.json({ success: false, error: createResult.error || 'Failed to save user account.' }, { status: 500 });
+    }
+
+    const savedUser = createResult.user;
     return NextResponse.json({
       success: true,
       message: 'Account created successfully!',
       user: {
-        username: formatCheck.username,
-        fullName: fullName.trim(),
-        email: email.trim().toLowerCase(),
-        accountType: body.accountType || 'Seeker',
+        username: savedUser.username,
+        fullName: savedUser.fullName,
+        email: savedUser.email,
+        accountType: savedUser.accountType,
+        accountCategory: savedUser.accountCategory,
       },
     });
   } catch (err: any) {

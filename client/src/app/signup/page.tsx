@@ -73,8 +73,8 @@ export default function SignUpPage() {
 
   // Live real-time username validation and availability check
   const handleUsernameChange = (val: string) => {
-    // lowercase & clean to handle characters (a-z, 0-9, _, .)
-    const clean = val.toLowerCase().replace(/[^a-z0-9_.]/g, '');
+    // lowercase & clean to handle characters (a-z, 0-9, _, ., -)
+    const clean = val.toLowerCase().replace(/[^a-z0-9_.-]/g, '');
     setUsername(clean);
 
     if (checkTimeoutRef.current) {

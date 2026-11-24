@@ -2,12 +2,14 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
-import { User, Eye, EyeOff, Check, ChevronDown, ArrowLeft } from 'lucide-react';
+import { User, Eye, EyeOff, Check, ChevronDown, ArrowLeft, Building2 } from 'lucide-react';
 
 export default function SignUpAPage() {
   const [mode, setMode] = useState<'signup' | 'signin'>('signup');
-  const [step, setStep] = useState<1 | 2>(1);
+  const [step, setStep] = useState<0 | 1 | 2>(0);
   const [spinType, setSpinType] = useState<'idle' | 'next' | 'back' | 'submit' | 'shake'>('idle');
+  const [accountCategory, setAccountCategory] = useState<'individual' | 'organization'>('individual');
+  const prefix = accountCategory === 'organization' ? 'OI-' : 'IO-';
 
   // Step 1: Full Name, Email, Mobile, Role
   const [fullName, setFullName] = useState('');
@@ -16,6 +18,7 @@ export default function SignUpAPage() {
   const [accountType, setAccountType] = useState('Individual');
 
   // Step 2: Username, Password, Confirm Password, Address/Location, DOB
+  const [rawHandle, setRawHandle] = useState('');
   const [username, setUsername] = useState('');
   const [usernameStatus, setUsernameStatus] = useState<'idle' | 'checking' | 'available' | 'taken' | 'invalid'>('idle');
   const [usernameMessage, setUsernameMessage] = useState('');
@@ -30,8 +33,21 @@ export default function SignUpAPage() {
   const [dobYear, setDobYear] = useState('');
 
   // Sign In states
+  const [signInCategory, setSignInCategory] = useState<'individual' | 'organization'>('individual');
+  const signInPrefix = signInCategory === 'organization' ? 'OI-' : 'IO-';
+  const [signInHandle, setSignInHandle] = useState('');
+  const cleanSignInHandle = signInHandle.replace(/^(IO-|OI-|io-|oi-)/i, '').trim();
   const [signInIdentifier, setSignInIdentifier] = useState('');
   const [signInPassword, setSignInPassword] = useState('');
+
+  const handleSignInHandleChange = (val: string) => {
+    if (val.includes('@')) {
+      setSignInHandle(val.trim());
+      return;
+    }
+    const clean = val.replace(/^(IO-|OI-|io-|oi-)/i, '').replace(/[^a-zA-Z0-9_.-]/g, '');
+    setSignInHandle(clean);
+  };
 
   const [unlocked, setUnlocked] = useState(false);
   const [activeUser, setActiveUser] = useState<{ username?: string; fullName?: string; email?: string } | null>(null);
@@ -81,10 +97,14 @@ export default function SignUpAPage() {
   ];
   const remainingRules = pwdRules.filter((r) => !r.done);
 
-  // Live real-time username validation and availability check
-  const handleUsernameChange = (val: string) => {
-    const clean = val.toLowerCase().replace(/[^a-z0-9_.]/g, '');
-    setUsername(clean);
+  // Live real-time handle validation with automatic prefixing (IO- for Individual, OI- for Organization)
+  const handleHandleChange = (val: string) => {
+    // Strip typed or pasted prefix so it never duplicates
+    const clean = val.replace(/^(IO-|OI-|io-|oi-)/i, '').toLowerCase().replace(/[^a-z0-9_.]/g, '');
+    setRawHandle(clean);
+
+    const full = clean ? `${prefix}${clean}` : '';
+    setUsername(full);
 
     if (checkTimeoutRef.current) {
       clearTimeout(checkTimeoutRef.current);
@@ -96,9 +116,9 @@ export default function SignUpAPage() {
       return;
     }
 
-    if (clean.length < 4) {
+    if (clean.length < 3) {
       setUsernameStatus('invalid');
-      setUsernameMessage('Min 4 chars');
+      setUsernameMessage('Min 3 chars');
       return;
     }
 
@@ -113,7 +133,7 @@ export default function SignUpAPage() {
 
     checkTimeoutRef.current = setTimeout(async () => {
       try {
-        const res = await fetch(`/api/auth/check-username?username=${encodeURIComponent(clean)}`);
+        const res = await fetch(`/api/auth/check-username?username=${encodeURIComponent(full)}`);
         const data = await res.json();
 
         if (!data.formatValid) {
@@ -127,7 +147,7 @@ export default function SignUpAPage() {
           setUsernameMessage('Available');
         }
       } catch (_e) {
-        if (clean.length >= 4 && /\d/.test(clean)) {
+        if (clean.length >= 3 && /\d/.test(clean)) {
           setUsernameStatus('available');
           setUsernameMessage('Available');
         }
@@ -135,7 +155,71 @@ export default function SignUpAPage() {
     }, 300);
   };
 
+  // Switch category and update prefix dynamically
+  const handleCategoryChange = (cat: 'individual' | 'organization') => {
+    setAccountCategory(cat);
+    const newPrefix = cat === 'organization' ? 'OI-' : 'IO-';
+    if (cat === 'organization') {
+      setAccountType('Corporate');
+    } else {
+      setAccountType('Individual');
+    }
+    if (rawHandle) {
+      const full = `${newPrefix}${rawHandle}`;
+      setUsername(full);
+      setUsernameStatus('checking');
+      setUsernameMessage('Checking...');
+      if (checkTimeoutRef.current) clearTimeout(checkTimeoutRef.current);
+      checkTimeoutRef.current = setTimeout(async () => {
+        try {
+          const res = await fetch(`/api/auth/check-username?username=${encodeURIComponent(full)}`);
+          const data = await res.json();
+          if (!data.formatValid) {
+            setUsernameStatus('invalid');
+            setUsernameMessage(data.error || 'Invalid format');
+          } else if (!data.available) {
+            setUsernameStatus('taken');
+            setUsernameMessage(data.message || 'Already taken');
+          } else {
+            setUsernameStatus('available');
+            setUsernameMessage('Available');
+          }
+        } catch (_e) {
+          setUsernameStatus('available');
+          setUsernameMessage('Available');
+        }
+      }, 300);
+    }
+  };
+
   const isSpinning = spinType === 'next' || spinType === 'back' || spinType === 'submit';
+
+  // STEP 0 (CHOICE) TO STEP 1: VISIBLE SPIN FORWARD
+  const handleSelectCategoryAndProceed = (cat: 'individual' | 'organization') => {
+    if (isSpinning) return;
+    setErrorMessage('');
+    handleCategoryChange(cat);
+    setSpinType('next');
+    setTimeout(() => {
+      setStep(1);
+    }, 400);
+    setTimeout(() => {
+      setSpinType('idle');
+    }, 850);
+  };
+
+  // STEP 1 TO STEP 0: CHANGE ACCOUNT TYPE
+  const handleBackToStep0 = () => {
+    if (isSpinning) return;
+    setErrorMessage('');
+    setSpinType('back');
+    setTimeout(() => {
+      setStep(0);
+    }, 400);
+    setTimeout(() => {
+      setSpinType('idle');
+    }, 850);
+  };
 
   // STEP 1 VALIDATION & VISIBLE SPIN TO STEP 2
   const handleNext = () => {
@@ -143,7 +227,7 @@ export default function SignUpAPage() {
     setErrorMessage('');
 
     if (!fullName.trim()) {
-      setErrorMessage('Please enter your Full Name.');
+      setErrorMessage(accountCategory === 'organization' ? 'Please enter Organization / Contact Name.' : 'Please enter your Full Name.');
       setSpinType('shake');
       setTimeout(() => setSpinType('idle'), 400);
       return;
@@ -191,14 +275,19 @@ export default function SignUpAPage() {
     setErrorMessage('');
 
     if (mode === 'signup') {
+      if (step === 0) {
+        handleSelectCategoryAndProceed(accountCategory);
+        return;
+      }
       if (step === 1) {
         handleNext();
         return;
       }
 
       // Step 2 validations
-      if (!username.trim() || username.length < 4 || !/\d/.test(username)) {
-        setErrorMessage('Username must have at least 4 characters and 1 digit (0-9).');
+      const full = `${prefix}${rawHandle}`.trim();
+      if (!rawHandle.trim() || rawHandle.length < 3 || !/\d/.test(rawHandle)) {
+        setErrorMessage(`Username handle must have at least 3 characters and 1 digit (e.g. ${prefix}yuvraj001).`);
         setSpinType('shake');
         setTimeout(() => setSpinType('idle'), 400);
         return;
@@ -243,7 +332,7 @@ export default function SignUpAPage() {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            username,
+            username: full,
             fullName,
             email,
             password,
@@ -252,6 +341,7 @@ export default function SignUpAPage() {
             dob: dobDay && dobMonth && dobYear ? `${dobDay}/${dobMonth}/${dobYear}` : '',
             location,
             accountType,
+            accountCategory,
           }),
         });
         const data = await res.json();
@@ -263,25 +353,37 @@ export default function SignUpAPage() {
           return;
         }
 
-        setActiveUser(data.user || { username, fullName, email });
+        setActiveUser(data.user || { username: full, fullName, email });
         setTimeout(() => {
           setSpinType('idle');
           setUnlocked(true);
         }, 850);
       } catch (_err) {
         setIsSubmitting(false);
-        setActiveUser({ username, fullName, email });
+        setActiveUser({ username: full, fullName, email });
         setTimeout(() => {
           setSpinType('idle');
           setUnlocked(true);
         }, 850);
       }
     } else {
-      // Signin mode
-      const identifier = signInIdentifier.trim() || email.trim();
+      // Signin mode: support both auto-prefixed username and email
+      let identifier = '';
+      if (signInHandle.includes('@')) {
+        identifier = signInHandle.trim().toLowerCase();
+      } else {
+        const clean = signInHandle.replace(/^(IO-|OI-|io-|oi-)/i, '').trim();
+        if (clean) {
+          identifier = `${signInPrefix}${clean}`;
+        }
+      }
+      if (!identifier && signInIdentifier.trim()) {
+        identifier = signInIdentifier.trim();
+      }
+
       const pwd = signInPassword || password;
       if (!identifier || !pwd) {
-        setErrorMessage('Please enter your username/email and password.');
+        setErrorMessage('Please enter your username handle and password.');
         setSpinType('shake');
         setTimeout(() => setSpinType('idle'), 400);
         return;
@@ -325,11 +427,14 @@ export default function SignUpAPage() {
     setUnlocked(false);
     setActiveUser(null);
     setFullName('');
+    setRawHandle('');
     setUsername('');
     setUsernameStatus('idle');
     setUsernameMessage('');
     setEmail('');
     setSignInIdentifier('');
+    setSignInHandle('');
+    setSignInCategory('individual');
     setSignInPassword('');
     setMobile('');
     setLocation('');
@@ -339,7 +444,8 @@ export default function SignUpAPage() {
     setPassword('');
     setConfirmPassword('');
     setErrorMessage('');
-    setStep(1);
+    setStep(0);
+    setAccountCategory('individual');
     setSpinType('idle');
   };
 
@@ -519,8 +625,14 @@ export default function SignUpAPage() {
             <form
               onSubmit={(e) => {
                 e.preventDefault();
-                if (mode === 'signup' && step === 1) {
-                  handleNext();
+                if (mode === 'signup') {
+                  if (step === 0) {
+                    handleSelectCategoryAndProceed(accountCategory);
+                  } else if (step === 1) {
+                    handleNext();
+                  } else {
+                    handleFinalSubmit();
+                  }
                 } else {
                   handleFinalSubmit();
                 }
@@ -529,17 +641,185 @@ export default function SignUpAPage() {
             >
               {mode === 'signup' ? (
                 <>
-                  {/* ── STEP 1: Full Name, Email, Mobile, 6 Roles ── */}
-                  {step === 1 ? (
+                  {/* ── STEP 0: Select Account Type (Individual vs Organization) ── */}
+                  {step === 0 ? (
+                    <div className="diamond-form-step" style={{ gap: '9px' }}>
+                      <div style={{ textAlign: 'center', marginBottom: '2px' }}>
+                        <p style={{ fontSize: '15px', fontWeight: 900, color: '#0f172a', margin: '0 0 2px', letterSpacing: '-0.2px' }}>
+                          Select Account Type
+                        </p>
+                        <p style={{ fontSize: '11px', color: '#475569', margin: 0, fontWeight: 600 }}>
+                          Choose before signing up:
+                        </p>
+                      </div>
+
+                      {/* Option 1: Individual */}
+                      <button
+                        type="button"
+                        onClick={() => handleSelectCategoryAndProceed('individual')}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '8px',
+                          padding: '9px 10px',
+                          borderRadius: '12px',
+                          border: accountCategory === 'individual' ? '2px solid #0284c7' : '1.5px solid #cbd5e1',
+                          backgroundColor: accountCategory === 'individual' ? '#f0f9ff' : '#ffffff',
+                          cursor: 'pointer',
+                          textAlign: 'left',
+                          transition: 'all 0.2s ease',
+                          width: '100%',
+                          boxSizing: 'border-box',
+                          boxShadow: accountCategory === 'individual' ? '0 3px 10px rgba(2, 132, 199, 0.12)' : 'none',
+                        }}
+                      >
+                        <div style={{
+                          width: '30px',
+                          height: '30px',
+                          borderRadius: '50%',
+                          backgroundColor: '#e0f2fe',
+                          color: '#0284c7',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          flexShrink: 0,
+                        }}>
+                          <User size={16} strokeWidth={2.4} />
+                        </div>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                            <span style={{ fontSize: '13px', fontWeight: 800, color: '#0f172a' }}>Individual</span>
+                            <span style={{ fontSize: '9.5px', fontWeight: 800, color: '#0284c7', backgroundColor: '#e0f2fe', padding: '2px 6px', borderRadius: '4px' }}>
+                              IO-
+                            </span>
+                          </div>
+                          <p style={{ fontSize: '9.5px', color: '#475569', margin: '2px 0 0', lineHeight: 1.25 }}>
+                            Seeker, student, parent &amp; personal growth
+                          </p>
+                        </div>
+                      </button>
+
+                      {/* Option 2: Organization */}
+                      <button
+                        type="button"
+                        onClick={() => handleSelectCategoryAndProceed('organization')}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '8px',
+                          padding: '9px 10px',
+                          borderRadius: '12px',
+                          border: accountCategory === 'organization' ? '2px solid #4f46e5' : '1.5px solid #cbd5e1',
+                          backgroundColor: accountCategory === 'organization' ? '#f5f3ff' : '#ffffff',
+                          cursor: 'pointer',
+                          textAlign: 'left',
+                          transition: 'all 0.2s ease',
+                          width: '100%',
+                          boxSizing: 'border-box',
+                          boxShadow: accountCategory === 'organization' ? '0 3px 10px rgba(79, 70, 229, 0.12)' : 'none',
+                        }}
+                      >
+                        <div style={{
+                          width: '30px',
+                          height: '30px',
+                          borderRadius: '50%',
+                          backgroundColor: '#e0e7ff',
+                          color: '#4f46e5',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          flexShrink: 0,
+                        }}>
+                          <Building2 size={16} strokeWidth={2.4} />
+                        </div>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                            <span style={{ fontSize: '13px', fontWeight: 800, color: '#0f172a' }}>Organization</span>
+                            <span style={{ fontSize: '9.5px', fontWeight: 800, color: '#4f46e5', backgroundColor: '#e0e7ff', padding: '2px 6px', borderRadius: '4px' }}>
+                              OI-
+                            </span>
+                          </div>
+                          <p style={{ fontSize: '9.5px', color: '#475569', margin: '2px 0 0', lineHeight: 1.25 }}>
+                            Institutions, corporate, colleges &amp; teams
+                          </p>
+                        </div>
+                      </button>
+
+                      {/* Micro Note */}
+                      <p style={{ fontSize: '9.5px', color: '#64748b', textAlign: 'center', margin: '2px 0 0', fontWeight: 600 }}>
+                        Handle auto-starts with <strong>{prefix}</strong> (e.g. {prefix}yuvraj001)
+                      </p>
+                    </div>
+                  ) : step === 1 ? (
+                    /* ── STEP 1: Full Name, Email, Mobile ── */
                     <div className="diamond-form-step">
+                      {/* Step 1 Category Header with Change Link */}
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '-2px' }}>
+                        <button
+                          type="button"
+                          onClick={handleBackToStep0}
+                          style={{
+                            background: 'none',
+                            border: 'none',
+                            color: '#64748b',
+                            fontSize: '11px',
+                            fontWeight: 700,
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '3px',
+                            padding: '1px 0',
+                          }}
+                        >
+                          <ArrowLeft size={12} strokeWidth={2.6} />
+                          <span>Type</span>
+                        </button>
+                        <div style={{ display: 'flex', gap: '3px' }}>
+                          <button
+                            type="button"
+                            onClick={() => handleCategoryChange('individual')}
+                            style={{
+                              fontSize: '9px',
+                              fontWeight: 700,
+                              padding: '2px 6px',
+                              borderRadius: '4px',
+                              cursor: 'pointer',
+                              border: 'none',
+                              backgroundColor: accountCategory === 'individual' ? '#0284c7' : '#e2e8f0',
+                              color: accountCategory === 'individual' ? '#ffffff' : '#64748b',
+                            }}
+                          >
+                            IO- Ind
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleCategoryChange('organization')}
+                            style={{
+                              fontSize: '9px',
+                              fontWeight: 700,
+                              padding: '2px 6px',
+                              borderRadius: '4px',
+                              cursor: 'pointer',
+                              border: 'none',
+                              backgroundColor: accountCategory === 'organization' ? '#4f46e5' : '#e2e8f0',
+                              color: accountCategory === 'organization' ? '#ffffff' : '#64748b',
+                            }}
+                          >
+                            OI- Org
+                          </button>
+                        </div>
+                      </div>
+
                       {/* 1. Full Name */}
                       <div className="input-group">
-                        <label className="input-label">Full Name</label>
+                        <label className="input-label">
+                          {accountCategory === 'organization' ? 'Organization / Contact Name' : 'Full Name'}
+                        </label>
                         <input
                           type="text"
                           value={fullName}
                           onChange={(e) => handleFullNameChange(e.target.value)}
-                          placeholder="e.g. Yuvraj Singh"
+                          placeholder={accountCategory === 'organization' ? "e.g. Acme Tech Pvt Ltd" : "e.g. Yuvraj Singh"}
                           className="diamond-input"
                           required
                           autoFocus
@@ -571,46 +851,6 @@ export default function SignUpAPage() {
                           className="diamond-input"
                         />
                       </div>
-
-                      {/* 4. Role (The 6 Roles) */}
-                      <div className="input-group">
-                        <label className="input-label">Select Role</label>
-                        <div style={{ position: 'relative' }}>
-                          <select
-                            value={accountType}
-                            onChange={(e) => setAccountType(e.target.value)}
-                            className="diamond-input"
-                            style={{
-                              cursor: 'pointer',
-                              appearance: 'none',
-                              paddingRight: '26px',
-                              fontWeight: 600,
-                              color: '#0f172a',
-                              textOverflow: 'ellipsis',
-                              whiteSpace: 'nowrap',
-                              overflow: 'hidden',
-                            }}
-                          >
-                            <option value="Individual">Individual (Seeker)</option>
-                            <option value="Student">Student (Academic)</option>
-                            <option value="Parent">Parent (Conscious Parenting)</option>
-                            <option value="Educational Institution">Educational Institution</option>
-                            <option value="Corporate">Corporate / Business</option>
-                            <option value="Government & NGO">Government / NGO</option>
-                          </select>
-                          <ChevronDown
-                            size={16}
-                            style={{
-                              position: 'absolute',
-                              right: 2,
-                              top: '50%',
-                              transform: 'translateY(-50%)',
-                              pointerEvents: 'none',
-                              color: '#64748b',
-                            }}
-                          />
-                        </div>
-                      </div>
                     </div>
                   ) : (
                     /* ── STEP 2: Username, Password, Confirm Password, Address, DOB ── */
@@ -638,7 +878,7 @@ export default function SignUpAPage() {
                         </button>
                       </div>
 
-                      {/* 1. Username (@handle) with live availability pill */}
+                      {/* 1. Username (@handle) with fixed prefix & live availability pill */}
                       <div className="input-group">
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                           <label className="input-label">Username (@handle)</label>
@@ -672,15 +912,50 @@ export default function SignUpAPage() {
                             </span>
                           )}
                         </div>
-                        <input
-                          type="text"
-                          value={username}
-                          onChange={(e) => handleUsernameChange(e.target.value)}
-                          placeholder="e.g. yuvraj8302"
-                          className="diamond-input"
-                          required
-                          autoFocus
-                        />
+
+                        {/* Compound Input: [ IO- ] [ yuvraj001 ] or [ OI- ] [ company01 ] */}
+                        <div style={{ display: 'flex', alignItems: 'center', width: '100%', marginTop: '2px' }}>
+                          <span
+                            style={{
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              fontWeight: 800,
+                              fontSize: '11px',
+                              padding: '2px 6px',
+                              backgroundColor: accountCategory === 'organization' ? '#4f46e5' : '#0284c7',
+                              color: '#ffffff',
+                              borderRadius: '4px 0 0 4px',
+                              letterSpacing: '0.5px',
+                              userSelect: 'none',
+                              height: '24px',
+                              boxSizing: 'border-box',
+                              flexShrink: 0,
+                            }}
+                          >
+                            {prefix}
+                          </span>
+                          <input
+                            type="text"
+                            value={rawHandle}
+                            onChange={(e) => handleHandleChange(e.target.value)}
+                            placeholder={accountCategory === 'organization' ? "company01" : "yuvraj001"}
+                            className="diamond-input"
+                            style={{
+                              borderRadius: '0 4px 4px 0',
+                              paddingLeft: '5px',
+                              height: '24px',
+                              width: '100%',
+                            }}
+                            required
+                            autoFocus
+                          />
+                        </div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '2px' }}>
+                          <span style={{ fontSize: '9px', color: '#64748b', fontWeight: 600 }}>
+                            Handle: <strong style={{ color: '#0f172a' }}>{prefix}{rawHandle || (accountCategory === 'organization' ? 'company01' : 'yuvraj001')}</strong>
+                          </span>
+                        </div>
                       </div>
 
                       {/* 2. Password with eye toggle & live requirements popover */}
@@ -872,28 +1147,150 @@ export default function SignUpAPage() {
                 </>
               ) : (
                 /* ── SIGN IN MODE ── */
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                  <div className="input-group">
-                    <label className="input-label">Email or Username</label>
-                    <input
-                      type="text"
-                      value={signInIdentifier}
-                      onChange={(e) => setSignInIdentifier(e.target.value)}
-                      placeholder="e.g. yuvraj or name@gmail.com"
-                      className="diamond-input"
-                      required
-                      autoFocus
-                    />
+                <div className="diamond-form-step" style={{ gap: '8px' }}>
+                  {/* Account Type Selection (2 Buttons: Individual vs Org) */}
+                  <div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '3px' }}>
+                      <span style={{ fontSize: '10px', fontWeight: 800, color: '#0f172a' }}>
+                        Account Type
+                      </span>
+                      <span style={{ fontSize: '9px', fontWeight: 700, color: signInCategory === 'organization' ? '#4f46e5' : '#0284c7' }}>
+                        {signInCategory === 'organization' ? 'OI- Organization' : 'IO- Individual'}
+                      </span>
+                    </div>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '5px' }}>
+                      {/* Individual Button */}
+                      <button
+                        type="button"
+                        onClick={() => setSignInCategory('individual')}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: '4px',
+                          padding: '4px 2px',
+                          borderRadius: '6px',
+                          border: signInCategory === 'individual' ? '2px solid #0284c7' : '1px solid #cbd5e1',
+                          backgroundColor: signInCategory === 'individual' ? '#f0f9ff' : '#ffffff',
+                          color: signInCategory === 'individual' ? '#0369a1' : '#64748b',
+                          fontWeight: 800,
+                          fontSize: '10px',
+                          cursor: 'pointer',
+                          boxShadow: signInCategory === 'individual' ? '0 1px 4px rgba(2, 132, 199, 0.18)' : 'none',
+                          transition: 'all 0.15s ease',
+                        }}
+                      >
+                        <User size={12} strokeWidth={2.5} />
+                        <span>Individual (IO-)</span>
+                      </button>
+
+                      {/* Organization Button */}
+                      <button
+                        type="button"
+                        onClick={() => setSignInCategory('organization')}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: '4px',
+                          padding: '4px 2px',
+                          borderRadius: '6px',
+                          border: signInCategory === 'organization' ? '2px solid #4f46e5' : '1px solid #cbd5e1',
+                          backgroundColor: signInCategory === 'organization' ? '#f5f3ff' : '#ffffff',
+                          color: signInCategory === 'organization' ? '#4338ca' : '#64748b',
+                          fontWeight: 800,
+                          fontSize: '10px',
+                          cursor: 'pointer',
+                          boxShadow: signInCategory === 'organization' ? '0 1px 4px rgba(79, 70, 229, 0.18)' : 'none',
+                          transition: 'all 0.15s ease',
+                        }}
+                      >
+                        <Building2 size={12} strokeWidth={2.5} />
+                        <span>Org (OI-)</span>
+                      </button>
+                    </div>
                   </div>
+
+                  {/* Username with locked prefix badge OR Email */}
+                  <div className="input-group">
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <label className="input-label" style={{ marginBottom: 0 }}>
+                        {signInHandle.includes('@') ? 'Email Address' : 'Username'}
+                      </label>
+                      <span style={{ fontSize: '8.5px', color: '#64748b', fontWeight: 600 }}>
+                        {signInHandle.includes('@') ? 'Logging via Email' : 'Auto-Prefix'}
+                      </span>
+                    </div>
+
+                    <div style={{ display: 'flex', alignItems: 'center', width: '100%', marginTop: '2px' }}>
+                      {!signInHandle.includes('@') && (
+                        <span
+                          style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            fontWeight: 800,
+                            fontSize: '11px',
+                            padding: '2px 6px',
+                            backgroundColor: signInCategory === 'organization' ? '#4f46e5' : '#0284c7',
+                            color: '#ffffff',
+                            borderRadius: '4px 0 0 4px',
+                            letterSpacing: '0.5px',
+                            userSelect: 'none',
+                            height: '24px',
+                            boxSizing: 'border-box',
+                            flexShrink: 0,
+                            transition: 'background-color 0.2s ease',
+                          }}
+                        >
+                          {signInPrefix}
+                        </span>
+                      )}
+                      <input
+                        type="text"
+                        value={signInHandle}
+                        onChange={(e) => handleSignInHandleChange(e.target.value)}
+                        placeholder={
+                          signInCategory === 'organization'
+                            ? "company01 (or email)"
+                            : "yuvraj001 (or email)"
+                        }
+                        className="diamond-input"
+                        style={{
+                          borderRadius: signInHandle.includes('@') ? '4px' : '0 4px 4px 0',
+                          paddingLeft: '5px',
+                          height: '24px',
+                          width: '100%',
+                        }}
+                        required
+                        autoFocus
+                      />
+                    </div>
+
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '2px' }}>
+                      <span style={{ fontSize: '9px', color: '#64748b', fontWeight: 600 }}>
+                        {signInHandle.includes('@') ? (
+                          <>Email: <strong style={{ color: '#0f172a' }}>{signInHandle.trim()}</strong></>
+                        ) : (
+                          <>
+                            Logging in as: <strong style={{ color: '#0f172a' }}>{signInPrefix}{cleanSignInHandle || (signInCategory === 'organization' ? 'company01' : 'yuvraj001')}</strong>
+                          </>
+                        )}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Password with eye toggle */}
                   <div className="input-group" style={{ position: 'relative' }}>
                     <label className="input-label">Password</label>
                     <input
                       type={showPassword ? 'text' : 'password'}
                       value={signInPassword}
                       onChange={(e) => setSignInPassword(e.target.value)}
-                      placeholder="Enter your password"
+                      placeholder="Enter password"
                       className="diamond-input"
-                      style={{ paddingRight: '22px' }}
+                      style={{ paddingRight: '22px', height: '24px' }}
                       required
                     />
                     <button
@@ -909,6 +1306,7 @@ export default function SignUpAPage() {
                         cursor: 'pointer',
                         padding: '2px',
                       }}
+                      title={showPassword ? 'Hide password' : 'Show password'}
                     >
                       {showPassword ? <EyeOff size={14} /> : <Eye size={14} />}
                     </button>
@@ -925,23 +1323,31 @@ export default function SignUpAPage() {
             <button
               type="button"
               onClick={() => {
-                if (mode === 'signup' && step === 1) {
-                  handleNext();
+                if (mode === 'signup') {
+                  if (step === 0) {
+                    handleSelectCategoryAndProceed(accountCategory);
+                  } else if (step === 1) {
+                    handleNext();
+                  } else {
+                    handleFinalSubmit();
+                  }
                 } else {
                   handleFinalSubmit();
                 }
               }}
               disabled={isSubmitting}
               className="diamond-bottom-apex-button"
-              title={mode === 'signup' ? (step === 1 ? 'Go to Step 2' : 'Complete Sign up') : 'Log in'}
+              title={mode === 'signup' ? (step === 0 ? 'Select & Continue' : step === 1 ? 'Go to Step 2' : 'Complete Sign up') : 'Log in'}
             >
               <span className="diamond-bottom-button-text">
                 {isSubmitting
                   ? '...'
                   : mode === 'signup'
-                    ? step === 1
+                    ? step === 0
                       ? 'Next →'
-                      : 'Sign up'
+                      : step === 1
+                        ? 'Next →'
+                        : 'Sign up'
                     : 'Log in'}
               </span>
             </button>
@@ -952,8 +1358,12 @@ export default function SignUpAPage() {
                 type="button"
                 onClick={() => {
                   setErrorMessage('');
-                  setMode(mode === 'signup' ? 'signin' : 'signup');
-                  setStep(1);
+                  const nextMode = mode === 'signup' ? 'signin' : 'signup';
+                  setMode(nextMode);
+                  if (nextMode === 'signin') {
+                    setSignInCategory(accountCategory);
+                  }
+                  setStep(nextMode === 'signup' ? 0 : 1);
                   setSpinType('next');
                   setTimeout(() => setSpinType('idle'), 850);
                 }}

@@ -242,10 +242,16 @@ export async function login(req, res) {
     }
 
     const cleanIdentifier = identifier.trim().toLowerCase();
+    const strippedTarget = cleanIdentifier.replace(/^(io-|oi-)/, '');
 
     if (mongoose.connection.readyState === 1) {
       const user = await User.findOne({
-        $or: [{ username: cleanIdentifier }, { email: cleanIdentifier }],
+        $or: [
+          { username: cleanIdentifier },
+          { username: `io-${strippedTarget}` },
+          { username: `oi-${strippedTarget}` },
+          { email: cleanIdentifier },
+        ],
       });
 
       if (!user || user.password !== password) {
@@ -267,7 +273,13 @@ export async function login(req, res) {
       // In-memory fallback
       let matched = null;
       for (const u of inMemoryUsers.values()) {
-        if (u.username === cleanIdentifier || u.email === cleanIdentifier) {
+        const uName = (u.username || '').toLowerCase();
+        const uStripped = uName.replace(/^(io-|oi-)/, '');
+        if (
+          uName === cleanIdentifier ||
+          uStripped === strippedTarget ||
+          (u.email && u.email.toLowerCase() === cleanIdentifier)
+        ) {
           matched = u;
           break;
         }
