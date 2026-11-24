@@ -84,6 +84,7 @@ export async function POST(request: Request) {
       mobile: body.mobile,
       accountType: body.accountType,
       accountCategory: body.accountCategory,
+      orgType: body.orgType,
       location: body.location,
       dob: body.dob,
     });
@@ -102,6 +103,7 @@ export async function POST(request: Request) {
         email: savedUser.email,
         accountType: savedUser.accountType,
         accountCategory: savedUser.accountCategory,
+        orgType: savedUser.orgType,
       },
     });
   } catch (err: any) {

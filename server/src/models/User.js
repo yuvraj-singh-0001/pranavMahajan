@@ -116,9 +116,18 @@ const userSchema = new mongoose.Schema(
     },
     accountType: {
       type: String,
-      enum: ['Student', 'Teacher', 'Parent', 'Seeker', 'Individual', 'Professional', 'Other'],
       default: 'Seeker',
       index: true,
+    },
+    accountCategory: {
+      type: String,
+      enum: ['individual', 'organization'],
+      default: 'individual',
+    },
+    orgType: {
+      type: String,
+      trim: true,
+      default: '',
     },
     bio: {
       type: String,

@@ -34,5 +34,18 @@
     "accountType": "Corporate",
     "accountCategory": "organization",
     "createdAt": "2026-11-24T06:43:28.366Z"
+  },
+  {
+    "username": "OI-yubi001",
+    "fullName": "The True Topper",
+    "email": "singhyuvraj8420@gmail.com",
+    "passwordHash": "Yuvraj@123",
+    "mobile": "8601300910",
+    "accountType": "Community / Other",
+    "orgType": "Community / Other",
+    "accountCategory": "organization",
+    "location": "",
+    "dob": "",
+    "createdAt": "2026-11-24T07:26:15.107Z"
   }
 ]

@@ -93,6 +93,8 @@ export async function register(req, res) {
       location,
       classGrade,
       accountType,
+      accountCategory,
+      orgType,
     } = req.body;
 
     // 1. Basic presence & format validation
@@ -163,6 +165,8 @@ export async function register(req, res) {
         }
       }
 
+      const finalAccountType = accountCategory === 'organization' ? (orgType || accountType || 'Corporate') : normalizedAccountType;
+
       const newUser = await User.create({
         username: cleanUsername,
         fullName: fullName.trim(),
@@ -172,7 +176,9 @@ export async function register(req, res) {
         dob: dob ? dob.trim() : '',
         location: location ? location.trim() : '',
         classGrade: classGrade ? classGrade.trim() : '',
-        accountType: normalizedAccountType,
+        accountType: finalAccountType,
+        accountCategory: accountCategory || (cleanUsername.startsWith('oi-') ? 'organization' : 'individual'),
+        orgType: orgType || (accountCategory === 'organization' ? finalAccountType : ''),
       });
 
       return res.status(201).json({
@@ -184,6 +190,8 @@ export async function register(req, res) {
           fullName: newUser.fullName,
           email: newUser.email,
           accountType: newUser.accountType,
+          accountCategory: newUser.accountCategory,
+          orgType: newUser.orgType,
         },
       });
     } else {
@@ -191,6 +199,8 @@ export async function register(req, res) {
       if (inMemoryUsers.has(cleanUsername)) {
         return res.status(409).json({ success: false, error: 'This username is already taken.' });
       }
+
+      const finalAccountType = accountCategory === 'organization' ? (orgType || accountType || 'Corporate') : normalizedAccountType;
 
       const userRecord = {
         id: 'mem_' + Date.now(),
@@ -201,7 +211,9 @@ export async function register(req, res) {
         dob: dob ? dob.trim() : '',
         location: location ? location.trim() : '',
         classGrade: classGrade ? classGrade.trim() : '',
-        accountType: normalizedAccountType,
+        accountType: finalAccountType,
+        accountCategory: accountCategory || (cleanUsername.startsWith('oi-') ? 'organization' : 'individual'),
+        orgType: orgType || (accountCategory === 'organization' ? finalAccountType : ''),
         createdAt: new Date().toISOString(),
       };
 

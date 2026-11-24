@@ -8,6 +8,7 @@ export interface UserRecord {
   passwordHash: string;
   mobile?: string;
   accountType?: string;
+  orgType?: string;
   accountCategory?: 'individual' | 'organization';
   location?: string;
   dob?: string;
@@ -137,6 +138,7 @@ export function createUser(data: {
   password: string;
   mobile?: string;
   accountType?: string;
+  orgType?: string;
   accountCategory?: 'individual' | 'organization';
   location?: string;
   dob?: string;
@@ -157,7 +159,8 @@ export function createUser(data: {
     email: data.email.trim().toLowerCase(),
     passwordHash: data.password, // Plain text or hashed
     mobile: data.mobile?.trim(),
-    accountType: data.accountType || 'Individual',
+    accountType: data.accountType || (data.accountCategory === 'organization' ? (data.orgType || 'School (K-12)') : 'Individual'),
+    orgType: data.orgType || (data.accountCategory === 'organization' ? data.accountType : undefined),
     accountCategory: data.accountCategory || (data.username.startsWith('OI-') ? 'organization' : 'individual'),
     location: data.location?.trim(),
     dob: data.dob?.trim(),

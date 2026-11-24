@@ -4,6 +4,19 @@ import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { User, Eye, EyeOff, Check, ChevronDown, ArrowLeft, Building2 } from 'lucide-react';
 
+const ORG_TYPES = [
+  'School (K-12)',
+  'College / University',
+  'Company / Corporate',
+  'Startup / Tech Firm',
+  'Coaching / EdTech',
+  'Non-Profit / NGO',
+  'Government / PSU',
+  'Healthcare / Hospital',
+  'Research Institute',
+  'Community / Other',
+];
+
 export default function SignUpAPage() {
   const [mode, setMode] = useState<'signup' | 'signin'>('signup');
   const [step, setStep] = useState<0 | 1 | 2>(0);
@@ -16,6 +29,7 @@ export default function SignUpAPage() {
   const [email, setEmail] = useState('');
   const [mobile, setMobile] = useState('');
   const [accountType, setAccountType] = useState('Individual');
+  const [orgType, setOrgType] = useState('School (K-12)');
 
   // Step 2: Username, Password, Confirm Password, Address/Location, DOB
   const [rawHandle, setRawHandle] = useState('');
@@ -160,7 +174,7 @@ export default function SignUpAPage() {
     setAccountCategory(cat);
     const newPrefix = cat === 'organization' ? 'OI-' : 'IO-';
     if (cat === 'organization') {
-      setAccountType('Corporate');
+      setAccountType(orgType || 'School (K-12)');
     } else {
       setAccountType('Individual');
     }
@@ -338,10 +352,11 @@ export default function SignUpAPage() {
             password,
             confirmPassword,
             mobile,
-            dob: dobDay && dobMonth && dobYear ? `${dobDay}/${dobMonth}/${dobYear}` : '',
+            dob: accountCategory === 'organization' ? '' : (dobDay && dobMonth && dobYear ? `${dobDay}/${dobMonth}/${dobYear}` : ''),
             location,
-            accountType,
+            accountType: accountCategory === 'organization' ? orgType : accountType,
             accountCategory,
+            orgType: accountCategory === 'organization' ? orgType : undefined,
           }),
         });
         const data = await res.json();
@@ -438,6 +453,7 @@ export default function SignUpAPage() {
     setSignInPassword('');
     setMobile('');
     setLocation('');
+    setOrgType('School (K-12)');
     setDobDay('');
     setDobMonth('');
     setDobYear('');
@@ -1092,10 +1108,10 @@ export default function SignUpAPage() {
                         </button>
                       </div>
 
-                      {/* 4. Address & Date of Birth Row */}
+                      {/* 4. Address & (DOB for Individual OR Org Type for Organization) */}
                       <div style={{ display: 'flex', gap: '8px' }}>
-                        {/* Address */}
-                        <div className="input-group" style={{ flex: '1.2' }}>
+                        {/* Address / City */}
+                        <div className="input-group" style={{ flex: accountCategory === 'organization' ? '1' : '1.2' }}>
                           <label className="input-label">City</label>
                           <input
                             type="text"
@@ -1106,41 +1122,87 @@ export default function SignUpAPage() {
                           />
                         </div>
 
-                        {/* Date of Birth: DD / MM / YYYY */}
-                        <div className="input-group" style={{ flex: '1.3' }}>
-                          <label className="input-label">DOB</label>
-                          <div style={{ display: 'flex', gap: '2px', alignItems: 'center' }}>
-                            <input
-                              type="text"
-                              value={dobDay}
-                              onChange={(e) => setDobDay(e.target.value.replace(/\D/g, '').slice(0, 2))}
-                              placeholder="DD"
-                              maxLength={2}
-                              className="diamond-input"
-                              style={{ textAlign: 'center', padding: '3px 1px' }}
-                            />
-                            <span style={{ color: '#94a3b8', fontSize: '10px' }}>/</span>
-                            <input
-                              type="text"
-                              value={dobMonth}
-                              onChange={(e) => setDobMonth(e.target.value.replace(/\D/g, '').slice(0, 2))}
-                              placeholder="MM"
-                              maxLength={2}
-                              className="diamond-input"
-                              style={{ textAlign: 'center', padding: '3px 1px' }}
-                            />
-                            <span style={{ color: '#94a3b8', fontSize: '10px' }}>/</span>
-                            <input
-                              type="text"
-                              value={dobYear}
-                              onChange={(e) => setDobYear(e.target.value.replace(/\D/g, '').slice(0, 4))}
-                              placeholder="YYYY"
-                              maxLength={4}
-                              className="diamond-input"
-                              style={{ textAlign: 'center', padding: '3px 1px' }}
-                            />
+                        {accountCategory === 'organization' ? (
+                          /* Organization Type Dropdown (10 Options) */
+                          <div className="input-group" style={{ flex: '1.4' }}>
+                            <label className="input-label">Org Type</label>
+                            <div style={{ position: 'relative' }}>
+                              <select
+                                value={orgType}
+                                onChange={(e) => {
+                                  setOrgType(e.target.value);
+                                  setAccountType(e.target.value);
+                                }}
+                                className="diamond-input"
+                                style={{
+                                  appearance: 'none',
+                                  WebkitAppearance: 'none',
+                                  paddingRight: '18px',
+                                  cursor: 'pointer',
+                                  fontSize: '10px',
+                                  fontWeight: 600,
+                                  color: '#0f172a',
+                                  height: '24px',
+                                  padding: '2px 18px 2px 6px',
+                                  width: '100%',
+                                }}
+                              >
+                                {ORG_TYPES.map((t) => (
+                                  <option key={t} value={t}>
+                                    {t}
+                                  </option>
+                                ))}
+                              </select>
+                              <ChevronDown
+                                size={12}
+                                style={{
+                                  position: 'absolute',
+                                  right: '5px',
+                                  top: '50%',
+                                  transform: 'translateY(-50%)',
+                                  pointerEvents: 'none',
+                                  color: '#64748b',
+                                }}
+                              />
+                            </div>
                           </div>
-                        </div>
+                        ) : (
+                          /* Date of Birth: DD / MM / YYYY (Only for Individual) */
+                          <div className="input-group" style={{ flex: '1.3' }}>
+                            <label className="input-label">DOB</label>
+                            <div style={{ display: 'flex', gap: '2px', alignItems: 'center' }}>
+                              <input
+                                type="text"
+                                value={dobDay}
+                                onChange={(e) => setDobDay(e.target.value.replace(/\D/g, '').slice(0, 2))}
+                                placeholder="DD"
+                                maxLength={2}
+                                className="diamond-input"
+                                style={{ textAlign: 'center', padding: '3px 1px' }}
+                              />
+                              <span style={{ color: '#94a3b8', fontSize: '10px' }}>/</span>
+                              <input
+                                type="text"
+                                value={dobMonth}
+                                onChange={(e) => setDobMonth(e.target.value.replace(/\D/g, '').slice(0, 2))}
+                                placeholder="MM"
+                                maxLength={2}
+                                className="diamond-input"
+                                style={{ textAlign: 'center', padding: '3px 1px' }}
+                              />
+                              <span style={{ color: '#94a3b8', fontSize: '10px' }}>/</span>
+                              <input
+                                type="text"
+                                value={dobYear}
+                                onChange={(e) => setDobYear(e.target.value.replace(/\D/g, '').slice(0, 4))}
+                                placeholder="YYYY"
+                                maxLength={4}
+                                className="diamond-input"
+                                style={{ textAlign: 'center', padding: '3px 1px' }}
+                              />
+                            </div>
+                          </div>
+                        )}
                       </div>
                     </div>
                   )}
